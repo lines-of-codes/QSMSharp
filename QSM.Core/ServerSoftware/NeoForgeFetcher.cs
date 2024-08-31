@@ -1,0 +1,66 @@
+﻿using System.Net.Http.Json;
+using System.Text.RegularExpressions;
+
+namespace QSM.Core.ServerSoftware
+{
+    public partial class NeoForgeFetcher : InfoFetcher
+    {
+        internal record class NeoForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
+
+        string[] availableVersionsCache = [];
+        Regex majorMinorVersionMatch = MajorMinorVersionMatch();
+        HttpClient httpClient;
+
+        public NeoForgeFetcher()
+        {
+            httpClient = new();
+        }
+
+        public override async Task<string[]> FetchAvailableMinecraftVersions()
+        {
+            if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
+
+            NeoForgeVersions? response = await httpClient.GetFromJsonAsync<NeoForgeVersions>("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge");
+
+            availableVersionsCache = response!.Versions!;
+
+            List<string> supportedVersions = [];
+
+            foreach (var version in availableVersionsCache)
+            {
+                var matched = majorMinorVersionMatch.Match(version).Value;
+                var minecraftVersion = $"1.{matched}";
+
+                if (!supportedVersions.Contains(minecraftVersion))
+                    supportedVersions.Add(minecraftVersion);
+            }
+
+            minecraftVersionsCache = supportedVersions.ToArray();
+
+            return minecraftVersionsCache;
+        }
+
+        public override Task<string[]> FetchAvailableBuilds(string minecraftVersion)
+        {
+            if (buildInfoCache.ContainsKey(minecraftVersion)) return Task.FromResult(buildInfoCache[minecraftVersion]);
+
+            var majorMinorVersion = minecraftVersion.Substring(2);
+            List<string> versions = [];
+
+            foreach (var version in availableVersionsCache)
+            {
+                if (version.StartsWith(majorMinorVersion))
+                {
+                    versions.Add(version);
+                }
+            }
+
+            buildInfoCache[minecraftVersion] = versions.ToArray();
+
+            return Task.FromResult(buildInfoCache[minecraftVersion]);
+        }
+
+        [GeneratedRegex("[\\d]+\\.[\\d]")]
+        private static partial Regex MajorMinorVersionMatch();
+    }
+}

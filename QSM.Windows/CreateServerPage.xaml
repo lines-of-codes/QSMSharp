@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.CreateServerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollView ContentOrientation="Vertical">
+        <StackPanel Margin="50,20">
+            <TextBlock Text="Create new server" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <InfoBar x:Name="requiredNameInfoBar" IsOpen="False" Severity="Error" Title="A name is required." Message="Please give your server a proper name." Margin="0,5,0,0" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,10,10,10">
+                    <TextBox x:Name="serverNameInput" Header="Server Name:" PlaceholderText="Server Name" TextChanged="serverNameInput_TextChanged" />
+                </StackPanel>
+
+                <Grid Margin="0,0,0,10" Grid.Column="0" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" x:Name="serverFolderPathInput" Header="Server Folder Path:" PlaceholderText="Path to the server folder..." />
+                    <Button Grid.Column="1" x:Name="serverFolderBrowseBtn" Content="Browse..." Click="serverFolderBrowseBtn_Click" Margin="10,0" VerticalAlignment="Bottom" />
+                </Grid>
+
+                <ComboBox x:Name="serverSoftware" Margin="0,10" Header="Server Software:" Grid.Column="1" Grid.Row="0" SelectionChanged="serverSoftware_SelectionChanged" ItemsSource="{x:Bind serverSoftwares, Mode=OneTime}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="local:ServerSoftware">
+                            <StackPanel Orientation="Horizontal">
+                                <ImageIcon Source="{x:Bind Icon}" Height="16"/>
+                                <TextBlock Text="{x:Bind Name}" Margin="5,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+
+            <SplitView DisplayMode="Inline" IsPaneOpen="True" MaxHeight="250">
+                <SplitView.Pane>
+                    <ListView x:Name="minecraftVersionList" ItemsSource="{x:Bind minecraftVersions}" SelectionChanged="minecraftVersionList_SelectionChanged">
+                        <ListView.Header>
+                            <TextBlock TextAlignment="Center" Text="Minecraft/Software version" FontWeight="Bold" Margin="0,5,0,5" />
+                        </ListView.Header>
+                    </ListView>
+                </SplitView.Pane>
+                <ListView x:Name="serverBuildList" ItemsSource="{x:Bind availableBuilds}">
+                    <ListView.Header>
+                        <TextBlock TextAlignment="Center" Text="Available Builds" FontWeight="Bold" Margin="0,5,0,5" />
+                    </ListView.Header>
+                </ListView>
+            </SplitView>
+
+            <Button x:Name="serverCreateBtn" Content="Create server" Style="{StaticResource AccentButtonStyle}" Margin="0,10" Click="serverCreateBtn_Click" />
+        </StackPanel>
+    </ScrollView>
+</Page>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "QSMWindows (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "QSMWindows (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

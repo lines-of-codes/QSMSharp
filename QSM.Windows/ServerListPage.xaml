@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.ServerListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <local:SymbolImageSourceConverter x:Key="SymbolImageSourceConverter" />
+        <local:MenuItemTemplateSelector x:Key="selector">
+            <local:MenuItemTemplateSelector.ItemTemplate>
+                <DataTemplate x:DataType="local:WinServerInfo">
+                    <NavigationViewItem Content="{x:Bind Name}">
+                        <NavigationViewItem.Icon>
+                            <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource SymbolImageSourceConverter}}">
+                            </IconSourceElement>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </DataTemplate>
+            </local:MenuItemTemplateSelector.ItemTemplate >
+        </local:MenuItemTemplateSelector>
+    </Page.Resources>
+
+    <NavigationView x:Name="serverListView"
+            MenuItemTemplateSelector="{StaticResource selector}"
+            MenuItemsSource="{x:Bind ServerList, Mode=OneWay}"
+            SelectionChanged="serverListView_SelectionChanged">
+        <Frame Margin="0,0" x:Name="contentFrame" />
+    </NavigationView>
+</Page>
