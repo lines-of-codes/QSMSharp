@@ -31,10 +31,12 @@ namespace QSM.Core.ServerSoftware
             public string[]? Versions = versions;
         }
 
+        string project;
         HttpClient httpClient;
 
         public PaperMCFetcher(string project)
         {
+            this.project = project;
             httpClient = new()
             {
                 BaseAddress = new Uri($"https://api.papermc.io/v2/projects/{project}/")
@@ -72,6 +74,11 @@ namespace QSM.Core.ServerSoftware
             Array.Reverse(minecraftVersionsCache);
 
             return minecraftVersionsCache;
+        }
+
+        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        {
+            return Task.FromResult($"{httpClient.BaseAddress!.ToString()}versions/{minecraftVersion}/builds/{build}/downloads/paper-{minecraftVersion}-{build}.jar");
         }
     }
 }

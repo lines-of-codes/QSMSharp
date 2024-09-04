@@ -18,6 +18,7 @@ namespace QSM.Windows
         {
             this.InitializeComponent();
             ApplicationData.EnsureDataFolderExists();
+            ApplicationData.LoadConfiguration();
         }
 
         /// <summary>

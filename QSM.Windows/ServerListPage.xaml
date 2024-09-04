@@ -14,7 +14,7 @@
         <local:MenuItemTemplateSelector x:Key="selector">
             <local:MenuItemTemplateSelector.ItemTemplate>
                 <DataTemplate x:DataType="local:WinServerInfo">
-                    <NavigationViewItem Content="{x:Bind Name}">
+                    <NavigationViewItem Content="{x:Bind Metadata.Name}">
                         <NavigationViewItem.Icon>
                             <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource SymbolImageSourceConverter}}">
                             </IconSourceElement>

@@ -20,7 +20,7 @@ namespace QSM.Windows
             else if (symbolImage.ImagePath.EndsWith(".svg"))
                 return new ImageIconSource() { ImageSource = new SvgImageSource(new Uri(symbolImage.ImagePath)) };
             else if (!string.IsNullOrEmpty(symbolImage.ImagePath))
-                return new ImageIconSource() { ImageSource = new BitmapImage(new Uri(symbolImage.ImagePath)) };
+                return new BitmapIconSource() { UriSource = new Uri(symbolImage.ImagePath), ShowAsMonochrome = false };
 
             return null;
         }

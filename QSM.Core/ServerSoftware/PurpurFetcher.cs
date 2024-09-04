@@ -60,5 +60,10 @@ namespace QSM.Core.ServerSoftware
 
             return minecraftVersionsCache;
         }
+
+        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        {
+            return Task.FromResult($"https://api.purpurmc.org/v2/purpur/{minecraftVersion}/{build}/download");
+        }
     }
 }

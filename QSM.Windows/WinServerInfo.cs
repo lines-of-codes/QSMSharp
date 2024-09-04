@@ -1,11 +1,16 @@
-﻿using QSM.Core;
+﻿using QSM.Core.ServerSoftware;
 
 namespace QSM.Windows
 {
-    internal class WinServerInfo : ServerInfo<SymbolImage>
+    internal class WinServerInfo
     {
-        public WinServerInfo(string name, SymbolImage icon, string path) : base(name, icon, path)
+        public SymbolImage Icon;
+        public ServerMetadata Metadata;
+
+        public WinServerInfo(SymbolImage icon, ServerMetadata metadata)
         {
+            Icon = icon;
+            Metadata = metadata;
         }
     }
 }

@@ -36,6 +36,7 @@ namespace QSM.Core.ServerSoftware
             }
 
             minecraftVersionsCache = supportedVersions.ToArray();
+            Array.Reverse(minecraftVersionsCache);
 
             return minecraftVersionsCache;
         }
@@ -55,6 +56,8 @@ namespace QSM.Core.ServerSoftware
                 }
             }
 
+            versions.Reverse();
+
             buildInfoCache[minecraftVersion] = versions.ToArray();
 
             return Task.FromResult(buildInfoCache[minecraftVersion]);
@@ -62,5 +65,10 @@ namespace QSM.Core.ServerSoftware
 
         [GeneratedRegex("[\\d]+\\.[\\d]")]
         private static partial Regex MajorMinorVersionMatch();
+
+        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        {
+            return Task.FromResult($"https://maven.neoforged.net/releases/net/neoforged/neoforge/{build}/neoforge-{build}-installer.jar");
+        }
     }
 }

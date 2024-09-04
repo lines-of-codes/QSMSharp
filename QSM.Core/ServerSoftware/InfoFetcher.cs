@@ -13,5 +13,7 @@
         /// A dictionary where the keys are the build number and the values are the download link to the build
         /// </returns>
         public abstract Task<string[]> FetchAvailableBuilds(string minecraftVersion);
+
+        public abstract Task<string> GetDownloadUrl(string minecraftVersion, string build);
     }
 }
