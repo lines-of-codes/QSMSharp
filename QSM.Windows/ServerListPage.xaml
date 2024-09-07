@@ -28,7 +28,11 @@
     <NavigationView x:Name="serverListView"
             MenuItemTemplateSelector="{StaticResource selector}"
             MenuItemsSource="{x:Bind ServerList, Mode=OneWay}"
-            SelectionChanged="serverListView_SelectionChanged">
+            FooterMenuItemsSource="{x:Bind FooterItems, Mode=OneWay}"
+            SelectionChanged="serverListView_SelectionChanged"
+            IsBackEnabled="False"
+            IsBackButtonVisible="Collapsed"
+            PaneTitle="QSM">
         <Frame Margin="0,0" x:Name="contentFrame" />
     </NavigationView>
 </Page>

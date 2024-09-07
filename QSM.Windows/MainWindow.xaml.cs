@@ -13,6 +13,7 @@ namespace QSM.Windows
         public MainWindow()
         {
             this.InitializeComponent();
+            Title = "QSM";
         }
     }
 }

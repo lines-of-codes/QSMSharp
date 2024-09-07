@@ -25,14 +25,15 @@ namespace QSM.Windows
             { ServerSoftwares.NeoForge, "ms-appx:///Assets/ServerSoftware/NeoForged.png" },
             { ServerSoftwares.Velocity, "ms-appx:///Assets/ServerSoftware/velocity-blue.svg" }
         };
+        private ObservableCollection<WinServerInfo> FooterItems = [
+            new WinServerInfo(new(Symbol.Add), new()
+            {
+                Name = "Create new server"
+            })
+        ];
 
         public ServerListPage()
         {
-            ServerList.Add(new WinServerInfo(new(Symbol.Add), new ServerMetadata()
-            {
-                Name = "Create server"
-            }));
-
             foreach(ServerMetadata metadata in ApplicationData.Configuration.Servers)
             {
                 ServerList.Add(new WinServerInfo(new(SoftwareIconPaths[metadata.Software]), metadata));
@@ -56,7 +57,7 @@ namespace QSM.Windows
             {
                 contentFrame.Navigate(typeof(SettingsPage));
             }
-            else if (((WinServerInfo)args.SelectedItem).Metadata.Name == "Create server")
+            else if (((WinServerInfo)args.SelectedItem).Metadata.Name == "Create new server")
             {
                 contentFrame.Navigate(typeof(CreateServerPage));
             }

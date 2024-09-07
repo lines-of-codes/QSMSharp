@@ -6,18 +6,46 @@
     xmlns:local="using:QSM.Windows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ScottPlot="using:ScottPlot.WinUI"
     mc:Ignorable="d">
 
-    <StackPanel Margin="50,20">
-        <StackPanel Orientation="Horizontal">
-            <StackPanel>
-                <TextBlock x:Name="ServerNameTitle" Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock x:Name="ServerActiveStatus" Text="Inactive" Style="{StaticResource DisplayTextBlockStyle}" />
-                <TextBlock Text="Status" />
-            </StackPanel>
-            
-            <ScottPlot:WinUIPlot x:Name="ServerStats" />
-        </StackPanel>
+    <StackPanel>
+        <NavigationView
+            IsBackButtonVisible="Collapsed"
+            IsBackEnabled="False"
+            SelectionFollowsFocus="Enabled"
+            PaneDisplayMode="Top"
+            IsSettingsVisible="False"
+            SelectionChanged="NavigationView_SelectionChanged"
+            x:Name="ConfigurationNavigationView">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Summary" x:Name="SummaryTab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEA37;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Backups" x:Name="BackupsTab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81C;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Configuration" x:Name="ConfigurationTab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Mods/Plugins" x:Name="ModsPluginsTab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xF259;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Console" x:Name="ConsoleTab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8FD;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ConfigurationFrame" />
+        </NavigationView>
     </StackPanel>
 </Page>

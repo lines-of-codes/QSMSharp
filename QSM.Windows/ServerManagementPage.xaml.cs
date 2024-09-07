@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ServerSoftware;
-using ScottPlot;
+using System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -14,6 +14,7 @@ namespace QSM.Windows
     public sealed partial class ServerManagementPage : Page
     {
         ServerMetadata Metadata;
+        int MetadataIndex;
 
         public ServerManagementPage()
         {
@@ -22,15 +23,31 @@ namespace QSM.Windows
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Metadata = ApplicationData.Configuration.Servers[(int)e.Parameter];
+            MetadataIndex = (int)e.Parameter;
+            Metadata = ApplicationData.Configuration.Servers[MetadataIndex];
 
-            ServerNameTitle.Text = Metadata.Name;
-
-            ServerStats.Plot.Add.Signal(Generate.Sin(51));
-            ServerStats.Plot.Add.Signal(Generate.Cos(51));
-            ServerStats.Refresh();
+            ConfigurationNavigationView.SelectedItem = SummaryTab;
 
             base.OnNavigatedTo(e);
+        }
+
+        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            FrameNavigationOptions navOptions = new();
+            navOptions.TransitionInfoOverride = args.RecommendedNavigationTransitionInfo;
+            navOptions.IsNavigationStackEnabled = false;
+            Type targetPage = null;
+
+            if ((NavigationViewItem)args.SelectedItem == SummaryTab)
+            {
+                targetPage = typeof(ServerSummaryPage);
+            }
+            else if ((NavigationViewItem)args.SelectedItem == BackupsTab)
+            {
+                targetPage = typeof(ServerBackupsPage);
+            }
+
+            ConfigurationFrame.NavigateToType(targetPage, MetadataIndex, navOptions);
         }
     }
 }
