@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.ServerJavaConfigPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel>
+    <Grid ColumnSpacing="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBox x:Name="JavaPath" Header="Java Executable:" PlaceholderText="Path to java executable..." />
+
+        <NumberBox x:Name="MaxPlayerCountInput" Minimum="0" Header="Max Players:" Grid.Row="1" PlaceholderText="Max Player Count..." />
+
+        <Slider 
+            x:Name="InitMemorySizeSlider" 
+            Minimum="0.5" 
+            Header="Initial Memory Allocation (GB):" 
+            StepFrequency="0.5"
+            Grid.Row="0" 
+            Grid.Column="1"
+            TickFrequency="0.5"
+            TickPlacement="BottomRight" />
+
+        <Slider 
+            x:Name="MaxMemorySizeSlider" 
+            Minimum="0.5" 
+            Header="Maximum Memory Allocation (GB):" 
+            StepFrequency="0.5"
+            Grid.Row="1"
+            Grid.Column="1"
+            TickFrequency="0.5" 
+            TickPlacement="BottomRight" />
+
+        <Grid Grid.Row="3" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Custom JVM Arguments" VerticalAlignment="Center" />
+
+            <ComboBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" SelectedIndex="0">
+                <ComboBoxItem Content="None" />
+                <ComboBoxItem Content="Aikar's Flags" />
+                <ComboBoxItem Content="Aikar's Flags (12GB+)" />
+                <ComboBoxItem Content="Shenandoah GC" />
+                <ComboBoxItem Content="ZGC" />
+                <ComboBoxItem Content="Custom" />
+            </ComboBox>
+
+            <TextBox TextWrapping="Wrap" AcceptsReturn="True" Grid.Row="1" Grid.ColumnSpan="2" />
+        </Grid>
+    </Grid>
+    </StackPanel>
+</Page>

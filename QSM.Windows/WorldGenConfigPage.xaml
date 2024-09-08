@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.WorldGenConfigPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="16">
+        <TextBox Header="Level Name:" x:Name="LevelNameInput" />
+
+        <TextBox Header="Level Seed:" x:Name="LevelSeedInput" />
+        
+        <TextBox Header="Generator Settings:" x:Name="GeneratorSettingsInput" />
+
+        <NumberBox Header="Max World Size:" Maximum="29999984" Minimum="1" x:Name="MaxWorldSizeInput" />
+
+        <ComboBox Header="Level Type:" ItemsSource="{x:Bind levelTypes, Mode=OneWay}" x:Name="LevelTypeComboBox" />
+
+        <CheckBox Content="Generate Structures" x:Name="GenerateStructuresCheckbox" />
+    </StackPanel>
+</Page>

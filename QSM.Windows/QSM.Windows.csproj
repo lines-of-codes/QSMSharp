@@ -12,16 +12,27 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <DefaultLanguage>en-us</DefaultLanguage>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="ChatAndCommandsConfigPage.xaml" />
     <None Remove="CreateServerPage.xaml" />
+    <None Remove="GameplayConfigPage.xaml" />
+    <None Remove="NetworkConfigPage.xaml" />
+    <None Remove="PlayerInteractConfigPage.xaml" />
     <None Remove="ServerBackupsPage.xaml" />
     <None Remove="ServerConfigurationPage.xaml" />
+    <None Remove="ServerDebugConfigPage.xaml" />
+    <None Remove="ServerJavaConfigPage.xaml" />
     <None Remove="ServerListPage.xaml" />
     <None Remove="ServerManagementPage.xaml" />
+    <None Remove="ServerMiscConfigPage.xaml" />
+    <None Remove="ServerPerformanceConfigPage.xaml" />
+    <None Remove="ServerSecurityConfigPage.xaml" />
     <None Remove="ServerSummaryPage.xaml" />
     <None Remove="SettingsPage.xaml" />
     <None Remove="SingleFileDownloadDialogContent.xaml" />
+    <None Remove="WorldGenConfigPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,6 +86,56 @@
     <Content Update="Assets\ServerSoftware\velocity-blue.svg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServerMiscConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServerDebugConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ChatAndCommandsConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServerSecurityConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="PlayerInteractConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="NetworkConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServerPerformanceConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="GameplayConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="WorldGenConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServerJavaConfigPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ServerConfigurationPage.xaml">

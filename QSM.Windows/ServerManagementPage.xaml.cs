@@ -46,6 +46,10 @@ namespace QSM.Windows
             {
                 targetPage = typeof(ServerBackupsPage);
             }
+            else if ((NavigationViewItem)args.SelectedItem == ConfigurationTab)
+            {
+                targetPage = typeof(ServerConfigurationPage);
+            }
 
             ConfigurationFrame.NavigateToType(targetPage, MetadataIndex, navOptions);
         }

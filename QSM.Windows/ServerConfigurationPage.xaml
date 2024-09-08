@@ -6,12 +6,29 @@
     xmlns:local="using:QSM.Windows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
-    <ScrollView>
-        <StackPanel Margin="50,20">
-            
-        </StackPanel>
-    </ScrollView>
+    <NavigationView
+        IsBackButtonVisible="Collapsed"
+        IsBackEnabled="False"
+        SelectionFollowsFocus="Enabled"
+        IsPaneToggleButtonVisible="False"
+        PaneDisplayMode="Left"
+        IsSettingsVisible="False"
+        SelectionChanged="ConfigurationNavigationView_SelectionChanged"
+        x:Name="ConfigurationNavigationView">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="World Generation" x:Name="WorldGenTab" />
+            <NavigationViewItem Content="Gameplay Settings" x:Name="GameplayTab" />
+            <NavigationViewItem Content="Server Performance" x:Name="PerformanceTab" />
+            <NavigationViewItem Content="Network Settings" x:Name="NetworkTab" />
+            <NavigationViewItem Content="Player Interactions" x:Name="PlayerInteractTab" />
+            <NavigationViewItem Content="Server Security" x:Name="SecurityTab" />
+            <NavigationViewItem Content="Logging and Debugging" x:Name="DebugTab" />
+            <NavigationViewItem Content="Java" x:Name="JavaTab" />
+            <NavigationViewItem Content="Miscellaneous" x:Name="MiscTab" />
+        </NavigationView.MenuItems>
+
+        <Frame x:Name="ConfigurationFrame" Margin="30,20" />
+    </NavigationView>
 </Page>
