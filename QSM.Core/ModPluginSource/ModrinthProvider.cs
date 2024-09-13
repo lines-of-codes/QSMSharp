@@ -149,7 +149,7 @@ namespace QSM.Core.ModPluginSource
 
             facets.Add(["server_side!=unsupported"]);
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             sb.Append('[');
             foreach (var facet in facets)
