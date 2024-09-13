@@ -23,18 +23,12 @@
 
         public bool IsModSupported
         {
-            get
-            {
-                return SupportMods.Contains(Software);
-            }
+            get => SupportMods.Contains(Software);
         }
 
         public bool IsPluginSupported
         {
-            get
-            {
-                return SupportPlugins.Contains(Software);
-            }
+            get => SupportPlugins.Contains(Software);
         }
 
         public ServerMetadata()
