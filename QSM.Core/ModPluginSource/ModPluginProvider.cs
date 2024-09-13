@@ -11,7 +11,7 @@ namespace QSM.Core.ModPluginSource
     {
         protected ServerMetadata ServerMetadata;
 
-        public ModPluginProvider(ServerMetadata serverMetadata)
+        protected ModPluginProvider(ServerMetadata serverMetadata)
         {
             ServerMetadata = serverMetadata;
         }
