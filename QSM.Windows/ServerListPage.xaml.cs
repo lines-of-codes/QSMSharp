@@ -15,8 +15,8 @@ namespace QSM.Windows
     /// </summary>
     public sealed partial class ServerListPage : Page
     {
-        private ObservableCollection<WinServerInfo> ServerList = new();
-        private static Dictionary<ServerSoftwares, string> SoftwareIconPaths = new()
+        private readonly ObservableCollection<WinServerInfo> ServerList = new();
+        private static readonly Dictionary<ServerSoftwares, string> SoftwareIconPaths = new()
         {
             { ServerSoftwares.Paper, "ms-appx:///Assets/ServerSoftware/papermc-logomark.png" },
             { ServerSoftwares.Purpur, "ms-appx:///Assets/ServerSoftware/purpur.svg" },
@@ -25,7 +25,7 @@ namespace QSM.Windows
             { ServerSoftwares.NeoForge, "ms-appx:///Assets/ServerSoftware/NeoForged.png" },
             { ServerSoftwares.Velocity, "ms-appx:///Assets/ServerSoftware/velocity-blue.svg" }
         };
-        private ObservableCollection<WinServerInfo> FooterItems = [
+        private readonly ObservableCollection<WinServerInfo> FooterItems = [
             new WinServerInfo(new(Symbol.Add), new()
             {
                 Name = "Create new server"

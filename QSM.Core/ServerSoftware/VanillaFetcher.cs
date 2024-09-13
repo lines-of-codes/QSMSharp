@@ -23,12 +23,12 @@ namespace QSM.Core.ServerSoftware
             pasteMystClient = new();
         }
 
-        public override Task<string[]> FetchAvailableBuilds(string minecraftVersion)
+        public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
         {
             return Task.FromResult<string[]>([]);
         }
 
-        public override async Task<string[]> FetchAvailableMinecraftVersions()
+        public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
         {
             if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
 
@@ -55,7 +55,7 @@ namespace QSM.Core.ServerSoftware
             return minecraftVersionsCache;
         }
 
-        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
         {
             return Task.FromResult(DownloadUrls[minecraftVersion]);
         }

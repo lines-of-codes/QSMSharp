@@ -43,9 +43,10 @@ namespace QSM.Core.ServerSoftware
             };
         }
 
-        public override async Task<string[]> FetchAvailableBuilds(string minecraftVersion)
+        public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
         {
-            if (buildInfoCache.ContainsKey(minecraftVersion)) return buildInfoCache[minecraftVersion];
+            if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
+                return buildInfo;
 
             AvailableBuildsRequest? response = await httpClient.GetFromJsonAsync<AvailableBuildsRequest>($"versions/{minecraftVersion}");
 
@@ -60,7 +61,7 @@ namespace QSM.Core.ServerSoftware
             return builds;
         }
 
-        public override async Task<string[]> FetchAvailableMinecraftVersions()
+        public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
         {
             if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
 
@@ -76,7 +77,7 @@ namespace QSM.Core.ServerSoftware
             return minecraftVersionsCache;
         }
 
-        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
         {
             return Task.FromResult($"{httpClient.BaseAddress!.ToString()}versions/{minecraftVersion}/builds/{build}/downloads/paper-{minecraftVersion}-{build}.jar");
         }

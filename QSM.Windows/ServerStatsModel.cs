@@ -5,8 +5,7 @@ namespace QSM.Windows
 {
     public class ServerStatsModel
     {
-        public ISeries[] Series { get; set; } = 
-        [
+        private ISeries[] series = [
             new LineSeries<double>
             {
                 Values = [ 20, 20, 19, 16, 20, 20, 20 ],
@@ -20,5 +19,11 @@ namespace QSM.Windows
                 Name = "MSPT"
             }
         ];
+
+        public ISeries[] Series
+        {
+            get => (ISeries[])series.Clone();
+            set => series = value;
+        }
     }
 }

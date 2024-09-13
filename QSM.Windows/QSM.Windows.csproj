@@ -18,10 +18,14 @@
     <None Remove="ChatAndCommandsConfigPage.xaml" />
     <None Remove="CreateServerPage.xaml" />
     <None Remove="GameplayConfigPage.xaml" />
+    <None Remove="ModManagementPage.xaml" />
+    <None Remove="ModSearchPage.xaml" />
+    <None Remove="MultipleFileDownloadDialogContent.xaml" />
     <None Remove="NetworkConfigPage.xaml" />
     <None Remove="PlayerInteractConfigPage.xaml" />
     <None Remove="ServerBackupsPage.xaml" />
     <None Remove="ServerConfigurationPage.xaml" />
+    <None Remove="ServerConsolePage.xaml" />
     <None Remove="ServerDebugConfigPage.xaml" />
     <None Remove="ServerJavaConfigPage.xaml" />
     <None Remove="ServerListPage.xaml" />
@@ -65,6 +69,7 @@
     <ProjectReference Include="..\QSM.Core\QSM.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Assets\ModPluginProvider\" />
     <Folder Include="Assets\ServerSoftware\" />
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +91,26 @@
     <Content Update="Assets\ServerSoftware\velocity-blue.svg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="MultipleFileDownloadDialogContent.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ModSearchPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServerConsolePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ModManagementPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ServerMiscConfigPage.xaml">

@@ -32,6 +32,7 @@ namespace QSM.Windows
         public ServerConfigurationPage()
         {
             this.InitializeComponent();
+            ConfigurationNavigationView.SelectedItem = WorldGenTab;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -50,41 +51,35 @@ namespace QSM.Windows
             Type targetPage = null;
             NavigationViewItem viewItem = (NavigationViewItem)args.SelectedItem;
 
-            if (viewItem == WorldGenTab)
+            switch(viewItem.Name)
             {
-                targetPage = typeof(WorldGenConfigPage);
-            }
-            else if (viewItem == GameplayTab)
-            {
-                targetPage = typeof(GameplayConfigPage);
-            }
-            else if (viewItem == PerformanceTab)
-            {
-                targetPage = typeof(ServerPerformanceConfigPage);
-            }
-            else if (viewItem == NetworkTab)
-            {
-                targetPage = typeof(NetworkConfigPage);
-            }
-            else if (viewItem == PlayerInteractTab)
-            {
-                targetPage = typeof(PlayerInteractConfigPage);
-            }
-            else if (viewItem == SecurityTab)
-            {
-                targetPage = typeof(ServerSecurityConfigPage);
-            }
-            else if (viewItem == DebugTab)
-            {
-                targetPage = typeof(ServerDebugConfigPage);
-            }
-            else if (viewItem == JavaTab)
-            {
-                targetPage = typeof(ServerJavaConfigPage);
-            }
-            else if (viewItem == MiscTab)
-            {
-                targetPage = typeof(ServerMiscConfigPage);
+                case "WorldGenTab":
+                    targetPage = typeof(WorldGenConfigPage);
+                    break;
+                case "GameplayTab":
+                    targetPage = typeof(GameplayConfigPage);
+                    break;
+                case "PerformanceTab":
+                    targetPage = typeof(ServerPerformanceConfigPage);
+                    break;
+                case "NetworkTab":
+                    targetPage = typeof(NetworkConfigPage);
+                    break;
+                case "PlayerInteractTab":
+                    targetPage = typeof(PlayerInteractConfigPage);
+                    break;
+                case "SecurityTab":
+                    targetPage = typeof(ServerSecurityConfigPage);
+                    break;
+                case "DebugTab":
+                    targetPage = typeof(ServerDebugConfigPage);
+                    break;
+                case "JavaTab":
+                    targetPage = typeof(ServerJavaConfigPage);
+                    break;
+                case "MiscTab":
+                    targetPage = typeof(ServerMiscConfigPage);
+                    break;
             }
 
             ConfigurationFrame.NavigateToType(targetPage, MetadataIndex, navOptions);

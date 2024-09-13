@@ -16,7 +16,7 @@ namespace QSM.Windows.Utilities
             {
                 return $"{bytesToMegabytes(bytes).ToString(digitFormatting)}MB";
             }
-            else if (bytes >= 1000)
+            if (bytes >= 1000)
             {
                 return $"{bytesToKilobyte(bytes).ToString(digitFormatting)}KB";
             }

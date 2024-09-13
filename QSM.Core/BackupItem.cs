@@ -14,7 +14,7 @@
         public BackupItem(ushort id, string name, Uri uri, bool isSavedOnline = false)
         {
             Name = name;
-            SavedDate = DateTime.Now;
+            SavedDate = DateTime.UtcNow;
             Uri = uri;
             IsSavedOnline = isSavedOnline;
         }

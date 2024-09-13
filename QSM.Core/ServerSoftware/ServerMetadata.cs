@@ -2,11 +2,40 @@
 {
     public class ServerMetadata
     {
+        static ServerSoftwares[] SupportMods =
+        [
+            ServerSoftwares.Fabric,
+            ServerSoftwares.NeoForge
+        ];
+
+        static ServerSoftwares[] SupportPlugins =
+        [
+            ServerSoftwares.Paper,
+            ServerSoftwares.Purpur,
+            ServerSoftwares.Velocity
+        ];
+
         public string Name { get; set; } = "";
         public ServerSoftwares Software { get; init; }
         public string MinecraftVersion { get; init; } = "";
         public string ServerVersion { get; init; } = "";
         public string ServerPath { get; set; } = "";
+
+        public bool IsModSupported
+        {
+            get
+            {
+                return SupportMods.Contains(Software);
+            }
+        }
+
+        public bool IsPluginSupported
+        {
+            get
+            {
+                return SupportPlugins.Contains(Software);
+            }
+        }
 
         public ServerMetadata()
         {

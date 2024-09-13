@@ -1,22 +1,41 @@
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using QSM.Core.ServerSoftware;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
+using QSM.Core.ModPluginSource;
+using QSM.Core.ServerSoftware;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace QSM.Windows
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class ServerManagementPage : Page
+    internal class ProviderInfo
     {
-        ServerMetadata Metadata;
+        public string Icon;
+        public string ProviderName;
+        public ModPluginProvider Provider;
+    }
+
+    /// <summary>
+    /// Mods/Plugins management page.
+    /// </summary>
+    public sealed partial class ModManagementPage : Page
+    {
         int MetadataIndex;
 
-        public ServerManagementPage()
+        public ModManagementPage()
         {
             this.InitializeComponent();
         }
@@ -24,9 +43,7 @@ namespace QSM.Windows
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             MetadataIndex = (int)e.Parameter;
-            Metadata = ApplicationData.Configuration.Servers[MetadataIndex];
-
-            ConfigurationNavigationView.SelectedItem = SummaryTab;
+            NavigationView.SelectedItem = SearchTab;
 
             base.OnNavigatedTo(e);
         }
@@ -41,24 +58,12 @@ namespace QSM.Windows
 
             switch (viewItem.Name)
             {
-                case "SummaryTab":
-                    targetPage = typeof(ServerSummaryPage);
-                    break;
-                case "BackupsTab":
-                    targetPage = typeof(ServerBackupsPage);
-                    break;
-                case "ConfigurationTab":
-                    targetPage = typeof(ServerConfigurationPage);
-                    break;
-                case "ModsPluginsTab":
-                    targetPage = typeof(ModManagementPage);
-                    break;
-                case "ConsoleTab":
-                    targetPage = typeof(ServerConsolePage);
+                case "SearchTab":
+                    targetPage = typeof(ModSearchPage);
                     break;
             }
 
-            ConfigurationFrame.NavigateToType(targetPage, MetadataIndex, navOptions);
+            ContentFrame.NavigateToType(targetPage, MetadataIndex, navOptions);
         }
     }
 }

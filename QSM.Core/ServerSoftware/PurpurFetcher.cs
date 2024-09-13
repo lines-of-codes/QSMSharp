@@ -27,9 +27,10 @@ namespace QSM.Core.ServerSoftware
             };
         }
 
-        public override async Task<string[]> FetchAvailableBuilds(string minecraftVersion)
+        public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
         {
-            if (buildInfoCache.ContainsKey(minecraftVersion)) return buildInfoCache[minecraftVersion];
+            if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
+                return buildInfo;
 
             BuildInfoRequest? response = await httpClient.GetFromJsonAsync<BuildInfoRequest>(minecraftVersion);
 
@@ -38,7 +39,14 @@ namespace QSM.Core.ServerSoftware
 
             string[] builds = response.Builds!.All!;
 
-            Array.Sort(builds, (a, b) => int.Parse(a) - int.Parse(b));
+            Array.Sort(builds, (a, b) =>
+            {
+                // Ignore the result, as the output integer will be 0 if it failed anyway.
+                _ = int.TryParse(a, out var aint);
+                _ = int.TryParse(b, out var bint);
+
+                return aint - bint;
+            });
             Array.Reverse(builds);
 
             buildInfoCache[minecraftVersion] = builds;
@@ -46,7 +54,7 @@ namespace QSM.Core.ServerSoftware
             return builds;
         }
 
-        public override async Task<string[]> FetchAvailableMinecraftVersions()
+        public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
         {
             if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
 
@@ -61,7 +69,7 @@ namespace QSM.Core.ServerSoftware
             return minecraftVersionsCache;
         }
 
-        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
         {
             return Task.FromResult($"https://api.purpurmc.org/v2/purpur/{minecraftVersion}/{build}/download");
         }

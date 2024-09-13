@@ -24,6 +24,7 @@ namespace QSM.Windows
             Metadata = ApplicationData.Configuration.Servers[(int)e.Parameter];
 
             ServerNameTitle.Text = Metadata.Name;
+            ServerSoftwareInfo.Text = $"{Metadata.Software.ToString()} {Metadata.MinecraftVersion} ({Metadata.ServerVersion})";
 
             base.OnNavigatedTo(e);
         }

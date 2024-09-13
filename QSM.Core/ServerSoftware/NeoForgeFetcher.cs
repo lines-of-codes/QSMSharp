@@ -16,7 +16,7 @@ namespace QSM.Core.ServerSoftware
             httpClient = new();
         }
 
-        public override async Task<string[]> FetchAvailableMinecraftVersions()
+        public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
         {
             if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
 
@@ -41,9 +41,10 @@ namespace QSM.Core.ServerSoftware
             return minecraftVersionsCache;
         }
 
-        public override Task<string[]> FetchAvailableBuilds(string minecraftVersion)
+        public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
         {
-            if (buildInfoCache.ContainsKey(minecraftVersion)) return Task.FromResult(buildInfoCache[minecraftVersion]);
+            if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
+                return Task.FromResult(buildInfo);
 
             var majorMinorVersion = minecraftVersion.Substring(2);
             List<string> versions = [];
@@ -66,7 +67,7 @@ namespace QSM.Core.ServerSoftware
         [GeneratedRegex("[\\d]+\\.[\\d]")]
         private static partial Regex MajorMinorVersionMatch();
 
-        public override Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
         {
             return Task.FromResult($"https://maven.neoforged.net/releases/net/neoforged/neoforge/{build}/neoforge-{build}-installer.jar");
         }

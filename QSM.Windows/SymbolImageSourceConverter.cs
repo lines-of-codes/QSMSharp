@@ -17,9 +17,9 @@ namespace QSM.Windows
 
             if (symbolImage.Symbol != null)
                 return new SymbolIconSource() { Symbol = (Symbol)symbolImage.Symbol };
-            else if (symbolImage.ImagePath.EndsWith(".svg"))
+            if (symbolImage.ImagePath.EndsWith(".svg"))
                 return new ImageIconSource() { ImageSource = new SvgImageSource(new Uri(symbolImage.ImagePath)) };
-            else if (!string.IsNullOrEmpty(symbolImage.ImagePath))
+            if (!string.IsNullOrEmpty(symbolImage.ImagePath))
                 return new BitmapIconSource() { UriSource = new Uri(symbolImage.ImagePath), ShowAsMonochrome = false };
 
             return null;

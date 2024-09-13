@@ -34,9 +34,10 @@ namespace QSM.Core.ServerSoftware
             };
         }
 
-        public override async Task<string[]> FetchAvailableBuilds(string minecraftVersion)
+        public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
         {
-            if (buildInfoCache.ContainsKey(minecraftVersion)) return buildInfoCache[minecraftVersion];
+            if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
+                return buildInfo;
 
             AvailableFabricVersion[]? response = await httpClient.GetFromJsonAsync<AvailableFabricVersion[]>($"versions/loader/{minecraftVersion}");
 
@@ -52,7 +53,7 @@ namespace QSM.Core.ServerSoftware
             return buildInfoCache[minecraftVersion];
         }
 
-        public override async Task<string[]> FetchAvailableMinecraftVersions()
+        public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
         {
             if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
 
@@ -74,7 +75,7 @@ namespace QSM.Core.ServerSoftware
             return minecraftVersionsCache;
         }
 
-        public override async Task<string> GetDownloadUrl(string minecraftVersion, string build)
+        public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
         {
             FabricInstaller[]? response = await httpClient.GetFromJsonAsync<FabricInstaller[]>("versions/installer");
 

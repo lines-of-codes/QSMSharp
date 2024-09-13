@@ -43,7 +43,7 @@ namespace QSM.Windows
         {
             int MetadataIndex = (int)e.Parameter;
             Metadata = ApplicationData.Configuration.Servers[MetadataIndex];
-            Version minecraftVersion = new Version(Metadata.MinecraftVersion);
+            Version minecraftVersion = new(Metadata.MinecraftVersion);
 
             // If Minecraft server version is 1.15 or below
             if (minecraftVersion.Minor <= 15)

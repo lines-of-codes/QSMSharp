@@ -82,7 +82,7 @@ namespace QSM.Windows
         async Task FetchAvailableMinecraftVersions()
         {
             minecraftVersions.Clear();
-            string[] versions = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.FetchAvailableMinecraftVersions();
+            string[] versions = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.FetchAvailableMinecraftVersionsAsync();
             minecraftVersions.AddRange(versions);
             minecraftVersionList.SelectedIndex = 0;
         }
@@ -91,7 +91,7 @@ namespace QSM.Windows
         {
             availableBuilds.Clear();
             if (minecraftVersionList.SelectedItem == null) return;
-            string[] builds = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.FetchAvailableBuilds((string)minecraftVersionList.SelectedItem);
+            string[] builds = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.FetchAvailableBuildsAsync((string)minecraftVersionList.SelectedItem);
             availableBuilds.AddRange(builds);
             serverBuildList.SelectedIndex = 0;
         }
@@ -111,7 +111,7 @@ namespace QSM.Windows
 
             DirectoryInfo serverDirectory = Directory.CreateDirectory(serverFolderPathInput.Text);
 
-            string downloadUrl = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.GetDownloadUrl((string)minecraftVersionList.SelectedItem, (string)serverBuildList.SelectedItem);
+            string downloadUrl = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.GetDownloadUrlAsync((string)minecraftVersionList.SelectedItem, (string)serverBuildList.SelectedItem);
 
             ContentDialog dialog = new();
 

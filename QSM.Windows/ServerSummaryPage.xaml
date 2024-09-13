@@ -24,6 +24,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel>
             <TextBlock x:Name="ServerNameTitle" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock x:Name="ServerSoftwareInfo" />
             <TextBlock x:Name="ServerActiveStatus" Text="Inactive" Style="{StaticResource DisplayTextBlockStyle}" />
             <TextBlock Text="Status" />
         </StackPanel>
