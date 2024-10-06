@@ -2,17 +2,16 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace QSM.Windows
+namespace QSM.Windows;
+
+internal class ExtendedObservableCollection<T> : ObservableCollection<T>
 {
-    internal class ExtendedObservableCollection<T> : ObservableCollection<T>
+    public void AddRange(IEnumerable<T> items)
     {
-        public void AddRange(IEnumerable<T> items)
+        foreach (var item in items)
         {
-            foreach (var item in items)
-            {
-                Items.Add(item);
-            }
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            Items.Add(item);
         }
+        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
 }

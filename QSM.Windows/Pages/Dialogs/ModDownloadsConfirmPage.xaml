@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.Pages.Dialogs.ModDownloadsConfirmPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows.Pages.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:modplugin="using:QSM.Core.ModPluginSource"
+    mc:Ignorable="d">
+
+    <StackPanel>
+        <TextBlock Text="You are about to download the following items:" />
+        <ListView ItemsSource="{x:Bind DownloadList, Mode=OneTime}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="modplugin:ModPluginDownloadInfo">
+                    <CheckBox IsChecked="{x:Bind Download}">
+                        <TextBlock Text="{x:Bind FileName}" />
+                    </CheckBox>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackPanel>
+</Page>

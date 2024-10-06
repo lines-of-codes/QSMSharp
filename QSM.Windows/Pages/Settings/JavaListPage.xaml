@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.Pages.Settings.JavaListPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows.Pages.Settings"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel>
+        <CommandBar DefaultLabelPosition="Right">
+            <AppBarButton Icon="Add" Label="Import">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Zip Archive" x:Name="PickJavaZip" Click="PickJavaZip_Click" />
+                        <MenuFlyoutItem Text="Folder" x:Name="PickJavaFolder" Click="PickJavaFolder_Click" />
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarButton Icon="Delete" Label="Remove" x:Name="DeleteJavaButton" Click="DeleteJavaButton_Click" />
+        </CommandBar>
+        <ListView ItemsSource="{x:Bind JavaInstallations, Mode=OneWay}" x:Name="JavaInstallationList">
+            <ListView.Header>
+                <Grid Padding="16,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="170" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="Version" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="Vendor"
+                           Grid.Column="1" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="Path"
+                           Grid.Column="2" />
+                </Grid>
+            </ListView.Header>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:JavaInstallation">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="85" />
+                            <ColumnDefinition Width="155" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="{x:Bind Version}" />
+                        <TextBlock Text="{x:Bind Vendor}" Grid.Column="1" />
+                        <TextBlock Text="{x:Bind Path}" Grid.Column="2" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackPanel>
+</Page>

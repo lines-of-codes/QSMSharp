@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.ServerJavaConfigPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid ColumnSpacing="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Spacing="8">
+            <TextBlock Text="Java Executable:" />
+            <Button 
+                x:Name="JavaSelectButton" 
+                Content="Select" 
+                Style="{StaticResource AccentButtonStyle}" 
+                Click="JavaSelectButton_Click" />
+        </StackPanel>
+
+        <Slider 
+            x:Name="InitMemorySizeSlider" 
+            Minimum="0.5" 
+            Header="Initial Memory Allocation (GB):" 
+            StepFrequency="0.5"
+            Grid.Row="0" 
+            Grid.Column="1"
+            TickFrequency="0.5"
+            TickPlacement="BottomRight" />
+
+        <Slider 
+            x:Name="MaxMemorySizeSlider" 
+            Minimum="0.5" 
+            Header="Maximum Memory Allocation (GB):" 
+            StepFrequency="0.5"
+            Grid.Row="1"
+            Grid.Column="1"
+            TickFrequency="0.5" 
+            TickPlacement="BottomRight" />
+
+        <Grid Grid.Row="1" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Custom JVM Arguments" VerticalAlignment="Center" />
+            <ComboBox 
+                x:Name="JvmArgPresetSelector"
+                SelectionChanged="JvmArgPresetSelector_SelectionChanged"
+                Grid.Column="1" 
+                VerticalAlignment="Center" 
+                HorizontalAlignment="Right" 
+                SelectedIndex="0">
+                <x:String>None</x:String>
+                <x:String>Aikar's Flags</x:String>
+                <x:String>Aikar's Flags (12GB+)</x:String>
+                <x:String>Shenandoah GC</x:String>
+                <x:String>ZGC</x:String>
+                <x:String>Custom</x:String>
+            </ComboBox>
+
+            <TextBox 
+                x:Name="JvmArgsInput"
+                TextChanged="JvmArgsInput_TextChanged"
+                TextWrapping="Wrap" 
+                AcceptsReturn="True" 
+                Grid.Row="1" 
+                Grid.ColumnSpan="2" />
+        </Grid>
+    </Grid>
+</Page>

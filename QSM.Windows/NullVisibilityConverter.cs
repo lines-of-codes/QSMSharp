@@ -2,19 +2,18 @@
 using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace QSM.Windows
-{
-    internal class NullVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value == null) return Visibility.Collapsed;
-            return Visibility.Visible;
-        }
+namespace QSM.Windows;
 
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
+internal class NullVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value == null) return Visibility.Collapsed;
+        return Visibility.Visible;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
     }
 }

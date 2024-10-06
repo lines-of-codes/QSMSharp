@@ -1,7 +1,10 @@
 ﻿using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Serilog;
 using SkiaSharp;
+using System.IO;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -22,7 +25,14 @@ namespace QSM.Windows
             this.InitializeComponent();
             ApplicationData.EnsureDataFolderExists();
             ApplicationData.LoadConfiguration();
-        }
+
+			Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+				.WriteTo.File(
+                    Path.Combine(ApplicationData.LogsFolderPath, "WinQSM.txt"), 
+                    rollingInterval: RollingInterval.Day)
+				.CreateLogger();
+		}
 
         /// <summary>
         /// Invoked when the application is launched.
@@ -46,6 +56,13 @@ namespace QSM.Windows
 
                 config.HasGlobalSKTypeface(SKFontManager.Default.MatchCharacter('ก'));
             });
+
+            MainWindow.AppWindow.Closing += OnClosing;
+        }
+
+        private async void OnClosing(object sender, AppWindowClosingEventArgs e)
+        {
+            await Log.CloseAndFlushAsync();
         }
 
         public static Window MainWindow;

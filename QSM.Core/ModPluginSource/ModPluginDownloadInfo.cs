@@ -1,44 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace QSM.Core.ModPluginSource;
 
-namespace QSM.Core.ModPluginSource
+public class ModPluginDownloadInfo
 {
-    public class ModPluginDownloadInfo
+    public class Dependency
     {
-        public class Dependency
-        {
-            public required string Name;
-            public Uri? DownloadUri;
-            public string? ExternalPageUrl;
-            public bool Required;
-        }
-
-        public string DisplayName = string.Empty;
-        public string FileName = string.Empty;
-        public string? DownloadUri;
+        /// <summary>
+        /// A unique name/identity to the dependency.
+        /// </summary>
+        public string Slug = string.Empty;
+        public required string Name;
+        public Uri? DownloadUri;
         public string? ExternalPageUrl;
-        public string? Hash;
-        public Dependency[] Dependencies = [];
+        public bool Required;
+    }
 
-        public override bool Equals(object? obj)
-        {
-            if (obj == null)
-                return false;
+    /// <summary>
+    /// A boolean specifying whether or not this mod should be downloaded
+    /// </summary>
+    public bool Download = true;
+    public string DisplayName = string.Empty;
+    public string FileName = string.Empty;
+    public string? DownloadUri;
+    public string? ExternalPageUrl;
+    public string? Hash;
+    public Dependency[] Dependencies = [];
 
-            if (obj.GetType() != typeof(ModPluginDownloadInfo))
-                return false;
+    public override bool Equals(object? obj)
+    {
+        if (obj == null)
+            return false;
 
-            var info = (ModPluginDownloadInfo)obj;
+        if (obj.GetType() != typeof(ModPluginDownloadInfo))
+            return false;
 
-            return DisplayName == info.DisplayName && FileName == info.FileName && Hash == info.Hash;
-        }
+        var info = (ModPluginDownloadInfo)obj;
 
-        public override int GetHashCode()
-        {
-            return DisplayName.GetHashCode() + FileName.GetHashCode() + Hash?.GetHashCode() ?? 0;
-        }
+        return DisplayName == info.DisplayName && FileName == info.FileName && Hash == info.Hash;
+    }
+
+    public override int GetHashCode()
+    {
+        return DisplayName.GetHashCode() + FileName.GetHashCode() + Hash?.GetHashCode() ?? 0;
     }
 }

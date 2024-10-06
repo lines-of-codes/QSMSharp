@@ -1,34 +1,42 @@
-﻿using System;
+﻿using QSM.Core.ServerSettings;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using AppData = Windows.Storage.ApplicationData;
 
-namespace QSM.Windows
+namespace QSM.Windows;
+
+internal class ApplicationData
 {
-    internal class ApplicationData
+    public static string ApplicationDataPath = Path.Combine(AppData.Current.LocalCacheFolder.Path, "Local", "QSM");
+    public static string ServersFolderPath = Path.Combine(ApplicationDataPath, "Servers");
+    public static string JavaInstallsPath = Path.Combine(ApplicationDataPath, "Java");
+    public static string LogsFolderPath = Path.Combine(ApplicationDataPath, "Logs");
+	public static string ConfigFile = Path.Combine(ApplicationDataPath, "config.json");
+    public static ApplicationConfiguration Configuration { get; set; } = new();
+    public static Dictionary<Guid, ServerSettings> ServerSettings { get; set; } = [];
+    public static JsonSerializerOptions SerializerOptions = new()
+	{
+        IgnoreReadOnlyProperties = true
+    };
+
+	public static void EnsureDataFolderExists()
     {
-        public static string ApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QSM");
-        public static string ConfigFile = Path.Combine(ApplicationDataPath, "config.json");
-        public static ApplicationConfiguration Configuration { get; set; } = new();
+        Directory.CreateDirectory(ApplicationDataPath);
+        Directory.CreateDirectory(JavaInstallsPath);
+        Directory.CreateDirectory(LogsFolderPath);
+    }
 
-        public static void EnsureDataFolderExists()
-        {
-            Directory.CreateDirectory(ApplicationDataPath);
-        }
+    public static void LoadConfiguration()
+    {
+        if (!File.Exists(ConfigFile)) return;
+        Configuration = JsonSerializer.Deserialize<ApplicationConfiguration>(File.ReadAllText(ConfigFile));
+    }
 
-        public static void LoadConfiguration()
-        {
-            if (!File.Exists(ConfigFile)) return;
-            Configuration = JsonSerializer.Deserialize<ApplicationConfiguration>(File.ReadAllText(ConfigFile));
-        }
-
-        public static void SaveConfiguration()
-        {
-            string jsonStr = JsonSerializer.Serialize(Configuration);
-            File.WriteAllText(ConfigFile, jsonStr);
-        }
+    public static void SaveConfiguration()
+    {
+        string jsonStr = JsonSerializer.Serialize(Configuration, SerializerOptions);
+        File.WriteAllText(ConfigFile, jsonStr);
     }
 }

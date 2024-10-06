@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.Pages.Settings.JavaDownloadPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}">
+
+    <StackPanel Spacing="8" Margin="50,16">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="Java Provider:" VerticalAlignment="Center" />
+            <ComboBox
+                SelectedIndex="0"
+                x:Name="JavaProviderSelector"
+                SelectionChanged="JavaProviderSelector_SelectionChanged">
+                <x:String>Azul Zulu</x:String>
+                <x:String>Eclipse Temurin</x:String>
+            </ComboBox>
+        </StackPanel>
+
+        <SplitView 
+            IsPaneOpen="True"
+            DisplayMode="Inline"
+            MaxHeight="350">
+            <SplitView.Pane>
+                <ListView 
+                    x:Name="MajorReleaseSelector" 
+                    ItemsSource="{x:Bind _majorReleases, Mode=OneWay}" 
+                    SelectionChanged="MajorReleaseSelector_SelectionChanged">
+                    
+                </ListView>
+            </SplitView.Pane>
+
+            <ListView
+                x:Name="JreReleaseSelector"
+                ItemsSource="{x:Bind _jreReleases, Mode=OneWay}"></ListView>
+        </SplitView>
+
+        <TextBlock Text="View this provider's terms/license at " x:Name="TermsText" />
+
+        <Button 
+            x:Name="DownloadButton"
+            Click="DownloadButton_Click"
+            Style="{StaticResource AccentButtonStyle}" 
+            Margin="0,8,0,0">
+            Download
+        </Button>
+    </StackPanel>
+</Page>

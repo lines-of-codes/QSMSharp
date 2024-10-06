@@ -94,11 +94,11 @@ namespace QSM.Core.ModPluginSource
             };
         }
 
-        public override async Task<ModPluginDownloadInfo[]> GetVersions(string slug)
+        public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
         {
             VersionRequest response = await HttpClient.GetFromJsonAsync<VersionRequest>(
                 $"projects/{slug}/versions?platform={ServerMetadata.Software.ToString()}&platformVersion={ServerMetadata.MinecraftVersion}")
-                ?? throw new NullReferenceException();
+                ?? throw new NetworkResourceUnavailableException();
 
             List<ModPluginDownloadInfo> versions = [];
 
@@ -106,7 +106,9 @@ namespace QSM.Core.ModPluginSource
             {
                 string platform = ServerMetadata.Software.ToString().ToUpper();
                 HangarDownloadEntry downloadEntry = version.Downloads![platform];
-                Dependency[] dependencies = version.PluginDependencies![platform];
+                _ = version.PluginDependencies!.TryGetValue(platform, out var dependencies);
+
+                dependencies ??= [];
 
                 IEnumerable<ModPluginDownloadInfo.Dependency> genericInfo = dependencies.Select(dependency =>
                     new ModPluginDownloadInfo.Dependency()
@@ -132,10 +134,10 @@ namespace QSM.Core.ModPluginSource
             return versions.ToArray();
         }
 
-        public override async Task<ModPluginInfo[]> Search(string query = "")
+        public override async Task<ModPluginInfo[]> SearchAsync(string query = "")
         {
             SearchRequest response = await HttpClient.GetFromJsonAsync<SearchRequest>("projects") 
-                ?? throw new NullReferenceException();
+                ?? throw new NetworkResourceUnavailableException();
 
             List<ModPluginInfo> plugins = [];
 
@@ -157,7 +159,7 @@ namespace QSM.Core.ModPluginSource
             return plugins.ToArray();
         }
 
-        public override async Task<ModPluginDownloadInfo> ResolveDependencies(ModPluginDownloadInfo mod)
+        public override async Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
         {
             var resolvedDependencies = await Task.WhenAll(mod.Dependencies.Select(async dependency =>
             {
@@ -165,7 +167,7 @@ namespace QSM.Core.ModPluginSource
 
                 if (dependency.ExternalPageUrl == null)
                 {
-                    downloadUri = new Uri((await GetVersions(dependency.Name!)).First().DownloadUri!);
+                    downloadUri = new Uri((await GetVersionsAsync(dependency.Name!)).First().DownloadUri!);
                 }
 
                 return new ModPluginDownloadInfo.Dependency()
@@ -180,6 +182,13 @@ namespace QSM.Core.ModPluginSource
             mod.Dependencies = resolvedDependencies.ToArray();
 
             return mod;
+        }
+
+        public override async Task<ModPluginInfo> GetDetailedInfo(ModPluginInfo modPlugin)
+        {
+            modPlugin.LongDescription = await HttpClient.GetStringAsync($"https://hangar.papermc.io/api/v1/pages/main/{modPlugin.Slug}");
+
+            return modPlugin;
         }
     }
 }
