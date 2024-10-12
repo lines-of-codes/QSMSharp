@@ -20,23 +20,17 @@ public class AdoptiumProvider : JavaProvider
 
 		public override string Terms => "https://adoptium.net/about/#_licenses";
 
-		private string _processArchitecture
-		{
-			get
-			{
-				return RuntimeInformation.ProcessArchitecture switch
-				{
-					Architecture.X86 => "x32",
-					Architecture.X64 => "x64",
-					Architecture.Arm => "arm",
-					Architecture.Arm64 => "aarch64",
-                Architecture.S390x => "s390x",
-                Architecture.Ppc64le => "ppc64le",
-					_ => throw new NotSupportedException("Invalid CPU architecture")
-				};
-			}
-		}
-		private string _os
+	private string _processArchitecture => RuntimeInformation.ProcessArchitecture switch
+	{
+		Architecture.X86 => "x32",
+		Architecture.X64 => "x64",
+		Architecture.Arm => "arm",
+		Architecture.Arm64 => "aarch64",
+		Architecture.S390x => "s390x",
+		Architecture.Ppc64le => "ppc64le",
+		_ => throw new NotSupportedException("Invalid CPU architecture")
+	};
+	private string _os
 		{
 			get
 			{

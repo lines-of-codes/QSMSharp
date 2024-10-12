@@ -23,9 +23,37 @@ namespace QSM.Windows.Pages
     /// </summary>
     public sealed partial class ModListPage : Page
     {
+        int _metadataIndex;
+		string _modsFolderPath;
+		readonly ExtendedObservableCollection<string> _mods = [];
+
         public ModListPage()
         {
             this.InitializeComponent();
         }
-    }
+
+		protected override void OnNavigatedTo(NavigationEventArgs e)
+		{
+			_metadataIndex = (int)e.Parameter;
+            var metadata = ApplicationData.Configuration.Servers[_metadataIndex];
+
+            if (metadata.IsModSupported)
+                _modsFolderPath = Path.Combine(metadata.ServerPath, "mods");
+            if (metadata.IsPluginSupported)
+                _modsFolderPath = Path.Combine(metadata.ServerPath, "plugins");
+
+            Directory.CreateDirectory(_modsFolderPath);
+
+            var fsEntries = Directory.EnumerateFiles(_modsFolderPath);
+
+            foreach (var fsEntry in fsEntries)
+            {
+                _mods.Add(Path.GetFileName(fsEntry));
+            }
+
+            Directory.CreateDirectory(_modsFolderPath);
+
+			base.OnNavigatedTo(e);
+		}
+	}
 }

@@ -35,6 +35,11 @@ public class ServerMetadata
         get => SupportPlugins.Contains(Software);
     }
 
+    public string QsmConfigFile
+    {
+        get => Path.Combine(ServerPath, "config.qsm.json");
+    }
+
     public ServerMetadata() {}
 
     public ServerMetadata(string name, ServerSoftwares software, string minecraftVersion, string serverVersion, string serverPath, Guid? guid = null)
@@ -44,6 +49,6 @@ public class ServerMetadata
         MinecraftVersion = minecraftVersion;
         ServerVersion = serverVersion;
         ServerPath = serverPath;
-        Guid = guid ?? new Guid();
+        Guid = guid ?? Guid.NewGuid();
     }
 }

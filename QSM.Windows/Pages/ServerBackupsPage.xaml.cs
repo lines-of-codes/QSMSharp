@@ -13,7 +13,7 @@ namespace QSM.Windows.Pages;
 /// </summary>
 public sealed partial class ServerBackupsPage : Page
 {
-    int MetadataIndex;
+    int _metadataIndex;
 	private readonly ExtendedObservableCollection<BackupItem> _backups = [];
 
     public ServerBackupsPage()
@@ -23,8 +23,8 @@ public sealed partial class ServerBackupsPage : Page
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
-		MetadataIndex = (int)e.Parameter;
-		_backups.AddRange(ApplicationData.ServerSettings[ApplicationData.Configuration.Servers[MetadataIndex].Guid].Backups);
+		_metadataIndex = (int)e.Parameter;
+		_backups.AddRange(ApplicationData.ServerSettings[ApplicationData.Configuration.Servers[_metadataIndex].Guid].Backups);
 
 		base.OnNavigatedTo(e);
 	}

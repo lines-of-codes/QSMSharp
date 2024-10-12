@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace QSM.Windows.Pages.Dialogs;
@@ -20,5 +21,20 @@ public sealed partial class RemovalConfirmationPage : Page
 		{
 			Description.Text += " If the checkbox below is left unchecked, Only the registered entry will be removed and the files on your system will be kept.";
 		}
+	}
+
+	public ContentDialog CreateDialog(Page page)
+	{
+		return new ContentDialog()
+		{
+			XamlRoot = page.XamlRoot,
+			Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+			Title = "Are you sure?",
+			PrimaryButtonText = "Remove",
+			CloseButtonText = "Cancel",
+			IsSecondaryButtonEnabled = false,
+			DefaultButton = ContentDialogButton.Close,
+			Content = this
+		};
 	}
 }

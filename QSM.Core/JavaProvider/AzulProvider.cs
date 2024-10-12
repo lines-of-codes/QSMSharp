@@ -19,20 +19,14 @@ public class AzulProvider : JavaProvider
 		string? support_term = null);
 
 	HttpClient HttpClient;
-	private string _processArchitecture
+	private string _processArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
-		get
-		{
-			return RuntimeInformation.ProcessArchitecture switch
-			{
-				Architecture.X86 => "i686",
-				Architecture.X64 => "amd64",
-				Architecture.Arm => "aarch32",
-				Architecture.Arm64 => "aarch64",
-				_ => throw new NotSupportedException("Invalid CPU architecture")
-			};
-		}
-	}
+		Architecture.X86 => "i686",
+		Architecture.X64 => "amd64",
+		Architecture.Arm => "aarch32",
+		Architecture.Arm64 => "aarch64",
+		_ => throw new NotSupportedException("Invalid CPU architecture")
+	};
 	private string _os
 	{
 		get

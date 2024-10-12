@@ -1,43 +1,80 @@
-using Microsoft.UI.Windowing;
+using Microsoft.Graphics.Canvas.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using QSM.Windows.Pages.Settings;
-using System;
+using Serilog;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace QSM.Windows
+namespace QSM.Windows;
+
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class SettingsPage : Page
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class SettingsPage : Page
+    public static Window JavaWindow { get; private set; }
+	private static readonly string[] s_systemFonts = CanvasTextFormat.GetSystemFontFamilies();
+
+    public SettingsPage()
     {
-        public static Window JavaWindow;
-
-        public SettingsPage()
-        {
-            this.InitializeComponent();
-        }
-
-		private void OpenJavaWindowButton_Click(object sender, RoutedEventArgs e)
-		{
-            JavaWindow = new Window();
-			JavaWindow.Title = "Manage Java Installations";
-			JavaWindow.Content = new JavaManagementPage();
-			JavaWindow.Activate();
-        }
+        this.InitializeComponent();
+		MonospaceFontSelector.Text = ApplicationData.Configuration.MonospaceFont;
     }
+
+	private void OpenJavaWindowButton_Click(object sender, RoutedEventArgs e)
+	{
+		JavaWindow = new Window
+		{
+			Title = "Manage Java Installations",
+			Content = new JavaManagementPage()
+		};
+		JavaWindow.Activate();
+    }
+
+	private void MonospaceFontSelector_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+	{
+		if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+		{
+			var suitableItems = new List<string>();
+			var splitText = sender.Text.ToLower().Split(" ");
+			
+			foreach (var font in s_systemFonts)
+			{
+				var found = splitText.All((key) =>
+				{
+					return font.Contains(key, System.StringComparison.CurrentCultureIgnoreCase);
+				});
+
+				if (found)
+				{
+					suitableItems.Add(font);
+				}
+			}
+
+			if (suitableItems.Count == 0)
+			{
+				suitableItems.Add("No results found");
+			}
+			sender.ItemsSource = suitableItems;
+		}
+	}
+
+	private void MonospaceFontSelector_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+	{
+		ApplicationData.Configuration.MonospaceFont = args.SelectedItem.ToString();
+		ApplicationData.SaveConfiguration();
+    }
+
+	private void ResetConfigButton_Click(object sender, RoutedEventArgs e)
+	{
+		Log.Information("Resetting configuration file...");
+		File.Delete(ApplicationData.ConfigFile);
+		ApplicationData.SaveConfiguration();
+		Log.Information("Configuration resetting finished.");
+	}
 }

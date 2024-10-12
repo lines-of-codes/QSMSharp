@@ -62,8 +62,8 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-
-                                <ImageIcon 
+                                
+                                <Image
                                     Source="{x:Bind IconUrl}"
                                     Grid.RowSpan="2"
                                     Margin="6"

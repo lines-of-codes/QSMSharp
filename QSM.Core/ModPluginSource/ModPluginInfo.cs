@@ -5,7 +5,7 @@ public class ModPluginInfo
     public required string Name;
     public required string Owner;
     public required string Slug;
-    public required string IconUrl;
+    public string? IconUrl = null;
     public required string License;
     public string Description = string.Empty;
     public string LongDescription = string.Empty;

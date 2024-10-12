@@ -17,7 +17,7 @@
             </AppBarButton>
             <AppBarButton Icon="Add" Label="Add file" />
         </CommandBar>
-        <ListView>
+        <ListView ItemsSource="{x:Bind _mods, Mode=OneWay}">
             
         </ListView>
     </StackPanel>

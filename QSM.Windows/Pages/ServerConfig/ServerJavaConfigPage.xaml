@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page
-    x:Class="QSM.Windows.ServerJavaConfigPage"
+    x:Class="QSM.Windows.Pages.ServerConfig.ServerJavaConfigPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:QSM.Windows"
@@ -30,22 +30,24 @@
         <Slider 
             x:Name="InitMemorySizeSlider" 
             Minimum="0.5" 
-            Header="Initial Memory Allocation (GB):" 
+            Header="Initial Memory Allocation (GiB):" 
             StepFrequency="0.5"
             Grid.Row="0" 
             Grid.Column="1"
             TickFrequency="0.5"
-            TickPlacement="BottomRight" />
+            TickPlacement="BottomRight"
+            ValueChanged="InitMemorySizeSlider_ValueChanged" />
 
         <Slider 
             x:Name="MaxMemorySizeSlider" 
             Minimum="0.5" 
-            Header="Maximum Memory Allocation (GB):" 
+            Header="Maximum Memory Allocation (GiB):" 
             StepFrequency="0.5"
             Grid.Row="1"
             Grid.Column="1"
             TickFrequency="0.5" 
-            TickPlacement="BottomRight" />
+            TickPlacement="BottomRight"
+            ValueChanged="MaxMemorySizeSlider_ValueChanged" />
 
         <Grid Grid.Row="1" RowSpacing="8">
             <Grid.RowDefinitions>

@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Utilities;
 using System;
@@ -20,9 +21,9 @@ namespace QSM.Windows
     /// </summary>
     public sealed partial class CreateServerPage : Page
     {
-        string defaultServersLocation;
+        string _defaultServersLocation;
 
-        ServerSoftware[] serverSoftwares = [
+        ServerSoftware[] _serverSoftwares = [
             new() {
                 Name = "Paper",
                 Icon = "/Assets/ServerSoftware/papermc-logomark.png",
@@ -55,7 +56,7 @@ namespace QSM.Windows
             }
         ];
 
-        static Dictionary<string, ServerSoftwares> SoftwareDisplayNameToEnumMapping = new()
+        static Dictionary<string, ServerSoftwares> s_softwareDisplayNameToEnumMapping = new()
         {
             { "Paper", ServerSoftwares.Paper },
             { "Purpur", ServerSoftwares.Purpur },
@@ -65,31 +66,31 @@ namespace QSM.Windows
             { "Velocity", ServerSoftwares.Velocity }
         };
 
-        ExtendedObservableCollection<string> minecraftVersions { get; set; } = [];
-        ExtendedObservableCollection<string> availableBuilds { get; set; } = [];
+        ExtendedObservableCollection<string> MinecraftVersions { get; set; } = [];
+        ExtendedObservableCollection<string> AvailableBuilds { get; set; } = [];
 
         public CreateServerPage()
         {
             this.InitializeComponent();
-            defaultServersLocation = ApplicationData.ServersFolderPath;
-            serverFolderPathInput.Text = defaultServersLocation;
+            _defaultServersLocation = ApplicationData.ServersFolderPath;
+            serverFolderPathInput.Text = _defaultServersLocation;
             serverSoftware.SelectedIndex = 0;
         }
 
         async Task FetchAvailableMinecraftVersions()
         {
-            minecraftVersions.Clear();
+            MinecraftVersions.Clear();
             string[] versions = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.FetchAvailableMinecraftVersionsAsync();
-            minecraftVersions.AddRange(versions);
+            MinecraftVersions.AddRange(versions);
             minecraftVersionList.SelectedIndex = 0;
         }
 
         async Task FetchAvailableBuilds()
         {
-            availableBuilds.Clear();
+            AvailableBuilds.Clear();
             if (minecraftVersionList.SelectedItem == null) return;
             string[] builds = await ((ServerSoftware)serverSoftware.SelectedItem).InfoFetcher.FetchAvailableBuildsAsync((string)minecraftVersionList.SelectedItem);
-            availableBuilds.AddRange(builds);
+            AvailableBuilds.AddRange(builds);
             serverBuildList.SelectedIndex = 0;
         }
 
@@ -122,11 +123,17 @@ namespace QSM.Windows
 
             var metadata = new ServerMetadata(
                 serverNameInput.Text,
-                SoftwareDisplayNameToEnumMapping[((ServerSoftware)serverSoftware.SelectedItem).Name],
+                s_softwareDisplayNameToEnumMapping[((ServerSoftware)serverSoftware.SelectedItem).Name],
                 (string)minecraftVersionList.SelectedItem,
                 (string)serverBuildList.SelectedItem,
                 serverDirectory.FullName
             );
+
+            ServerSettings settings = new();
+
+            await settings.SaveJson(metadata.QsmConfigFile, ApplicationData.SerializerOptions);
+
+            ApplicationData.ServerSettings[metadata.Guid] = settings;
 
             AppEvents.AddNewServer(metadata);
 
@@ -160,9 +167,9 @@ namespace QSM.Windows
         private void serverNameInput_TextChanged(object sender, TextChangedEventArgs e)
         {
             // Don't change the server folder path if the user has already set a custom one
-            if (!serverFolderPathInput.Text.StartsWith(defaultServersLocation)) return;
+            if (!serverFolderPathInput.Text.StartsWith(_defaultServersLocation)) return;
 
-            serverFolderPathInput.Text = $"{defaultServersLocation}\\{StringUtility.TurnIntoValidFileName(serverNameInput.Text)}";
+            serverFolderPathInput.Text = $"{_defaultServersLocation}\\{StringUtility.TurnIntoValidFileName(serverNameInput.Text)}";
         }
     }
 }

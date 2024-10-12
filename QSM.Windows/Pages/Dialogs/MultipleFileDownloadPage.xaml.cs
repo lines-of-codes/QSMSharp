@@ -32,16 +32,10 @@ public struct FileDownloadEntry
 public sealed partial class MultipleFileDownloadPage : Page
 {
     const byte ConcurrentDownloads = 5;
-    private ObservableCollection<FileDownloadEntry> Files = 
-    [
-        new FileDownloadEntry(),
-        new FileDownloadEntry(),
-        new FileDownloadEntry(),
-        new FileDownloadEntry(),
-        new FileDownloadEntry()
-    ];
+    private readonly ObservableCollection<FileDownloadEntry> Files = [];
+    private readonly Queue<byte> _indexQueue = new([0, 1, 2, 3, 4]);
 
-    public MultipleFileDownloadPage()
+	public MultipleFileDownloadPage()
     {
         InitializeComponent();
     }
@@ -56,10 +50,14 @@ public sealed partial class MultipleFileDownloadPage : Page
     public Task DownloadMods(Queue<ModPluginDownloadInfo> downloads, string folderPath)
     {
         List<Task> tasks = [];
-        SemaphoreSlim semaphore = new(ConcurrentDownloads);
-        var indexQueue = new Queue<byte>(new byte[] { 0, 1, 2, 3, 4 });
-
         int initialQueueSize = downloads.Count;
+        SemaphoreSlim semaphore = new(ConcurrentDownloads > initialQueueSize ? initialQueueSize : ConcurrentDownloads);
+
+        for (byte i = 0; i < initialQueueSize && i < ConcurrentDownloads; i++)
+        {
+            Files.Add(new FileDownloadEntry());
+        }
+
         for (byte i = 0; i < initialQueueSize; i++)
         {
             var download = downloads.Dequeue();
@@ -70,17 +68,17 @@ public sealed partial class MultipleFileDownloadPage : Page
                 try
                 {
                     byte index;
-                    lock (indexQueue)
+                    lock (_indexQueue)
                     {
-                        index = indexQueue.Dequeue();
+                        index = _indexQueue.Dequeue();
                     }
-                    await DownloadFileAsync(download.DownloadUri, Path.Combine(folderPath, download.FileName), i);
+                    await DownloadFileAsync(download.DownloadUri, Path.Combine(folderPath, download.FileName), index);
                 }
                 finally
                 {
-                    lock (indexQueue)
+                    lock (_indexQueue)
                     {
-                        indexQueue.Enqueue((byte)(tasks.Count % 5));
+                        _indexQueue.Enqueue((byte)(tasks.Count % 5));
                     }
                     semaphore.Release();
                 }
@@ -116,7 +114,7 @@ public sealed partial class MultipleFileDownloadPage : Page
             entry.IsIndeterminate = false;
         }
 
-        Files[index] = entry;
+        DispatcherQueue.TryEnqueue(() => Files[index] = entry);
 
         while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
         {
@@ -132,10 +130,8 @@ public sealed partial class MultipleFileDownloadPage : Page
                 entry.TotalBytes = totalBytes;
                 entry.ProgressText = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
 
-                Files[index] = entry;
-            }
+				DispatcherQueue.TryEnqueue(() => Files[index] = entry);
+			}
         }
-
-        Files.RemoveAt(index);
     }
 }

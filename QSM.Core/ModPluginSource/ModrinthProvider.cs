@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace QSM.Core.ModPluginSource
@@ -182,7 +183,7 @@ namespace QSM.Core.ModPluginSource
 
             facets.Add(["server_side!=unsupported"]);
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             sb.Append('[');
             foreach (var facet in facets)
@@ -215,7 +216,7 @@ namespace QSM.Core.ModPluginSource
             {
                 modPlugins.Add(new()
                 {
-                    IconUrl = project.icon_url!,
+                    IconUrl = project.icon_url,
                     License = project.license!,
                     Name = project.title!,
                     Owner = project.author!,
@@ -258,7 +259,7 @@ namespace QSM.Core.ModPluginSource
             return mod;
         }
 
-        public override async Task<ModPluginInfo> GetDetailedInfo(ModPluginInfo modPlugin)
+        public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
         {
             var project = await HttpClient.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
 
@@ -271,5 +272,25 @@ namespace QSM.Core.ModPluginSource
 
             return modPlugin;
         }
-    }
+
+		public override Task<ModPluginDownloadInfo[]> CheckForUpdates(IEnumerable<string> modFiles)
+		{
+            List<string> hashes = [];
+
+            foreach (var fileName in modFiles)
+            {
+                using var file = File.OpenRead(fileName);
+                using var hasher = SHA512.Create();
+                var hashed = hasher.ComputeHash(file);
+                StringBuilder sb = new();
+
+                foreach (byte b in hashed)
+                    sb.Append(b.ToString("x2"));
+
+                hashes.Add(sb.ToString());
+            }
+
+            return Task.FromResult(Array.Empty<ModPluginDownloadInfo>());
+		}
+	}
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -83,6 +84,11 @@ namespace QSM.Core.ModPluginSource
         internal record class VersionRequest(
             PaginationInfo? Pagination = null,
             ProjectVersionEntry[]? Result = null);
+
+        /// <summary>
+        /// Time until the rate limit is being reset in milliseconds.
+        /// </summary>
+        const ushort RateLimitResetTime = 5000;
 
         HttpClient HttpClient;
 
@@ -184,11 +190,50 @@ namespace QSM.Core.ModPluginSource
             return mod;
         }
 
-        public override async Task<ModPluginInfo> GetDetailedInfo(ModPluginInfo modPlugin)
+        public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
         {
             modPlugin.LongDescription = await HttpClient.GetStringAsync($"https://hangar.papermc.io/api/v1/pages/main/{modPlugin.Slug}");
 
             return modPlugin;
         }
-    }
+
+        async Task<HangarProject?> GetProjectFromHash(string hash)
+        {
+			try
+			{
+				HangarProject? project = await HttpClient.GetFromJsonAsync<HangarProject>($"versions/hash/{hash}");
+                return project;
+			}
+			catch (HttpRequestException ex)
+			{
+				if (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+				{
+					await Task.Delay(RateLimitResetTime);
+                    return await GetProjectFromHash(hash);
+				}
+
+				throw;
+			}
+		}
+
+		public override async Task<ModPluginDownloadInfo[]> CheckForUpdates(IEnumerable<string> modFiles)
+		{
+            List<ModPluginDownloadInfo> updates = [];
+
+			foreach (var fileName in modFiles)
+			{
+				using var file = File.OpenRead(fileName);
+				using var hasher = SHA256.Create();
+				var hashed = hasher.ComputeHash(file);
+				StringBuilder sb = new();
+
+				foreach (byte b in hashed)
+					sb.Append(b.ToString("x2"));
+
+                await GetProjectFromHash(sb.ToString());
+			}
+
+			return updates.ToArray();
+		}
+	}
 }

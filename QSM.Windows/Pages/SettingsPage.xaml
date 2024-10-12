@@ -11,17 +11,34 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Margin="50,20">
+    <StackPanel Margin="50,20" Spacing="4">
         <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,10" />
 
+        <controls:SettingsCard
+            Header="Monospace Font">
+            <AutoSuggestBox 
+                x:Name="MonospaceFontSelector"
+                TextChanged="MonospaceFontSelector_TextChanged"
+                SuggestionChosen="MonospaceFontSelector_SuggestionChosen"
+                MinWidth="200" />
+        </controls:SettingsCard>
+        
         <controls:SettingsCard 
             Header="Manage Java Installations"
             Description="Install/Import Java installations.">
             <Button 
                 x:Name="OpenJavaWindowButton" 
                 Click="OpenJavaWindowButton_Click"
-                Content="Manage" 
-                Style="{StaticResource AccentButtonStyle}" />
+                Content="Manage" />
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            Header="Reset Configuration File"
+            Description="Removes the configuration file and create it again. Do use this if configuring things doesn't work properly after a version update.">
+            <Button 
+                x:Name="ResetConfigButton"
+                Click="ResetConfigButton_Click"
+                Content="Reset Configuration" />
         </controls:SettingsCard>
     </StackPanel>
 </Page>

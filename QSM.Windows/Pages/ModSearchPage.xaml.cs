@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ModPluginSource;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,8 +24,8 @@ namespace QSM.Windows
     /// </summary>
     public sealed partial class ModSearchPage : Page
     {
-        int MetadataIndex;
-        ServerMetadata Metadata;
+        int _metadataIndex;
+		ServerMetadata _metadata;
         ModPluginInfo SelectedMod;
         ProviderInfo CurrentProvider;
         List<ModPluginDownloadInfo> SelectedMods = [];
@@ -39,16 +40,16 @@ namespace QSM.Windows
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            MetadataIndex = (int)e.Parameter;
-            Metadata = ApplicationData.Configuration.Servers[MetadataIndex];
+            _metadataIndex = (int)e.Parameter;
+            _metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-            if (Metadata.Software == ServerSoftwares.Paper || Metadata.Software == ServerSoftwares.Velocity)
+            if (_metadata.Software == ServerSoftwares.Paper || _metadata.Software == ServerSoftwares.Velocity)
             {
                 Providers.Add(new()
                 {
                     Icon = "/Assets/ModPluginProvider/hangar-logo.svg",
                     ProviderName = "PaperMC Hangar",
-                    Provider = new PaperMCHangarProvider(Metadata)
+                    Provider = new PaperMCHangarProvider(_metadata)
                 });
             }
 
@@ -56,7 +57,7 @@ namespace QSM.Windows
             {
                 Icon = "/Assets/ModPluginProvider/modrinth-logo.svg",
                 ProviderName = "Modrinth",
-                Provider = new ModrinthProvider(Metadata)
+                Provider = new ModrinthProvider(_metadata)
             });
 
             ProviderSelector.SelectedIndex = 0;
@@ -81,7 +82,7 @@ namespace QSM.Windows
 
             var mod = (ModPluginInfo)e.AddedItems.First();
 
-            mod = await CurrentProvider.Provider.GetDetailedInfo(mod);
+            mod = await CurrentProvider.Provider.GetDetailedInfoAsync(mod);
 
             SelectedMod = mod;
 
@@ -124,8 +125,16 @@ namespace QSM.Windows
 
         private async void ModSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-
             var mods = await ((ProviderInfo)ProviderSelector.SelectedItem).Provider.SearchAsync(args.QueryText);
+
+            mods = mods.Select(mod =>
+            {
+                if (string.IsNullOrWhiteSpace(mod.IconUrl))
+                {
+                    mod.IconUrl = "ms-appx://Square44x44Logo.scale-200.png";
+                }
+                return mod;
+            }).ToArray();
 
             SearchResults.Clear();
             SearchResults.AddRange(mods);
@@ -149,11 +158,24 @@ namespace QSM.Windows
 
             var result = await dialog.ShowAsync();
 
-            var modsFolder = Path.Combine(Metadata.ServerPath, "/mods/");
+            string modsFolderPath = string.Empty;
 
-            if (result is ContentDialogResult.Primary)
+			if (_metadata.IsModSupported)
+				modsFolderPath = Path.Combine(_metadata.ServerPath, "mods");
+			if (_metadata.IsPluginSupported)
+				modsFolderPath = Path.Combine(_metadata.ServerPath, "plugins");
+
+            if (string.IsNullOrEmpty(modsFolderPath))
             {
-                dialog = new()
+                Log.Error("Unable to identify if the software uses the mod or plugins folder.");
+                return;
+            }
+
+			if (result is ContentDialogResult.Primary)
+            {
+                var downloadPage = new MultipleFileDownloadPage();
+
+				dialog = new()
                 {
                     XamlRoot = XamlRoot,
                     Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
@@ -161,11 +183,16 @@ namespace QSM.Windows
                     IsPrimaryButtonEnabled = false,
                     IsSecondaryButtonEnabled = false,
                     DefaultButton = ContentDialogButton.Primary,
-                    Content = new MultipleFileDownloadPage(
-                        new Queue<ModPluginDownloadInfo>(confirmPage.DownloadList.Where(entry => entry.Download)), 
-                        modsFolder
-                    )
+                    Content = downloadPage
                 };
+
+                _ = dialog.ShowAsync();
+
+                await downloadPage.DownloadMods(
+                    new Queue<ModPluginDownloadInfo>(confirmPage.DownloadList.Where(entry => entry.Download)),
+                    modsFolderPath);
+
+                dialog.Hide();
             }
         }
 

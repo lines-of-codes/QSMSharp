@@ -6,15 +6,15 @@ public class JavaSettings
 
 	/// <summary>
 	/// The initial memory allocation pool size 
-	/// of the Java instance. (-Xms)
+	/// of the Java instance in GiB. (-Xms)
 	/// </summary>
-	public int InitMemoryPoolSize { get; set; }
+	public double InitMemoryPoolSize { get; set; }
 
 	/// <summary>
 	/// The maximum memory allocation pool size
-	/// of the Java instance. (-Xmx)
+	/// of the Java instance in GiB. (-Xmx)
 	/// </summary>
-	public int MaxMemoryPoolSize { get; set; }
+	public double MaxMemoryPoolSize { get; set; }
 
 	public string JvmArgs { get; set; } = string.Empty;
 }

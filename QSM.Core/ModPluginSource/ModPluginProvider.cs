@@ -13,7 +13,7 @@ public abstract class ModPluginProvider
 
     public abstract Task<ModPluginInfo[]> SearchAsync(string query = "");
 
-    public abstract Task<ModPluginInfo> GetDetailedInfo(ModPluginInfo modPlugin);
+    public abstract Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin);
 
     /// <summary>
     /// Get available versions for 
@@ -23,4 +23,11 @@ public abstract class ModPluginProvider
     public abstract Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug);
 
     public abstract Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod);
+
+    /// <summary>
+    /// Check for mod/plugin updates.
+    /// </summary>
+    /// <param name="modFiles">The path to the mod files.</param>
+    /// <returns>The download information for available updates.</returns>
+    public abstract Task<ModPluginDownloadInfo[]> CheckForUpdates(IEnumerable<string> modFiles);
 }

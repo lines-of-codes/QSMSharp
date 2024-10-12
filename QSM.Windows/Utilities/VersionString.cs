@@ -1,31 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace QSM.Windows.Utilities
+namespace QSM.Windows.Utilities;
+
+class VersionString
 {
-    class VersionString
+    public string Major;
+    public string Minor;
+    public string Build;
+    public string Revision;
+
+    public VersionString(string VersionString)
     {
-        public string Major;
-        public string Minor;
-        public string Build;
-        public string Revision;
+        string[] parts = VersionString.Split('.', StringSplitOptions.TrimEntries);
+        Major = parts[0];
 
-        public VersionString(string VersionString)
-        {
-            string[] parts = VersionString.Split('.', StringSplitOptions.TrimEntries);
-            Major = parts[0];
-
-            if (parts.Length > 1)
-                Minor = parts[1];
-            
-            if (parts.Length > 2)
-                Build = parts[2];
-            
-            if (parts.Length > 3)
-                Revision = parts[3];
-        }
+        if (parts.Length > 1)
+            Minor = parts[1];
+        
+        if (parts.Length > 2)
+            Build = parts[2];
+        
+        if (parts.Length > 3)
+            Revision = parts[3];
     }
 }

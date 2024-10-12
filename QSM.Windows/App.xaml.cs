@@ -62,6 +62,11 @@ namespace QSM.Windows
 
         private async void OnClosing(object sender, AppWindowClosingEventArgs e)
         {
+            foreach(var process in ServerProcessManager.Instance.Processes)
+            {
+                if (!process.Value.HasExited)
+                    process.Value.Kill();
+            }
             await Log.CloseAndFlushAsync();
         }
 

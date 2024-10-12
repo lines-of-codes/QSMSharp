@@ -1,65 +1,61 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages;
+using QSM.Windows.Pages.ServerConfig;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace QSM.Windows
+namespace QSM.Windows;
+
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class ServerManagementPage : Page
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class ServerManagementPage : Page
+    int _metadataIndex;
+	ServerMetadata _metadata;
+
+    public ServerManagementPage()
     {
-        int _metadataIndex;
+        this.InitializeComponent();
+    }
 
-        public ServerManagementPage()
-        {
-            this.InitializeComponent();
-        }
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        _metadataIndex = (int)e.Parameter;
+		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            _metadataIndex = (int)e.Parameter;
+		if (ServerSettings.TryLoadJson(_metadata.QsmConfigFile, out var settings, ApplicationData.SerializerOptions))
+			ApplicationData.ServerSettings[_metadata.Guid] = settings;
 
-            ConfigurationNavigationView.SelectedItem = SummaryTab;
+        ConfigurationNavigationView.SelectedItem = SummaryTab;
 
-            base.OnNavigatedTo(e);
-        }
+        base.OnNavigatedTo(e);
+    }
 
-        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-        {
-            FrameNavigationOptions navOptions = new();
-            navOptions.TransitionInfoOverride = args.RecommendedNavigationTransitionInfo;
-            navOptions.IsNavigationStackEnabled = false;
-            Type targetPage = null;
-            NavigationViewItem viewItem = (NavigationViewItem)args.SelectedItem;
+	private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+		FrameNavigationOptions navOptions = new()
+		{
+			TransitionInfoOverride = args.RecommendedNavigationTransitionInfo,
+			IsNavigationStackEnabled = false
+		};
+		NavigationViewItem viewItem = (NavigationViewItem)args.SelectedItem;
 
-            switch (viewItem.Name)
-            {
-                case "SummaryTab":
-                    targetPage = typeof(ServerSummaryPage);
-                    break;
-                case "BackupsTab":
-                    targetPage = typeof(ServerBackupsPage);
-                    break;
-                case "ConfigurationTab":
-                    targetPage = typeof(ServerConfigurationPage);
-                    break;
-                case "ModsPluginsTab":
-                    targetPage = typeof(ModManagementPage);
-                    break;
-                case "ConsoleTab":
-                    targetPage = typeof(ServerConsolePage);
-                    break;
-                default:
-                    throw new ArgumentException("An unexpected NavigationViewItem has been encountered!");
-            }
+		Type targetPage = viewItem.Name switch
+		{
+			"SummaryTab" => typeof(ServerSummaryPage),
+			"BackupsTab" => typeof(ServerBackupsPage),
+			"ConfigurationTab" => typeof(ServerConfigurationPage),
+			"ModsPluginsTab" => typeof(ModManagementPage),
+			"ConsoleTab" => typeof(ServerConsolePage),
+			_ => throw new ArgumentException("An unexpected NavigationViewItem has been encountered!"),
+		};
 
-            ConfigurationFrame.NavigateToType(targetPage, _metadataIndex, navOptions);
-        }
+		ConfigurationFrame.NavigateToType(targetPage, _metadataIndex, navOptions);
     }
 }
