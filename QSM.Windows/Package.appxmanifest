@@ -10,8 +10,8 @@
 
   <Identity
     Name="LinesOfCodes.QSM.Windows"
-    Publisher="CN=galax"
-    Version="1.0.0.0" />
+    Publisher="CN=Trashbin Games"
+    Version="1.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="560bb762-01d5-4a78-b173-f590d64f0c22" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

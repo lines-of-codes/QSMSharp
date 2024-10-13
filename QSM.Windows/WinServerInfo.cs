@@ -4,12 +4,12 @@ namespace QSM.Windows;
 
 internal class WinServerInfo
 {
-    public SymbolImage Icon;
-    public ServerMetadata Metadata;
+	public SymbolImage Icon;
+	public ServerMetadata Metadata;
 
-    public WinServerInfo(SymbolImage icon, ServerMetadata metadata)
-    {
-        Icon = icon;
-        Metadata = metadata;
-    }
+	public WinServerInfo(SymbolImage icon, ServerMetadata metadata)
+	{
+		Icon = icon;
+		Metadata = metadata;
+	}
 }

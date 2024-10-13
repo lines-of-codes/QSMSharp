@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35219.272
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QSM.Windows", "QSM.Windows\QSM.Windows.csproj", "{034B756F-6758-4593-9F78-2A3E5D150723}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QSM.Core", "QSM.Core\QSM.Core.csproj", "{5F241EDD-0CFA-4BC8-B87E-F0206032D910}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QSM.Core", "QSM.Core\QSM.Core.csproj", "{5F241EDD-0CFA-4BC8-B87E-F0206032D910}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

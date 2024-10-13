@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Serilog;
 using System;
 using Windows.System;
 
@@ -16,90 +17,88 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class ServerConsolePage : Page
 {
-    int _metadataIndex;
-    Guid _serverGuid;
+	int _metadataIndex;
+	Guid _serverGuid;
 
-    public ServerConsolePage()
-    {
-        this.InitializeComponent();
+	public ServerConsolePage()
+	{
+		this.InitializeComponent();
 
-        // Configured font + some fallback fonts
-        var monospaceFont = new FontFamily($"{ApplicationData.Configuration.MonospaceFont},Cascadia Code,Consolas");
-        ProcessOutput.FontFamily = monospaceFont;
-        CommandInput.FontFamily = monospaceFont;
-    }
+		// Configured font + some fallback fonts
+		var monospaceFont = new FontFamily($"{ApplicationData.Configuration.MonospaceFont},Cascadia Code,Consolas");
+		ProcessOutput.FontFamily = monospaceFont;
+		CommandInput.FontFamily = monospaceFont;
+	}
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
 		_metadataIndex = (int)e.Parameter;
-        var metadata = ApplicationData.Configuration.Servers[_metadataIndex];
+		var metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-        _serverGuid = metadata.Guid;
+		_serverGuid = metadata.Guid;
 
-        if (!ServerProcessManager.Instance.Processes.TryGetValue(_serverGuid, out var process))
-            return;
+		if (!ServerProcessManager.Instance.Processes.TryGetValue(_serverGuid, out var process))
+			return;
 
-        var outputs = ServerProcessManager.Instance.ProcessOutputs[_serverGuid];
+		var outputs = ServerProcessManager.Instance.ProcessOutputs[_serverGuid];
 
-        foreach (var output in outputs)
-        {
-            switch(output.Type)
-            {
-                case ServerProcessManager.OutputType.Normal:
-                    ProcessOutput.Text += output.Message + Environment.NewLine;
-                    break;
-                case ServerProcessManager.OutputType.Error:
-                    AppendError(output.Message);
-                    break;
-            }
-        }
+		foreach (var output in outputs)
+		{
+			switch (output.Type)
+			{
+				case ServerProcessManager.OutputType.Normal:
+					ProcessOutput.Text += output.Message + Environment.NewLine;
+					break;
+				case ServerProcessManager.OutputType.Error:
+					AppendError(output.Message);
+					break;
+				default:
+					Log.Warning("An unkown OutputType has been received.");
+					break;
+			}
+		}
 
-        ScrollToEnd();
+		ScrollToEnd();
 
-        process.OutputDataReceived += (sender, args) =>
-        {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                ProcessOutput.Text += args.Data + Environment.NewLine;
-                ScrollToEnd();
-            });
-        };
-        process.ErrorDataReceived += (sender, args) =>
-        {
-            AppendError(args.Data);
-        };
+		process.OutputDataReceived += (sender, args) =>
+			DispatcherQueue.TryEnqueue(() =>
+			{
+				ProcessOutput.Text += args.Data + Environment.NewLine;
+				ScrollToEnd();
+			});
+		process.ErrorDataReceived += (sender, args) => AppendError(args.Data);
 
 		base.OnNavigatedTo(e);
 	}
 
-    void AppendError(string data)
-    {
-        DispatcherQueue.TryEnqueue(() =>
-        {
+	void AppendError(string data)
+	{
+		DispatcherQueue.TryEnqueue(() =>
+		{
 			Run run = new()
 			{
 				Foreground = new SolidColorBrush(Colors.Red),
 				Text = data + Environment.NewLine
 			};
 			ProcessOutput.Inlines.Add(run);
-            ScrollToEnd();
+			ScrollToEnd();
 		});
 	}
 
-    void ScrollToEnd()
-    {
+	void ScrollToEnd()
+	{
 		OutputScrollView.ScrollToVerticalOffset(OutputScrollView.ScrollableHeight);
 	}
 
 	private async void CommandInput_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
 	{
-        if (e.Key == VirtualKey.Enter)
-        {
-            if (!ServerProcessManager.Instance.Processes.TryGetValue(_serverGuid, out var process) && process.HasExited)
-                return;
+		if (e.Key == VirtualKey.Enter)
+		{
+			if (!ServerProcessManager.Instance.Processes.TryGetValue(_serverGuid, out var process) && process.HasExited)
+				return;
 
-            await process.StandardInput.WriteLineAsync(CommandInput.Text);
-            CommandInput.Text = "";
-        }
+			await process.StandardInput.WriteLineAsync(CommandInput.Text);
+			CommandInput.Text = "";
+		}
 	}
 }

@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class NetworkConfigPage : Page
 {
-    public NetworkConfigPage()
-    {
-        this.InitializeComponent();
-    }
+	public NetworkConfigPage()
+	{
+		this.InitializeComponent();
+	}
 }

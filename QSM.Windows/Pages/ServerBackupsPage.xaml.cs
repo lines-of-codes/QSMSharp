@@ -1,4 +1,3 @@
-using System;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using QSM.Core;
@@ -13,13 +12,13 @@ namespace QSM.Windows.Pages;
 /// </summary>
 public sealed partial class ServerBackupsPage : Page
 {
-    int _metadataIndex;
+	int _metadataIndex;
 	private readonly ExtendedObservableCollection<BackupItem> _backups = [];
 
-    public ServerBackupsPage()
-    {
-        this.InitializeComponent();
-    }
+	public ServerBackupsPage()
+	{
+		this.InitializeComponent();
+	}
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{

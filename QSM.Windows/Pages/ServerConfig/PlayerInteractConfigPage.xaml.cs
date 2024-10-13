@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class PlayerInteractConfigPage : Page
 {
-    public PlayerInteractConfigPage()
-    {
-        this.InitializeComponent();
-    }
+	public PlayerInteractConfigPage()
+	{
+		this.InitializeComponent();
+	}
 }

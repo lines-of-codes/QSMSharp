@@ -26,8 +26,9 @@ public abstract class ModPluginProvider
 
     /// <summary>
     /// Check for mod/plugin updates.
+    /// This function is on-hold, will implement later. (But contributions are still welcome)
     /// </summary>
     /// <param name="modFiles">The path to the mod files.</param>
     /// <returns>The download information for available updates.</returns>
-    public abstract Task<ModPluginDownloadInfo[]> CheckForUpdates(IEnumerable<string> modFiles);
+    public abstract Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles);
 }

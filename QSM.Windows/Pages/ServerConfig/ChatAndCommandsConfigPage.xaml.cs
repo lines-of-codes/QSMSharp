@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class ChatAndCommandsConfigPage : Page
 {
-    public ChatAndCommandsConfigPage()
-    {
-        this.InitializeComponent();
-    }
+	public ChatAndCommandsConfigPage()
+	{
+		this.InitializeComponent();
+	}
 }

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace QSM.Core.JavaProvider;
 
-public class AzulProvider : JavaProvider
+public class AzulProvider : IJavaProvider
 {
 	internal record class ZuluJVMData(
 		string? availability_type = null,
@@ -52,7 +52,7 @@ public class AzulProvider : JavaProvider
 		}
 	}
 
-	public override string Terms => "https://www.azul.com/products/core/openjdk-terms-of-use/";
+	public string Terms => "https://www.azul.com/products/core/openjdk-terms-of-use/";
 
 	Dictionary<int, Dictionary<string, string>> DownloadURLCache = [];
 
@@ -64,7 +64,7 @@ public class AzulProvider : JavaProvider
 		};
 	}
 
-	public override async Task<Dictionary<string, int>> GetAvailableReleasesAsync()
+	public async Task<Dictionary<string, int>> GetAvailableReleasesAsync()
 	{
 		Dictionary<int, string> availableMajorReleases = new();
 
@@ -83,7 +83,7 @@ public class AzulProvider : JavaProvider
 		return availableMajorReleases.ToDictionary(x => x.Value, x => x.Key);
 	}
 
-	public override Task<string> GetDownloadUrlAsync(string releaseName)
+	public Task<string> GetDownloadUrlAsync(string releaseName)
 	{
 		if (!int.TryParse(releaseName.Split('.')[0], out int major))
 			throw new FormatException();
@@ -91,7 +91,7 @@ public class AzulProvider : JavaProvider
 		return Task.FromResult(DownloadURLCache[major][releaseName]);
 	}
 
-	public override async Task<string[]> ListJREAsync(int javaMajorRelease)
+	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
 		var response = await HttpClient.GetFromJsonAsync<ZuluJVMData[]>($"packages?java_version={javaMajorRelease}&arch={_processArchitecture}&os={_os}&java_package_type=jre&javafx_bundled=false&archive_type={_archiveType}&include_fields=lib_c_type");
 

@@ -1,6 +1,6 @@
 ﻿namespace QSM.Core.JavaProvider;
 
-public abstract class JavaProvider
+public interface IJavaProvider
 {
     public abstract string Terms { get; }
 

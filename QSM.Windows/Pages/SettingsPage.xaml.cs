@@ -17,14 +17,14 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class SettingsPage : Page
 {
-    public static Window JavaWindow { get; private set; }
+	public static Window JavaWindow { get; private set; }
 	private static readonly string[] s_systemFonts = CanvasTextFormat.GetSystemFontFamilies();
 
-    public SettingsPage()
-    {
-        this.InitializeComponent();
+	public SettingsPage()
+	{
+		this.InitializeComponent();
 		MonospaceFontSelector.Text = ApplicationData.Configuration.MonospaceFont;
-    }
+	}
 
 	private void OpenJavaWindowButton_Click(object sender, RoutedEventArgs e)
 	{
@@ -34,7 +34,7 @@ public sealed partial class SettingsPage : Page
 			Content = new JavaManagementPage()
 		};
 		JavaWindow.Activate();
-    }
+	}
 
 	private void MonospaceFontSelector_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
 	{
@@ -42,13 +42,10 @@ public sealed partial class SettingsPage : Page
 		{
 			var suitableItems = new List<string>();
 			var splitText = sender.Text.ToLower().Split(" ");
-			
+
 			foreach (var font in s_systemFonts)
 			{
-				var found = splitText.All((key) =>
-				{
-					return font.Contains(key, System.StringComparison.CurrentCultureIgnoreCase);
-				});
+				var found = splitText.All((key) => font.Contains(key, System.StringComparison.CurrentCultureIgnoreCase));
 
 				if (found)
 				{
@@ -68,7 +65,7 @@ public sealed partial class SettingsPage : Page
 	{
 		ApplicationData.Configuration.MonospaceFont = args.SelectedItem.ToString();
 		ApplicationData.SaveConfiguration();
-    }
+	}
 
 	private void ResetConfigButton_Click(object sender, RoutedEventArgs e)
 	{

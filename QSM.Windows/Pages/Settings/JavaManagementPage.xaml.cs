@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Serilog;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -34,8 +35,11 @@ public sealed partial class JavaManagementPage : Page
 			case "DownloadTab":
 				targetPage = typeof(JavaDownloadPage);
 				break;
+			default:
+				Log.Warning("An unknown Java management tab has been accessed.");
+				break;
 		}
 
 		ContentFrame.NavigateToType(targetPage, null, navOptions);
 	}
-    }
+}

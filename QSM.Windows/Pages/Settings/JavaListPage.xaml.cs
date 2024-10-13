@@ -86,7 +86,7 @@ public sealed partial class JavaListPage : Page
 
 		ApplicationData.SaveConfiguration();
 	}
-	
+
 	private async void DeleteJavaButton_Click(object sender, RoutedEventArgs e)
 	{
 		var selectedInstall = (JavaInstallation)JavaInstallationList.SelectedItem;

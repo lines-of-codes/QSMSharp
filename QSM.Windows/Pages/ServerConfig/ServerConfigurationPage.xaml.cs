@@ -13,31 +13,31 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class ServerConfigurationPage : Page
 {
-    int _metadataIndex;
-    ServerMetadata _metadata;
+	int _metadataIndex;
+	ServerMetadata _metadata;
 
-    public ServerConfigurationPage()
-    {
-        this.InitializeComponent();
-        ConfigurationNavigationView.SelectedItem = WorldGenTab;
-    }
+	public ServerConfigurationPage()
+	{
+		this.InitializeComponent();
+		ConfigurationNavigationView.SelectedItem = WorldGenTab;
+	}
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
-    {
-        _metadataIndex = (int)e.Parameter;
-        _metadata = ApplicationData.Configuration.Servers[_metadataIndex];
+	protected override void OnNavigatedTo(NavigationEventArgs e)
+	{
+		_metadataIndex = (int)e.Parameter;
+		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-        base.OnNavigatedTo(e);
-    }
+		base.OnNavigatedTo(e);
+	}
 
-    private void ConfigurationNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-    {
+	private void ConfigurationNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+	{
 		FrameNavigationOptions navOptions = new()
 		{
 			TransitionInfoOverride = args.RecommendedNavigationTransitionInfo,
 			IsNavigationStackEnabled = false
 		};
-        NavigationViewItem viewItem = (NavigationViewItem)args.SelectedItem;
+		NavigationViewItem viewItem = (NavigationViewItem)args.SelectedItem;
 
 		Type targetPage = viewItem.Name switch
 		{
@@ -54,5 +54,5 @@ public sealed partial class ServerConfigurationPage : Page
 		};
 
 		ConfigurationFrame.NavigateToType(targetPage, _metadataIndex, navOptions);
-    }
+	}
 }

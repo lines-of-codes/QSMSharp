@@ -16,29 +16,29 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class ServerManagementPage : Page
 {
-    int _metadataIndex;
+	int _metadataIndex;
 	ServerMetadata _metadata;
 
-    public ServerManagementPage()
-    {
-        this.InitializeComponent();
-    }
+	public ServerManagementPage()
+	{
+		this.InitializeComponent();
+	}
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
-    {
-        _metadataIndex = (int)e.Parameter;
+	protected override void OnNavigatedTo(NavigationEventArgs e)
+	{
+		_metadataIndex = (int)e.Parameter;
 		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
 		if (ServerSettings.TryLoadJson(_metadata.QsmConfigFile, out var settings, ApplicationData.SerializerOptions))
 			ApplicationData.ServerSettings[_metadata.Guid] = settings;
 
-        ConfigurationNavigationView.SelectedItem = SummaryTab;
+		ConfigurationNavigationView.SelectedItem = SummaryTab;
 
-        base.OnNavigatedTo(e);
-    }
+		base.OnNavigatedTo(e);
+	}
 
 	private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-    {
+	{
 		FrameNavigationOptions navOptions = new()
 		{
 			TransitionInfoOverride = args.RecommendedNavigationTransitionInfo,
@@ -57,5 +57,5 @@ public sealed partial class ServerManagementPage : Page
 		};
 
 		ConfigurationFrame.NavigateToType(targetPage, _metadataIndex, navOptions);
-    }
+	}
 }

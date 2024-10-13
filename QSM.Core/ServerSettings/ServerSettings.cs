@@ -12,11 +12,13 @@ public partial class ServerSettings
 
 	public JavaSettings Java { get; set; } = new();
 
-	public Task SaveJson(string filePath, JsonSerializerOptions? options = null)
+	public Task SaveJsonAsync(string filePath)
 	{
-		options ??= JsonSerializerOptions.Default;
-
-		return File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(this, options));
+		return File.WriteAllTextAsync(
+			filePath, 
+			JsonSerializer.Serialize(
+				this, 
+				ServerSettingsContext.Default.ServerSettings));
 	}
 
 	/// <summary>
@@ -36,7 +38,7 @@ public partial class ServerSettings
 		
 		try
 		{
-			settings = JsonSerializer.Deserialize<ServerSettings>(stream, options);
+			settings = JsonSerializer.Deserialize(stream, ServerSettingsContext.Default.ServerSettings);
 		}
 		catch (Exception e)
 		{

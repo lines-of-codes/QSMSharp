@@ -5,20 +5,20 @@ namespace QSM.Windows.Utilities;
 
 internal partial class StringUtility
 {
-    static Regex invalidFileNameCheck = InvalidFileNameCheck();
+	static Regex invalidFileNameCheck = InvalidFileNameCheck();
 
-    public static string TurnIntoValidFileName(string original)
-    {
-        string result = invalidFileNameCheck.Replace(original, "");
+	public static string TurnIntoValidFileName(string original)
+	{
+		string result = invalidFileNameCheck.Replace(original, "");
 
-        if (result.Length == 0)
-        {
-            return Path.GetRandomFileName();
-        }
+		if (result.Length == 0)
+		{
+			return Path.GetRandomFileName();
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    [GeneratedRegex("[\\\\/<>:|\\\\?\\\\*\\\"\\0]|^(PRN|AUX|NUL|CON)$|^(COM|LPT)[\\d¹²³]{1}$|[ .]$")]
-    private static partial Regex InvalidFileNameCheck();
+	[GeneratedRegex("[\\\\/<>:|\\\\?\\\\*\\\"\\0]|^(PRN|AUX|NUL|CON)$|^(COM|LPT)[\\d¹²³]{1}$|[ .]$")]
+	private static partial Regex InvalidFileNameCheck();
 }

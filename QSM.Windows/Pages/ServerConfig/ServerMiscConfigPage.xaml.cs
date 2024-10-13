@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class ServerMiscConfigPage : Page
 {
-    public ServerMiscConfigPage()
-    {
-        this.InitializeComponent();
-    }
+	public ServerMiscConfigPage()
+	{
+		this.InitializeComponent();
+	}
 }

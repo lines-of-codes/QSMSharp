@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class GameplayConfigPage : Page
 {
-    public GameplayConfigPage()
-    {
-        this.InitializeComponent();
-    }
+	public GameplayConfigPage()
+	{
+		this.InitializeComponent();
+	}
 }

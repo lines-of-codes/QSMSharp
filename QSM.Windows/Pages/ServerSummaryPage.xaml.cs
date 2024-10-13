@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
+using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -16,89 +17,95 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class ServerSummaryPage : Page
 {
-    int _metadataIndex;
-    ServerMetadata _metadata;
-    bool ProcessExitWatched;
+	int _metadataIndex;
+	ServerMetadata _metadata;
+	bool ProcessExitWatched;
 
-    public ServerSummaryPage()
-    {
-        this.InitializeComponent();
-    }
+	public ServerSummaryPage()
+	{
+		this.InitializeComponent();
+	}
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
-    {
-        _metadataIndex = (int)e.Parameter;
-        _metadata = ApplicationData.Configuration.Servers[_metadataIndex];
+	protected override void OnNavigatedTo(NavigationEventArgs e)
+	{
+		_metadataIndex = (int)e.Parameter;
+		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-        ServerNameTitle.Text = _metadata.Name;
-        ServerSoftwareInfo.Text = $"{_metadata.Software} {_metadata.MinecraftVersion} ({_metadata.ServerVersion})";
+		ServerNameTitle.Text = _metadata.Name;
+		ServerSoftwareInfo.Text = $"{_metadata.Software} {_metadata.MinecraftVersion} ({_metadata.ServerVersion})";
 
-        if (ServerProcessManager.Instance.Processes.TryGetValue(_metadata.Guid, out var process))
-        {
-            StartButton.IsEnabled = process.HasExited;
-            StopButton.IsEnabled = !process.HasExited;
+		if (ServerProcessManager.Instance.Processes.TryGetValue(_metadata.Guid, out var process))
+		{
+			StartButton.IsEnabled = process.HasExited;
+			StopButton.IsEnabled = !process.HasExited;
 
-            if (!process.HasExited)
-            {
-                process.Exited += OnServerProcessExited;
-                ProcessExitWatched = true;
-            }
-        }
+			if (!process.HasExited)
+			{
+				process.Exited += OnServerProcessExited;
+				ProcessExitWatched = true;
+			}
+		}
 
-        base.OnNavigatedTo(e);
-    }
+		base.OnNavigatedTo(e);
+	}
 
 	protected override void OnNavigatedFrom(NavigationEventArgs e)
 	{
-        if (ProcessExitWatched)
-        {
-            ServerProcessManager.Instance.Processes[_metadata.Guid].Exited -= OnServerProcessExited;
-        }
+		if (ProcessExitWatched)
+		{
+			ServerProcessManager.Instance.Processes[_metadata.Guid].Exited -= OnServerProcessExited;
+		}
 
 		base.OnNavigatedFrom(e);
 	}
 
 	void OnServerProcessExited(object sender, EventArgs e)
-    {
+	{
 		StartButton.IsEnabled = true;
 	}
 
-    private void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        var process = ServerProcessManager.Instance.StartServer(_metadataIndex, _metadata.Guid);
-        process.Exited += OnServerProcessExited;
-        ProcessExitWatched = true;
-        StartButton.IsEnabled = false;
-        StopButton.IsEnabled = true;
-    }
+	private void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+	{
+		if (string.IsNullOrWhiteSpace(ApplicationData.ServerSettings[_metadata.Guid].Java.JavaHome))
+		{
+			Log.Error($"Java install not set for server instance. (Server \"{_metadata.Name}\")");
+			return;
+		}
+
+		var process = ServerProcessManager.Instance.StartServer(_metadataIndex, _metadata.Guid);
+		process.Exited += OnServerProcessExited;
+		ProcessExitWatched = true;
+		StartButton.IsEnabled = false;
+		StopButton.IsEnabled = true;
+	}
 
 	private async void DeleteButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-        var deletePage = new RemovalConfirmationPage(true);
+		var deletePage = new RemovalConfirmationPage(true);
 
-        var dialog = deletePage.CreateDialog(this);
+		var dialog = deletePage.CreateDialog(this);
 
-        var result = await dialog.ShowAsync();
+		var result = await dialog.ShowAsync();
 
-        if (result == ContentDialogResult.Primary)
-        {
-            AppEvents.RemoveServer(_metadata);
+		if (result == ContentDialogResult.Primary)
+		{
+			AppEvents.RemoveServer(_metadata);
 
-            if (deletePage.DeleteFile)
-            {
-                Directory.Delete(_metadata.ServerPath, true);
-            }
-        }
-    }
+			if (deletePage.DeleteFile)
+			{
+				Directory.Delete(_metadata.ServerPath, true);
+			}
+		}
+	}
 
 	private void StopButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-        ServerProcessManager.Instance.Processes[_metadata.Guid].StandardInput.WriteLine("stop");
-        StopButton.IsEnabled = false;
+		ServerProcessManager.Instance.Processes[_metadata.Guid].StandardInput.WriteLine("stop");
+		StopButton.IsEnabled = false;
 	}
 
 	private void OpenServerFolderButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-        Process.Start("explorer.exe", _metadata.ServerPath);
+		Process.Start("explorer.exe", _metadata.ServerPath);
 	}
 }

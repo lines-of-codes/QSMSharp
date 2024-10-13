@@ -16,31 +16,31 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class SingleFileDownloadPage : Page
 {
-    public SingleFileDownloadPage()
-    {
-        this.InitializeComponent();
-    }
+	public SingleFileDownloadPage()
+	{
+		this.InitializeComponent();
+	}
 
-    public void SetIsIndeterminate(bool indeterminate)
-    {
-        DownloadProgressBar.IsIndeterminate = indeterminate;
-    }
+	public void SetIsIndeterminate(bool indeterminate)
+	{
+		DownloadProgressBar.IsIndeterminate = indeterminate;
+	}
 
 	public void SetOperation(string operation)
 	{
 		DownloadProgressText.Text = operation;
 	}
 
-    public void UpdateProgress(double percentage, long totalBytesRead, long totalBytes)
-    {
-        DownloadProgressBar.Value = percentage;
-        DownloadProgressText.Text = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
-    }
+	public void UpdateProgress(double percentage, long totalBytesRead, long totalBytes)
+	{
+		DownloadProgressBar.Value = percentage;
+		DownloadProgressText.Text = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
+	}
 
-    public void DownloadComplete()
-    {
-        DownloadProgressText.Text = "Download complete!";
-    }
+	public void DownloadComplete()
+	{
+		DownloadProgressText.Text = "Download complete!";
+	}
 
 	public async Task DownloadFileAsync(string fileUrl, string dest)
 	{

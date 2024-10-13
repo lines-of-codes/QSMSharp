@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace QSM.Core.JavaProvider;
 
-public class AdoptiumProvider : JavaProvider
+public class AdoptiumProvider : IJavaProvider
 {
 		internal record class AvailableReleasesRequest(
         int[]? available_lts_releases = null,
@@ -18,7 +18,7 @@ public class AdoptiumProvider : JavaProvider
 
     HttpClient HttpClient;
 
-		public override string Terms => "https://adoptium.net/about/#_licenses";
+	public string Terms => "https://adoptium.net/about/#_licenses";
 
 	private string _processArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
@@ -31,21 +31,21 @@ public class AdoptiumProvider : JavaProvider
 		_ => throw new NotSupportedException("Invalid CPU architecture")
 	};
 	private string _os
+	{
+		get
 		{
-			get
-			{
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-					return "windows";
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-					return "linux";
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-					return "mac";
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				return "windows";
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+				return "linux";
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+				return "mac";
 
-				throw new NotSupportedException("Unidentified platform.");
-			}
+			throw new NotSupportedException("Unidentified platform.");
 		}
+	}
 
-		public AdoptiumProvider()
+	public AdoptiumProvider()
     {
         HttpClient = new()
         {
@@ -53,7 +53,7 @@ public class AdoptiumProvider : JavaProvider
         };
     }
 
-    public override async Task<Dictionary<string, int>> GetAvailableReleasesAsync()
+    public async Task<Dictionary<string, int>> GetAvailableReleasesAsync()
     {
         var response = await HttpClient.GetFromJsonAsync<AvailableReleasesRequest>("info/available_releases");
 
@@ -67,12 +67,12 @@ public class AdoptiumProvider : JavaProvider
         return versions;
     }
 
-    public override Task<string> GetDownloadUrlAsync(string releaseName)
+    public Task<string> GetDownloadUrlAsync(string releaseName)
     {
         return Task.FromResult($"{HttpClient.BaseAddress}binary/version/{releaseName}/{_os}/{_processArchitecture}/jre/hotspot/normal/eclipse");
     }
 
-    public override async Task<string[]> ListJREAsync(int javaMajorRelease)
+    public async Task<string[]> ListJREAsync(int javaMajorRelease)
     {
         var response = await HttpClient.GetFromJsonAsync<ReleaseNamesRequest>($"info/release_names?architecture={_processArchitecture}&heap_size=normal&image_type=jre&os={_os}&page=0&page_size=10&project=jdk&release_type=ga&semver=false&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse&version=%5B{javaMajorRelease}%2C{javaMajorRelease + 1}%5D");
 

@@ -6,15 +6,15 @@ namespace QSM.Windows;
 
 internal class NullVisibilityConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value == null) return Visibility.Collapsed;
-        if (value is string && string.IsNullOrWhiteSpace((string)value)) return Visibility.Collapsed;
-        return Visibility.Visible;
-    }
+	public object Convert(object value, Type targetType, object parameter, string language)
+	{
+		if (value == null) return Visibility.Collapsed;
+		if (value is string && string.IsNullOrWhiteSpace((string)value)) return Visibility.Collapsed;
+		return Visibility.Visible;
+	}
 
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
+	public object ConvertBack(object value, Type targetType, object parameter, string language)
+	{
+		throw new NotImplementedException();
+	}
 }

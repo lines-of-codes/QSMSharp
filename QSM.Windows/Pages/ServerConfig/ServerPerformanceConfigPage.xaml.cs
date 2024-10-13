@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class ServerPerformanceConfigPage : Page
 {
-    public ServerPerformanceConfigPage()
-    {
-        this.InitializeComponent();
-    }
+	public ServerPerformanceConfigPage()
+	{
+		this.InitializeComponent();
+	}
 }

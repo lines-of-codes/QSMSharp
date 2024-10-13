@@ -6,8 +6,8 @@ using System.IO;
 
 namespace QSM.Windows.Utilities;
 
-    public static class JavaCheck
-    {
+public static class JavaCheck
+{
 	private static readonly string PathToJavaCheck = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utilities", "JavaCheck.jar");
 	private static readonly string[] s_newLineSeparator = ["\r\n", "\n"];
 
@@ -19,7 +19,7 @@ namespace QSM.Windows.Utilities;
 			UseShellExecute = false,
 			FileName = Path.Combine(javaHome, "bin/javaw.exe"),
 			WindowStyle = ProcessWindowStyle.Hidden,
-			Arguments = $"-jar {PathToJavaCheck}",
+			Arguments = $"-jar \"{PathToJavaCheck}\"",
 			RedirectStandardOutput = true,
 			RedirectStandardError = true
 		};

@@ -16,14 +16,14 @@ namespace QSM.Windows.Pages.Dialogs;
 
 public struct FileDownloadEntry
 {
-    public string FileName = string.Empty;
-    public double Percentage = 0;
-    public long TotalBytes = 0;
-    public long TotalBytesRead = 0;
-    internal string ProgressText = string.Empty;
-    internal bool IsIndeterminate = true;
+	public string FileName = string.Empty;
+	public double Percentage = 0;
+	public long TotalBytes = 0;
+	public long TotalBytesRead = 0;
+	internal string ProgressText = string.Empty;
+	internal bool IsIndeterminate = true;
 
-    public FileDownloadEntry() { }
+	public FileDownloadEntry() { }
 }
 
 /// <summary>
@@ -31,107 +31,107 @@ public struct FileDownloadEntry
 /// </summary>
 public sealed partial class MultipleFileDownloadPage : Page
 {
-    const byte ConcurrentDownloads = 5;
-    private readonly ObservableCollection<FileDownloadEntry> Files = [];
-    private readonly Queue<byte> _indexQueue = new([0, 1, 2, 3, 4]);
+	const byte ConcurrentDownloads = 5;
+	private readonly ObservableCollection<FileDownloadEntry> Files = [];
+	private readonly Queue<byte> _indexQueue = new([0, 1, 2, 3, 4]);
 
 	public MultipleFileDownloadPage()
-    {
-        InitializeComponent();
-    }
+	{
+		InitializeComponent();
+	}
 
-    public MultipleFileDownloadPage(Queue<ModPluginDownloadInfo> downloads, string folderPath)
-    {
-        InitializeComponent();
-        DownloadMods(downloads, folderPath);
-    }
+	public MultipleFileDownloadPage(Queue<ModPluginDownloadInfo> downloads, string folderPath)
+	{
+		InitializeComponent();
+		DownloadMods(downloads, folderPath);
+	}
 
-    // I actually don't know how this works
-    public Task DownloadMods(Queue<ModPluginDownloadInfo> downloads, string folderPath)
-    {
-        List<Task> tasks = [];
-        int initialQueueSize = downloads.Count;
-        SemaphoreSlim semaphore = new(ConcurrentDownloads > initialQueueSize ? initialQueueSize : ConcurrentDownloads);
+	// I actually don't know how this works
+	public Task DownloadMods(Queue<ModPluginDownloadInfo> downloads, string folderPath)
+	{
+		List<Task> tasks = [];
+		int initialQueueSize = downloads.Count;
+		SemaphoreSlim semaphore = new(ConcurrentDownloads > initialQueueSize ? initialQueueSize : ConcurrentDownloads);
 
-        for (byte i = 0; i < initialQueueSize && i < ConcurrentDownloads; i++)
-        {
-            Files.Add(new FileDownloadEntry());
-        }
+		for (byte i = 0; i < initialQueueSize && i < ConcurrentDownloads; i++)
+		{
+			Files.Add(new FileDownloadEntry());
+		}
 
-        for (byte i = 0; i < initialQueueSize; i++)
-        {
-            var download = downloads.Dequeue();
+		for (byte i = 0; i < initialQueueSize; i++)
+		{
+			var download = downloads.Dequeue();
 
-            tasks.Add(Task.Run(async () =>
-            {
-                await semaphore.WaitAsync();
-                try
-                {
-                    byte index;
-                    lock (_indexQueue)
-                    {
-                        index = _indexQueue.Dequeue();
-                    }
-                    await DownloadFileAsync(download.DownloadUri, Path.Combine(folderPath, download.FileName), index);
-                }
-                finally
-                {
-                    lock (_indexQueue)
-                    {
-                        _indexQueue.Enqueue((byte)(tasks.Count % 5));
-                    }
-                    semaphore.Release();
-                }
-            }));
-        }
+			tasks.Add(Task.Run(async () =>
+			{
+				await semaphore.WaitAsync();
+				try
+				{
+					byte index;
+					lock (_indexQueue)
+					{
+						index = _indexQueue.Dequeue();
+					}
+					await DownloadFileAsync(download.DownloadUri, Path.Combine(folderPath, download.FileName), index);
+				}
+				finally
+				{
+					lock (_indexQueue)
+					{
+						_indexQueue.Enqueue((byte)(tasks.Count % 5));
+					}
+					semaphore.Release();
+				}
+			}));
+		}
 
-        return Task.WhenAll(tasks);
-    }
+		return Task.WhenAll(tasks);
+	}
 
-    private async Task DownloadFileAsync(string fileUrl, string dest, byte index)
-    {
-        using HttpClient client = new();
+	private async Task DownloadFileAsync(string fileUrl, string dest, byte index)
+	{
+		using HttpClient client = new();
 
-        using HttpResponseMessage response = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
+		using HttpResponseMessage response = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+		response.EnsureSuccessStatusCode();
 
-        long totalBytes = response.Content.Headers.ContentLength ?? -1L;
+		long totalBytes = response.Content.Headers.ContentLength ?? -1L;
 
-        using var contentStream = await response.Content.ReadAsStreamAsync();
-        using var fileStream = File.Create(dest);
+		using var contentStream = await response.Content.ReadAsStreamAsync();
+		using var fileStream = File.Create(dest);
 
-        var buffer = new byte[8192];
-        long totalBytesRead = 0;
-        int bytesRead;
-        double percentage = 0;
+		var buffer = new byte[8192];
+		long totalBytesRead = 0;
+		int bytesRead;
+		double percentage = 0;
 
-        var entry = Files[index];
+		var entry = Files[index];
 
-        entry.FileName = Path.GetFileName(dest);
+		entry.FileName = Path.GetFileName(dest);
 
-        if (totalBytes != -1)
-        {
-            entry.IsIndeterminate = false;
-        }
+		if (totalBytes != -1)
+		{
+			entry.IsIndeterminate = false;
+		}
 
-        DispatcherQueue.TryEnqueue(() => Files[index] = entry);
+		DispatcherQueue.TryEnqueue(() => Files[index] = entry);
 
-        while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
-        {
-            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
-            totalBytesRead += bytesRead;
+		while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+		{
+			await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+			totalBytesRead += bytesRead;
 
-            if (totalBytes != -1)
-            {
-                percentage = (double)totalBytesRead / totalBytes * 100;
+			if (totalBytes != -1)
+			{
+				percentage = (double)totalBytesRead / totalBytes * 100;
 
-                entry.Percentage = percentage;
-                entry.TotalBytesRead = totalBytesRead;
-                entry.TotalBytes = totalBytes;
-                entry.ProgressText = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
+				entry.Percentage = percentage;
+				entry.TotalBytesRead = totalBytesRead;
+				entry.TotalBytes = totalBytes;
+				entry.ProgressText = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
 
 				DispatcherQueue.TryEnqueue(() => Files[index] = entry);
 			}
-        }
-    }
+		}
+	}
 }
