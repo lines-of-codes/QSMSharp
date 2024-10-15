@@ -4,12 +4,12 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://lines-of-codes.github.io',
-	base: 'WinQSM',
+	base: 'QSMSharp',
 	integrations: [
 		starlight({
 			title: 'QSM',
 			social: {
-				github: 'https://github.com/lines-of-codes/WinQSM',
+				github: 'https://github.com/lines-of-codes/QSMSharp',
 			},
 			sidebar: [
 				{

@@ -79,6 +79,7 @@ public sealed partial class ServerSummaryPage : Page
 		StopButton.IsEnabled = true;
 	}
 
+	// skipcq: CS-R1005
 	private async void DeleteButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		var deletePage = new RemovalConfirmationPage(true);

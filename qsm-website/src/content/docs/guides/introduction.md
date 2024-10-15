@@ -36,7 +36,7 @@ that are not implemented yet, is being implemented, and is
 completed.
 
 ## License
-QSM for Windows is licensed under [GNU GPL v3](https://github.com/lines-of-codes/WinQSM/blob/master/LICENSE),
+QSM for Windows is licensed under [GNU GPL v3](https://github.com/lines-of-codes/QSMSharp/blob/master/LICENSE),
 But the licenses for QSM (Windows) dependencies are the
 following:
 
