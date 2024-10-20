@@ -1,4 +1,4 @@
-﻿namespace QSM.Core;
+﻿namespace QSM.Core.Backups;
 
 public class BackupItem
 {

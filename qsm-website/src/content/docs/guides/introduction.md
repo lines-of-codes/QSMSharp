@@ -27,7 +27,7 @@ The Minecraft Wiki states the following ([source](https://minecraft.wiki/w/Tutor
 
 (Planned) QSM features are of the following:
 - [ ] Basic server controls & Configurations
-- [ ] Java installation management
+- [x] Java installation management
 - [ ] Backups Management
 - [ ] Mods/Plugins management
 
@@ -38,17 +38,28 @@ completed.
 ## License
 QSM for Windows is licensed under [GNU GPL v3](https://github.com/lines-of-codes/QSMSharp/blob/master/LICENSE),
 But the licenses for QSM (Windows) dependencies are the
-following:
+following (according to NuGet packages referenced):
 
+- CommunityToolkit.WinUI.Controls.SettingsControls: [MIT License](https://licenses.nuget.org/MIT)
+- CommunityToolkit.WinUI.UI.Controls.Markdown: [MIT License](https://licenses.nuget.org/MIT)
 - Microsoft.WindowsAppSDK: [Microsoft Software License Terms for Windows App SDK](https://www.nuget.org/packages/Microsoft.WindowsAppSDK/1.5.240802000/license)
 - Microsoft.Windows.SDK.BuildTools: [Microsoft Software License Terms for Microsoft Windows SDK for Windows 10](https://aka.ms/WinSDKLicenseURL)
+- Microsoft.Graphics.Win2D: [Microsoft Software License Terms for Microsoft Win2D](https://www.microsoft.com/web/webpi/eula/eula_win2d_10012014.htm)
+- Microsoft.Windows.CsWinRT: [MIT License](https://www.nuget.org/packages/Microsoft.Windows.CsWinRT/2.1.6/License)
 - LiveChartsCore.SkiaSharpView.WinUI: [MIT License](https://github.com/beto-rodriguez/LiveCharts2/blob/master/LICENSE)
-- ZstdSharp.Port: [MIT License](https://github.com/oleg-st/ZstdSharp/blob/master/LICENSE)
+- Serilog: [Apache License 2.0](https://github.com/serilog/serilog/blob/dev/LICENSE)
+- Serilog.Sinks.File: [Apache License 2.0](https://github.com/serilog/serilog-sinks-file/blob/dev/LICENSE)
+- System.Net.Http: [MIT License](https://licenses.nuget.org/MIT)
+- System.Text.RegularExpressions: [MIT License](https://licenses.nuget.org/MIT)
 
 The QSM Core is licensed under the same GNU GPL v3,
 And its dependencies has the following licenses:
 
 - PasteMystNet: [MIT License](https://github.com/dentolos19/PasteMystNet/blob/main/LICENSE)
 - System.Text.Json: [MIT License](https://licenses.nuget.org/MIT)
+- System.IO.Pipelines: [MIT License](https://licenses.nuget.org/MIT)
+- ZstdSharp.Port: [MIT License](https://github.com/oleg-st/ZstdSharp/blob/master/LICENSE)
+- SharpCompress: [MIT License](https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt)
+- Serilog: [Apache License 2.0](https://github.com/serilog/serilog/blob/dev/LICENSE)
 
 These lists only include direct/top-level dependencies.

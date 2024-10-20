@@ -6,7 +6,7 @@
     xmlns:local="using:QSM.Windows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:core="using:QSM.Core"
+    xmlns:backups="using:QSM.Core.Backups"
     mc:Ignorable="d">
 
     <StackPanel>
@@ -34,7 +34,7 @@
                 </Grid>
             </ListView.Header>
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="core:BackupItem">
+                <DataTemplate x:DataType="backups:BackupItem">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="45" />

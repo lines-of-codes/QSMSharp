@@ -7,9 +7,18 @@ Backups are a copy of data at a certain point in time,
 They are made to make sure if a server fails, it can be
 restored back to its past state.
 
-Backups in QSM (Windows) are compressed with [Zstandard
-compression](https://en.wikipedia.org/wiki/Zstd) and stored
-as `.zst` files.
+Backups in QSM (Windows) can be compressed to either
+`.zip` or `.tar` files. The default recommended option is
+`.tar.zst` ([tar](https://en.wikipedia.org/wiki/Tar_(computing)) archives with [Zstandard
+compression](https://en.wikipedia.org/wiki/Zstd))
+
+All available compression methods include:
+- None
+- Deflate/GZip
+- BZip2
+- LZMA
+- PPMd (only supported by zip archives)
+- Zstd (only supported by tar archives)
 
 QSM (try to) help you follow the 3-2-1 backup rule.
 
