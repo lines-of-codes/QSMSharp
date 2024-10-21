@@ -1,6 +1,6 @@
 # QSM for Windows
 
-[![DeepSource](https://app.deepsource.com/gh/lines-of-codes/WinQSM.svg/?label=active+issues&show_trend=true&token=jM1AX4ulQuHoJzyLQRDv1Lg1)](https://app.deepsource.com/gh/lines-of-codes/WinQSM/)
+[![DeepSource](https://app.deepsource.com/gh/lines-of-codes/QSMSharp.svg/?label=code+coverage&show_trend=true&token=jM1AX4ulQuHoJzyLQRDv1Lg1)](https://app.deepsource.com/gh/lines-of-codes/QSMSharp/)
 
 A Quick Server Manager for Windows.
 
