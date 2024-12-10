@@ -15,4 +15,8 @@ public abstract class InfoFetcher
     public abstract Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion);
 
     public abstract Task<string> GetDownloadUrlAsync(string minecraftVersion, string build);
+
+	public virtual string FirstRunArgs => "";
+    public virtual string HttpClientName => "InfoFetcherApi";
+    public virtual string HttpBaseAddress => "";
 }

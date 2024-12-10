@@ -28,7 +28,7 @@ The Minecraft Wiki states the following ([source](https://minecraft.wiki/w/Tutor
 (Planned) QSM features are of the following:
 - [ ] Basic server controls & Configurations
 - [x] Java installation management
-- [ ] Backups Management
+- [x] Backups Management
 - [ ] Mods/Plugins management
 
 The documentation will include documentation for features

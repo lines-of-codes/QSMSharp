@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -42,13 +44,13 @@ public sealed partial class ModSearchPage : Page
 		_metadataIndex = (int)e.Parameter;
 		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-		if (_metadata.Software == ServerSoftwares.Paper || _metadata.Software == ServerSoftwares.Velocity)
+		if (_metadata.IsPluginSupported)
 		{
 			Providers.Add(new()
 			{
 				Icon = "/Assets/ModPluginProvider/hangar-logo.svg",
 				ProviderName = "PaperMC Hangar",
-				Provider = new PaperMCHangarProvider(_metadata)
+				Provider = Program.Hoster.Services.GetService<PaperMCHangarProvider>()
 			});
 		}
 
@@ -56,7 +58,7 @@ public sealed partial class ModSearchPage : Page
 		{
 			Icon = "/Assets/ModPluginProvider/modrinth-logo.svg",
 			ProviderName = "Modrinth",
-			Provider = new ModrinthProvider(_metadata)
+			Provider = Program.Hoster.Services.GetService<ModrinthProvider>()
 		});
 
 		ProviderSelector.SelectedIndex = 0;
@@ -69,7 +71,16 @@ public sealed partial class ModSearchPage : Page
 		var provider = (ProviderInfo)e.AddedItems.First();
 		CurrentProvider = provider;
 
-		var mods = await provider.Provider.SearchAsync();
+		ModPluginInfo[] mods;
+		try
+		{
+			mods = await provider.Provider.SearchAsync();
+		}
+		catch (HttpRequestException ex)
+		{
+			Log.Error(ex, $"An error occurred while requesting mod information. {ex}");
+			return;
+		}
 
 		SearchResults.Clear();
 		SearchResults.AddRange(mods);

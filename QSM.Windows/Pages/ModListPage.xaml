@@ -8,17 +8,21 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
         <CommandBar DefaultLabelPosition="Right">
-            <AppBarButton Label="Check for updates">
+            <!--<AppBarButton Label="Check for updates">
                 <AppBarButton.Icon>
                     <FontIcon Glyph="&#xE777;" />
                 </AppBarButton.Icon>
-            </AppBarButton>
+            </AppBarButton>-->
             <AppBarButton Icon="Add" Label="Add file" />
+            <AppBarButton Icon="Delete" Label="Remove" x:Name="RemoveButton" Click="RemoveButton_Click" />
         </CommandBar>
-        <ListView ItemsSource="{x:Bind _mods, Mode=OneWay}">
-            
-        </ListView>
-    </StackPanel>
+        <ListView Grid.Row="1" ItemsSource="{x:Bind _mods, Mode=OneWay}" x:Name="ModList" />
+    </Grid>
 </Page>

@@ -31,6 +31,11 @@ public sealed partial class SingleFileDownloadPage : Page
 		DownloadProgressText.Text = operation;
 	}
 
+	public void UpdateProgress(double percentage)
+	{
+		DownloadProgressBar.Value = percentage;
+	}
+
 	public void UpdateProgress(double percentage, long totalBytesRead, long totalBytes)
 	{
 		DownloadProgressBar.Value = percentage;
@@ -79,13 +84,13 @@ public sealed partial class SingleFileDownloadPage : Page
 		DownloadComplete();
 	}
 
-	public ContentDialog CreateDialog(Page page)
+	public ContentDialog CreateDialog(Page page, string title = "Downloading a file...")
 	{
 		ContentDialog dialog = new()
 		{
 			XamlRoot = page.XamlRoot,
 			Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
-			Title = "Downloading a file...",
+			Title = title,
 			IsPrimaryButtonEnabled = false,
 			IsSecondaryButtonEnabled = false,
 			DefaultButton = ContentDialogButton.Primary,

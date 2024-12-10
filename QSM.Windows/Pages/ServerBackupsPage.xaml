@@ -11,14 +11,24 @@
 
     <StackPanel>
         <CommandBar DefaultLabelPosition="Right">
-            <AppBarButton Icon="Add" Label="New Backup" />
-            <AppBarButton Icon="Delete" Label="Delete Backup" />
+            <AppBarButton 
+                Icon="Add" 
+                Label="New Backup" 
+                x:Name="NewBackupButton"
+                Click="NewBackupButton_Click" />
+            <AppBarButton 
+                Icon="Delete" 
+                Label="Delete Backup" 
+                x:Name="DeleteBackupButton"
+                Click="DeleteBackupButton_Click" />
         </CommandBar>
-        <ListView ItemsSource="{x:Bind _backups, Mode=OneWay}">
+        <ListView 
+            x:Name="BackupList" 
+            ItemsSource="{x:Bind _backups, Mode=OneWay}">
             <ListView.Header>
                 <Grid Padding="16,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="160" />
                     </Grid.ColumnDefinitions>
@@ -35,9 +45,9 @@
             </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="backups:BackupItem">
-                    <Grid ColumnSpacing="16">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="45" />
+                            <ColumnDefinition Width="80" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="160" />
                         </Grid.ColumnDefinitions>

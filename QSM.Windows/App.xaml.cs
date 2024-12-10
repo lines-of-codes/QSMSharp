@@ -23,14 +23,6 @@ public partial class App : Application
 	public App()
 	{
 		this.InitializeComponent();
-		ApplicationData.EnsureDataFolderExists();
-
-		Log.Logger = new LoggerConfiguration()
-			.MinimumLevel.Verbose()
-			.WriteTo.File(
-				Path.Combine(ApplicationData.LogsFolderPath, "WinQSM.txt"),
-				rollingInterval: RollingInterval.Day)
-			.CreateLogger();
 
 		UnhandledException += App_UnhandledException;
 

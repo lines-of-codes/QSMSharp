@@ -1,8 +1,7 @@
-﻿namespace QSM.Core.Backups
+﻿namespace QSM.Core.Backups;
+
+public enum ArchiveFormat
 {
-	public enum ArchiveFormat
-	{
-		Zip,
-		Tar
-	}
+	Zip,
+	Tar
 }

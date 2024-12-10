@@ -5,6 +5,8 @@
 /// </summary>
 public class ServerMetadata
 {
+    public static ServerMetadata? Selected = null;
+
     static ServerSoftwares[] SupportMods =
     [
         ServerSoftwares.Fabric,

@@ -9,6 +9,8 @@ namespace QSM.Core.ServerSettings;
 /// </summary>
 public partial class ServerSettings
 {
+	public bool FirstRun { get; set; } = true;
+
 	public List<BackupItem> Backups { get; set; } = [];
 
 	public JavaSettings Java { get; set; } = new();

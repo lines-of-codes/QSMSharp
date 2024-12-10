@@ -1,4 +1,5 @@
 ﻿using QSM.Core.ServerSoftware;
+using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -81,32 +82,36 @@ public class PaperMCHangarProvider : ModPluginProvider
         PaginationInfo? Pagination = null,
         ProjectVersionEntry[]? Result = null);
 
-    /// <summary>
-    /// Time until the rate limit is being reset in milliseconds.
-    /// </summary>
-    const ushort RateLimitResetTime = 5000;
+	public const string HttpClientName = "PaperMCHangarApi";
+	public const string BaseAddress = "https://hangar.papermc.io/api/v1/";
 
-    HttpClient HttpClient;
+	/// <summary>
+	/// Time until the rate limit is being reset in milliseconds.
+	/// </summary>
+	const ushort RateLimitResetTime = 5000;
+    
+	readonly IHttpClientFactory _httpClientFactory = null!;
 
-    public PaperMCHangarProvider(ServerMetadata serverMetadata) : base(serverMetadata)
+	public PaperMCHangarProvider(IHttpClientFactory httpClientFactory)
     {
-        HttpClient = new()
-        {
-            BaseAddress = new Uri("https://hangar.papermc.io/api/v1/")
-        };
+        _httpClientFactory = httpClientFactory;
     }
 
     public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
     {
-        VersionRequest response = await HttpClient.GetFromJsonAsync<VersionRequest>(
-            $"projects/{slug}/versions?platform={ServerMetadata.Software.ToString()}&platformVersion={ServerMetadata.MinecraftVersion}")
+        if (ServerMetadata is null) return [];
+
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+
+		VersionRequest response = await client.GetFromJsonAsync<VersionRequest>(
+            $"projects/{slug}/versions?platform={ServerMetadata.Software}&platformVersion={ServerMetadata.MinecraftVersion}")
             ?? throw new NetworkResourceUnavailableException();
 
         List<ModPluginDownloadInfo> versions = [];
 
         foreach (ProjectVersionEntry version in response.Result!)
         {
-            string platform = ServerMetadata.Software.ToString().ToUpper();
+            string platform = ServerMetadata.Software.ToString().ToUpperInvariant();
             HangarDownloadEntry downloadEntry = version.Downloads![platform];
             _ = version.PluginDependencies!.TryGetValue(platform, out var dependencies);
 
@@ -133,12 +138,27 @@ public class PaperMCHangarProvider : ModPluginProvider
             });
         }
 
-        return versions.ToArray();
+		return [.. versions];
     }
 
     public override async Task<ModPluginInfo[]> SearchAsync(string query = "")
     {
-        SearchRequest response = await HttpClient.GetFromJsonAsync<SearchRequest>("projects") 
+        string route = $"projects";
+
+        if (ServerMetadata is not null)
+        {
+            route += $"?platform={ServerMetadata.Software}&version={ServerMetadata.MinecraftVersion}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            route += route.Contains('?') ? '&' : '?';
+            route += $"query={WebUtility.UrlEncode(query)}";
+		}
+
+        using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+
+		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(route) 
             ?? throw new NetworkResourceUnavailableException();
 
         List<ModPluginInfo> plugins = [];
@@ -158,7 +178,7 @@ public class PaperMCHangarProvider : ModPluginProvider
             });
         }
 
-        return plugins.ToArray();
+		return [.. plugins];
     }
 
     public override async Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
@@ -181,54 +201,57 @@ public class PaperMCHangarProvider : ModPluginProvider
             };
         }));
 
-        mod.Dependencies = resolvedDependencies.ToArray();
+        mod.Dependencies = [.. resolvedDependencies];
 
         return mod;
     }
 
     public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
     {
-        modPlugin.LongDescription = await HttpClient.GetStringAsync($"https://hangar.papermc.io/api/v1/pages/main/{modPlugin.Slug}");
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		modPlugin.LongDescription = await client.GetStringAsync($"https://hangar.papermc.io/api/v1/pages/main/{modPlugin.Slug}");
 
         return modPlugin;
     }
 
     async Task<HangarProject?> GetProjectFromHash(string hash)
     {
-			try
-			{
-				HangarProject? project = await HttpClient.GetFromJsonAsync<HangarProject>($"versions/hash/{hash}");
-            return project;
-			}
-			catch (HttpRequestException ex)
-			{
-				if (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-				{
-					await Task.Delay(RateLimitResetTime);
-                return await GetProjectFromHash(hash);
-				}
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
 
-				throw;
-			}
-		}
-
-		public override async Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
+		try
 		{
-        List<ModPluginDownloadInfo> updates = [];
-
-			foreach (var fileName in modFiles)
+			HangarProject? project = await client.GetFromJsonAsync<HangarProject>($"versions/hash/{hash}");
+            return project;
+		}
+		catch (HttpRequestException ex)
+		{
+			if (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
 			{
-				using var file = File.OpenRead(fileName);
-				using var hasher = SHA256.Create();
-				var hashed = hasher.ComputeHash(file);
-				StringBuilder sb = new();
-
-				foreach (byte b in hashed)
-					sb.Append(b.ToString("x2"));
-
-            await GetProjectFromHash(sb.ToString());
+				await Task.Delay(RateLimitResetTime);
+                return await GetProjectFromHash(hash);
 			}
 
-			return updates.ToArray();
+			throw;
 		}
 	}
+
+	public override async Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
+	{
+        List<ModPluginDownloadInfo> updates = [];
+
+		foreach (var fileName in modFiles)
+		{
+			using var file = File.OpenRead(fileName);
+			using var hasher = SHA256.Create();
+			var hashed = hasher.ComputeHash(file);
+			StringBuilder sb = new();
+
+			foreach (byte b in hashed)
+				sb.Append(b.ToString("x2"));
+
+            await GetProjectFromHash(sb.ToString());
+		}
+
+		return [.. updates];
+	}
+}

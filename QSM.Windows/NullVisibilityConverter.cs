@@ -4,7 +4,7 @@ using System;
 
 namespace QSM.Windows;
 
-internal class NullVisibilityConverter : IValueConverter
+internal partial class NullVisibilityConverter : IValueConverter
 {
 	public object Convert(object value, Type targetType, object parameter, string language)
 	{

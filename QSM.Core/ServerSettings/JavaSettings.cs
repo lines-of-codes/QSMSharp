@@ -16,5 +16,15 @@ public class JavaSettings
 	/// </summary>
 	public double MaxMemoryPoolSize { get; set; }
 
+	/// <summary>
+	/// The arguments provided to the JVM. 
+	/// ("java {JvmArgs} -jar server.jar")
+	/// </summary>
 	public string JvmArgs { get; set; } = string.Empty;
+
+	/// <summary>
+	/// The arguments provided to the program. 
+	/// ("java -jar server.jar {ProgramArgs}")
+	/// </summary>
+	public string ProgramArgs { get; set; } = string.Empty;
 }

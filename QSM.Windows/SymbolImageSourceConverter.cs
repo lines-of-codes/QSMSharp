@@ -5,7 +5,7 @@ using System;
 
 namespace QSM.Windows;
 
-internal class SymbolImageSourceConverter : IValueConverter
+internal partial class SymbolImageSourceConverter : IValueConverter
 {
 	public object Convert(object value, Type targetType, object parameter, string language)
 	{

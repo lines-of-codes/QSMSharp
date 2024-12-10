@@ -53,7 +53,7 @@ public sealed partial class ServerConsolePage : Page
 					AppendError(output.Message);
 					break;
 				default:
-					Log.Warning("An unkown OutputType has been received.");
+					Log.Warning("An unknown OutputType has been received.");
 					break;
 			}
 		}

@@ -10,7 +10,9 @@ namespace QSM.Windows;
 internal class ApplicationData
 {
 	public static string ApplicationDataPath = Path.Combine(AppData.Current.LocalCacheFolder.Path, "Local", "QSM");
+	public static string DownloadFolderPath = Path.Combine(ApplicationDataPath, "Downloads");
 	public static string ServersFolderPath = Path.Combine(ApplicationDataPath, "Servers");
+	public static string BackupsFolderPath = Path.Combine(ApplicationDataPath, "Backups");
 	public static string JavaInstallsPath = Path.Combine(ApplicationDataPath, "Java");
 	public static string LogsFolderPath = Path.Combine(ApplicationDataPath, "Logs");
 	public static string ConfigFile = Path.Combine(ApplicationDataPath, "config.json");
@@ -23,7 +25,8 @@ internal class ApplicationData
 
 	public static void EnsureDataFolderExists()
 	{
-		Directory.CreateDirectory(ApplicationDataPath);
+		Directory.CreateDirectory(DownloadFolderPath);
+		Directory.CreateDirectory(BackupsFolderPath);
 		Directory.CreateDirectory(JavaInstallsPath);
 		Directory.CreateDirectory(LogsFolderPath);
 	}

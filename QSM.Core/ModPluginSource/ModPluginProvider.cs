@@ -4,14 +4,9 @@ namespace QSM.Core.ModPluginSource;
 
 public abstract class ModPluginProvider
 {
-    protected ServerMetadata ServerMetadata;
+    protected ServerMetadata? ServerMetadata => ServerMetadata.Selected;
 
-    protected ModPluginProvider(ServerMetadata serverMetadata)
-    {
-        ServerMetadata = serverMetadata;
-    }
-
-    public abstract Task<ModPluginInfo[]> SearchAsync(string query = "");
+	public abstract Task<ModPluginInfo[]> SearchAsync(string query = "");
 
     public abstract Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin);
 

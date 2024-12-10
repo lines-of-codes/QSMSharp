@@ -44,4 +44,13 @@ public sealed partial class ModListPage : Page
 
 		base.OnNavigatedTo(e);
 	}
+
+	private void RemoveButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+	{
+		var selected = (string)ModList.SelectedItem;
+
+		File.Delete(Path.Combine(_modsFolderPath, selected));
+
+		_mods.Remove(selected);
+	}
 }

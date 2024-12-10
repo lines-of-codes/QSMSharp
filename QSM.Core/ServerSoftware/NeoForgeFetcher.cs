@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using QSM.Core.ServerSettings;
+using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 
 namespace QSM.Core.ServerSoftware;
@@ -71,4 +73,42 @@ public partial class NeoForgeFetcher : InfoFetcher
     {
         return Task.FromResult($"https://maven.neoforged.net/releases/net/neoforged/neoforge/{build}/neoforge-{build}-installer.jar");
     }
+
+	public override string FirstRunArgs => "--install-server";
+
+    public async Task InitializeOnFirstRun(ServerMetadata metadata, ServerSettings.ServerSettings settings, DataReceivedEventHandler outputReceived)
+    {
+        string serverJar = Path.Combine(metadata.ServerPath, "server.jar");
+        string installerJar = Path.Combine(metadata.ServerPath, "installer.jar");
+
+        // If installer jar doesn't exist, assume server.jar is the installer jar.
+		if (!File.Exists(installerJar))
+            File.Move(serverJar, installerJar);
+
+		var startInfo = new ProcessStartInfo
+		{
+			CreateNoWindow = true,
+			UseShellExecute = false,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
+			FileName = Path.Combine(settings.Java.JavaHome, "bin", "javaw.exe"),
+			WindowStyle = ProcessWindowStyle.Hidden,
+			Arguments = $"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "installer.jar")}\" {FirstRunArgs}",
+			WorkingDirectory = metadata.ServerPath
+		};
+
+		var process = new Process
+		{
+			StartInfo = startInfo
+		};
+
+        process.OutputDataReceived += outputReceived;
+        process.ErrorDataReceived += outputReceived;
+
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        await process.WaitForExitAsync();
+	}
 }

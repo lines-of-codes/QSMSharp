@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Org.BouncyCastle.Asn1.Cms;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
 using Serilog;
@@ -38,6 +39,7 @@ public sealed partial class ServerSummaryPage : Page
 		{
 			StartButton.IsEnabled = process.HasExited;
 			StopButton.IsEnabled = !process.HasExited;
+			ServerActiveStatus.Text = process.HasExited ? "Inactive" : "Active";
 
 			if (!process.HasExited)
 			{
@@ -62,9 +64,12 @@ public sealed partial class ServerSummaryPage : Page
 	void OnServerProcessExited(object sender, EventArgs e)
 	{
 		StartButton.IsEnabled = true;
+		StopButton.IsEnabled = false;
+		ServerActiveStatus.Text = "Inactive";
 	}
 
-	private void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+	// skipcq: CS-R1005
+	private async void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		if (string.IsNullOrWhiteSpace(ApplicationData.ServerSettings[_metadata.Guid].Java.JavaHome))
 		{
@@ -72,11 +77,36 @@ public sealed partial class ServerSummaryPage : Page
 			return;
 		}
 
-		var process = ServerProcessManager.Instance.StartServer(_metadataIndex, _metadata.Guid);
-		process.Exited += OnServerProcessExited;
-		ProcessExitWatched = true;
 		StartButton.IsEnabled = false;
 		StopButton.IsEnabled = true;
+
+		var loadingPage = new SingleFileDownloadPage();
+
+		var dialog = loadingPage.CreateDialog(this, "Starting server...");
+
+		_ = dialog.ShowAsync();
+
+		var settings = ApplicationData.ServerSettings[_metadata.Guid];
+
+		if (settings.FirstRun && _metadata.Software == ServerSoftwares.NeoForge)
+		{
+			await new NeoForgeFetcher().InitializeOnFirstRun(
+				_metadata,
+				settings,
+				(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
+
+			settings.FirstRun = false;
+			await settings.SaveJsonAsync(_metadata.QsmConfigFile);
+		}
+
+		var process = ServerProcessManager.Instance.StartServer(_metadataIndex, _metadata.Guid);
+
+		dialog.Hide();
+
+		ServerActiveStatus.Text = "Active";
+		
+		process.Exited += OnServerProcessExited;
+		ProcessExitWatched = true;
 	}
 
 	// skipcq: CS-R1005

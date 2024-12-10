@@ -1,10 +1,13 @@
 using Microsoft.UI.Xaml.Controls;
+using QSM.Core;
 using QSM.Core.ModPluginSource;
+using QSM.Core.Utilities;
 using QSM.Windows.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,11 +30,12 @@ public struct FileDownloadEntry
 }
 
 /// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
+/// A page designed to display download progress of multiple files.
 /// </summary>
 public sealed partial class MultipleFileDownloadPage : Page
 {
 	const byte ConcurrentDownloads = 5;
+	private static readonly HttpClient _httpClient = new();
 	private readonly ObservableCollection<FileDownloadEntry> Files = [];
 	private readonly Queue<byte> _indexQueue = new([0, 1, 2, 3, 4]);
 
@@ -46,8 +50,19 @@ public sealed partial class MultipleFileDownloadPage : Page
 		DownloadMods(downloads, folderPath);
 	}
 
+	public Task DownloadMods(Queue<ModPluginDownloadInfo> mods, string folderPath)
+	{
+		Queue<FileDownloadRequest> files = new(mods.Select(mod => new FileDownloadRequest()
+		{
+			Destination = Path.Combine(folderPath, mod.FileName),
+			DownloadLocations = [mod.DownloadUri]
+		}));
+
+		return DownloadFiles(files);
+	}
+
 	// I actually don't know how this works
-	public Task DownloadMods(Queue<ModPluginDownloadInfo> downloads, string folderPath)
+	public Task DownloadFiles(Queue<FileDownloadRequest> downloads)
 	{
 		List<Task> tasks = [];
 		int initialQueueSize = downloads.Count;
@@ -58,9 +73,10 @@ public sealed partial class MultipleFileDownloadPage : Page
 			Files.Add(new FileDownloadEntry());
 		}
 
-		for (byte i = 0; i < initialQueueSize; i++)
+		while (downloads.Any())
 		{
 			var download = downloads.Dequeue();
+			var count = downloads.Count;
 
 			tasks.Add(Task.Run(async () =>
 			{
@@ -72,13 +88,31 @@ public sealed partial class MultipleFileDownloadPage : Page
 					{
 						index = _indexQueue.Dequeue();
 					}
-					await DownloadFileAsync(download.DownloadUri, Path.Combine(folderPath, download.FileName), index);
+
+					foreach (var uri in download.DownloadLocations)
+					{
+						var downloadResult = await DownloadFileAsync(uri, download.Destination, index);
+						
+						if (!downloadResult)
+							continue;
+
+						var localHash = Hasher.GetFileHash(download.HashAlgorithm, download.Destination);
+						
+						// If the hash of the downloaded file doesn't match the hash provided from file provider(s)...
+						if (localHash != download.Hash)
+						{
+							File.Delete(download.Destination);
+							continue;
+						}
+
+						break;
+					}
 				}
 				finally
 				{
 					lock (_indexQueue)
 					{
-						_indexQueue.Enqueue((byte)(tasks.Count % 5));
+						_indexQueue.Enqueue((byte)(count % 5));
 					}
 					semaphore.Release();
 				}
@@ -88,12 +122,21 @@ public sealed partial class MultipleFileDownloadPage : Page
 		return Task.WhenAll(tasks);
 	}
 
-	private async Task DownloadFileAsync(string fileUrl, string dest, byte index)
+	/// <summary>
+	/// Downloads a file and report progress to the interface.
+	/// </summary>
+	/// <param name="fileUrl">The URL to download the file</param>
+	/// <param name="dest">The destination where the file will be saved to</param>
+	/// <param name="index">The index in the download queue of this function.</param>
+	/// <returns>Returns true if download is successful.</returns>
+	private async Task<bool> DownloadFileAsync(string fileUrl, string dest, byte index)
 	{
-		using HttpClient client = new();
-
-		using HttpResponseMessage response = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-		response.EnsureSuccessStatusCode();
+		using HttpResponseMessage response = await _httpClient.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+		
+		if (!response.IsSuccessStatusCode)
+		{
+			return false;
+		}
 
 		long totalBytes = response.Content.Headers.ContentLength ?? -1L;
 
@@ -133,5 +176,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 				DispatcherQueue.TryEnqueue(() => Files[index] = entry);
 			}
 		}
+
+		return true;
 	}
 }

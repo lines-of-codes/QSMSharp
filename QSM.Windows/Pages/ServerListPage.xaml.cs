@@ -9,7 +9,7 @@ using System.Linq;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace QSM.Windows;
+namespace QSM.Windows.Pages;
 
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
@@ -67,23 +67,27 @@ public sealed partial class ServerListPage : Page
 
 	private void serverListView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
 	{
+		ServerMetadata.Selected = null;
+
 		if (args.IsSettingsSelected)
 		{
 			contentFrame.Navigate(typeof(SettingsPage));
 		}
 		else if (((WinServerInfo)args.SelectedItem).Metadata.Name == "Create new server")
 		{
-			contentFrame.Navigate(typeof(CreateServerPage));
+			contentFrame.Navigate(typeof(NewServerPage));
 		}
 		else
 		{
-			contentFrame.Navigate(typeof(ServerManagementPage), ApplicationData.Configuration.Servers.IndexOf(((WinServerInfo)args.SelectedItem).Metadata));
+			var metadata = ((WinServerInfo)args.SelectedItem).Metadata;
+			ServerMetadata.Selected = metadata;
+			contentFrame.Navigate(typeof(ServerManagementPage), ApplicationData.Configuration.Servers.IndexOf(metadata));
 		}
 	}
 }
 
 [ContentProperty(Name = "ItemTemplate")]
-class MenuItemTemplateSelector : DataTemplateSelector
+partial class MenuItemTemplateSelector : DataTemplateSelector
 {
 	public DataTemplate ItemTemplate { get; set; }
 	protected override DataTemplate SelectTemplateCore(object item)

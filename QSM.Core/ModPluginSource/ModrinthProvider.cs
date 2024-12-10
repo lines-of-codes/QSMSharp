@@ -1,7 +1,8 @@
-﻿using QSM.Core.ServerSoftware;
+﻿using Microsoft.Extensions.Logging;
+using QSM.Core.ModPluginSource.Modrinth;
+using QSM.Core.ServerSoftware;
 using System.Net;
 using System.Net.Http.Json;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,6 +10,13 @@ namespace QSM.Core.ModPluginSource;
 
 public class ModrinthProvider : ModPluginProvider
 {
+    public enum ProjectType
+    {
+        Mod,
+        Plugin,
+        Modpack
+    }
+
     internal record class VersionDependency(
         string? version_id = null,
         string? project_id = null,
@@ -106,28 +114,30 @@ public class ModrinthProvider : ModPluginProvider
         public int? TotalHits = total_hits;
     }
 
-    HttpClient HttpClient;
+    public const string HttpClientName = "ModrinthApi";
+    public const string BaseAddress = "https://api.modrinth.com/v2/";
+    
+	readonly IHttpClientFactory _httpClientFactory = null!;
     private static readonly string[] ignoredDependencyType = ["embedded", "incompatible"];
 
-    public ModrinthProvider(ServerMetadata serverMetadata) : base(serverMetadata)
-    {
-        HttpClient = new()
-        {
-            BaseAddress = new Uri("https://api.modrinth.com/v2/")
-        };
-
-        HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"lines-of-codes/WinQSM/{Assembly.GetEntryAssembly()!.GetName().Version} (linesofcodes@dailitation.xyz)");
-    }
+    public ModrinthProvider(IHttpClientFactory httpClientFactory) => 
+        _httpClientFactory = httpClientFactory;
 
     public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
     {
-        string queryString = $"project/{slug}/version?loaders=";
+        using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
 
-        queryString += WebUtility.UrlEncode($"[\"{ServerMetadata.Software.ToString().ToLower()}\"]");
-        queryString += "&game_versions=";
-        queryString += WebUtility.UrlEncode($"[\"{ServerMetadata.MinecraftVersion}\"]");
+        string queryString = $"project/{slug}/version";
 
-        VersionInfo[] response = await HttpClient.GetFromJsonAsync<VersionInfo[]>(queryString)
+        if (ServerMetadata != null)
+        {
+            queryString += "?loaders=";
+		    queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.Software.ToString().ToLowerInvariant()}\"]");
+            queryString += "&game_versions=";
+            queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.MinecraftVersion}\"]");
+        }
+
+        VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
                                         ?? throw new NetworkResourceUnavailableException();
 
         List<ModPluginDownloadInfo> versions = [];
@@ -143,7 +153,7 @@ public class ModrinthProvider : ModPluginProvider
                 Required = dependency.dependency_type == "required"
             });
 
-            VersionFile primaryFile = info.files!.First(file => (bool)file.primary!);
+            VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0]);
 
             versions.Add(new()
             {
@@ -159,27 +169,47 @@ public class ModrinthProvider : ModPluginProvider
         return versions.ToArray();
     }
 
-    public override async Task<ModPluginInfo[]> SearchAsync(string query = "")
+	public override Task<ModPluginInfo[]> SearchAsync(string query = "")
+    {
+        return SearchAsync(query);
+    }
+
+	public async Task<ModPluginInfo[]> SearchAsync(string query = "", ProjectType projectType = ProjectType.Mod, IEnumerable<string>? categories = null)
     {
         string queryString = "search";
 
         List<List<string>> facets = new();
 
-        List<string> projectType = new();
-        if (ServerMetadata.IsModSupported)
+        List<string> projectTypes = new();
+        if (ServerMetadata?.IsModSupported ?? false || projectType == ProjectType.Mod)
         {
-            projectType.Add("project_type:mod");
+            projectTypes.Add("project_type:mod");
         }
 
-        if (ServerMetadata.IsPluginSupported)
+        if (ServerMetadata?.IsPluginSupported ?? false || projectType == ProjectType.Plugin)
         {
-            projectType.Add("project_type:plugin");
+            projectTypes.Add("project_type:plugin");
         }
-        facets.Add(projectType);
 
-        facets.Add([$"versions:{ServerMetadata.MinecraftVersion}"]);
+        if (projectType == ProjectType.Modpack)
+        {
+            projectTypes.Add("project_type:modpack");
+        }
 
-        facets.Add([$"categories:{ServerMetadata.Software.ToString().ToLower()}"]);
+        facets.Add(projectTypes);
+
+        if (ServerMetadata != null)
+        {
+            facets.Add([$"versions:{ServerMetadata.MinecraftVersion}"]);
+            facets.Add([$"categories:{ServerMetadata.Software.ToString().ToLowerInvariant()}"]);
+        }
+
+        categories ??= Array.Empty<string>();
+
+        foreach (var category in categories)
+        {
+            facets.Add([$"categories:{category}"]);
+        }
 
         facets.Add(["server_side!=unsupported"]);
 
@@ -207,7 +237,8 @@ public class ModrinthProvider : ModPluginProvider
             queryString += WebUtility.UrlEncode(query);
         }
 
-        SearchRequest response = await HttpClient.GetFromJsonAsync<SearchRequest>(queryString)
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
                                         ?? throw new NetworkResourceUnavailableException();
 
         List<ModPluginInfo> modPlugins = [];
@@ -238,7 +269,8 @@ public class ModrinthProvider : ModPluginProvider
 
             if (!ignoredDependencyType.Contains(dependency.ExternalPageUrl))
             {
-                VersionInfo response = await HttpClient.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
+                using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+                VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
                                         ?? throw new NetworkResourceUnavailableException();
 
                 downloadUri = new Uri(response.files!.First(file => (bool)file.primary!).url!);
@@ -261,7 +293,8 @@ public class ModrinthProvider : ModPluginProvider
 
     public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
     {
-        var project = await HttpClient.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
+        using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+        var project = await client.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
 
         if (string.IsNullOrEmpty(modPlugin.LicenseUrl))
         {
@@ -273,8 +306,8 @@ public class ModrinthProvider : ModPluginProvider
         return modPlugin;
     }
 
-		public override Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
-		{
+	public override Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
+	{
         List<string> hashes = [];
 
         foreach (var fileName in modFiles)
@@ -291,5 +324,11 @@ public class ModrinthProvider : ModPluginProvider
         }
 
         return Task.FromResult(Array.Empty<ModPluginDownloadInfo>());
-		}
 	}
+
+    public async Task<Category[]> ListCategories()
+    {
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+        return (await client.GetFromJsonAsync<Category[]>("tag/category"))!;
+	}
+}

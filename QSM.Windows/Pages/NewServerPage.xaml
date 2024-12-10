@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.Pages.NewServerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <NavigationView 
+        x:Name="NewNavigationView"
+        SelectionChanged="NavigationView_SelectionChanged"
+        IsBackEnabled="False"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        PaneDisplayMode="Top">
+        <NavigationView.MenuItems>
+            <NavigationViewItem x:Name="CreateTab" Icon="Add">
+                Create
+            </NavigationViewItem>
+            <NavigationViewItem x:Name="ModrinthTab">
+                <NavigationViewItem.Icon>
+                    <ImageIcon Source="/Assets/ModPluginProvider/modrinth-logo.svg" />
+                </NavigationViewItem.Icon>
+                Modrinth
+            </NavigationViewItem>
+            <NavigationViewItem x:Name="ManualImportTab">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE8B5;" />
+                </NavigationViewItem.Icon>
+                Manual Import
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+
+        <Frame x:Name="ContentFrame" />
+    </NavigationView>
+</Page>
