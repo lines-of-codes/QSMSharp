@@ -24,6 +24,15 @@ public partial class ServerSettings
 				ServerSettingsContext.Default.ServerSettings));
 	}
 
+	public void SaveJson(string filePath)
+	{
+		File.WriteAllText(
+			filePath,
+			JsonSerializer.Serialize(
+				this,
+				ServerSettingsContext.Default.ServerSettings));
+	}
+
 	/// <summary>
 	/// 
 	/// </summary>

@@ -90,7 +90,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 	/// </summary>
 	const ushort RateLimitResetTime = 5000;
     
-	readonly IHttpClientFactory _httpClientFactory = null!;
+	readonly IHttpClientFactory _httpClientFactory;
 
 	public PaperMCHangarProvider(IHttpClientFactory httpClientFactory)
     {
@@ -143,7 +143,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 
     public override async Task<ModPluginInfo[]> SearchAsync(string query = "")
     {
-        string route = $"projects";
+        string route = "projects";
 
         if (ServerMetadata is not null)
         {

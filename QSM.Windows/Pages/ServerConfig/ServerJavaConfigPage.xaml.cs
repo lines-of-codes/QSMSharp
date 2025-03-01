@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Org.BouncyCastle.Bcpg;
 using QSM.Core.ServerSettings;
 using QSM.Windows.Pages.Dialogs;
 using QSM.Windows.Utilities;
@@ -61,12 +62,17 @@ public sealed partial class ServerJavaConfigPage : Page
 		_metadataIndex = (int)e.Parameter;
 		_serverGuid = ApplicationData.Configuration.Servers[_metadataIndex].Guid;
 
+		if (ServerSettings.Java.JavaHome != string.Empty && JavaCheck.CheckJavaInstallation(ServerSettings.Java.JavaHome, out var javaInstall))
+			JavaLabel.Text = $"{javaInstall.Vendor} {javaInstall.Version}";
+		else
+			JavaLabel.Text = "None selected.";
+
 		base.OnNavigatedTo(e);
 	}
 
 	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
 	{
-		ServerSettings.SaveJsonAsync(ApplicationData.Configuration.Servers[_metadataIndex].QsmConfigFile);
+		ServerSettings.SaveJson(ApplicationData.Configuration.Servers[_metadataIndex].QsmConfigFile);
 
 		base.OnNavigatingFrom(e);
 	}
@@ -102,6 +108,7 @@ public sealed partial class ServerJavaConfigPage : Page
 			return;
 
 		Log.Information($"Selected {picker.SelectedInstallation.Vendor} {picker.SelectedInstallation.Version}");
+		JavaLabel.Text = $"{picker.SelectedInstallation.Vendor} {picker.SelectedInstallation.Version}";
 		ServerSettings.Java.JavaHome = picker.SelectedInstallation.Path;
 	}
 

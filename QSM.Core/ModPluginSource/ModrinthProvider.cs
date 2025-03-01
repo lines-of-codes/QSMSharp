@@ -117,7 +117,7 @@ public class ModrinthProvider : ModPluginProvider
     public const string HttpClientName = "ModrinthApi";
     public const string BaseAddress = "https://api.modrinth.com/v2/";
     
-	readonly IHttpClientFactory _httpClientFactory = null!;
+	readonly IHttpClientFactory _httpClientFactory;
     private static readonly string[] ignoredDependencyType = ["embedded", "incompatible"];
 
     public ModrinthProvider(IHttpClientFactory httpClientFactory) => 

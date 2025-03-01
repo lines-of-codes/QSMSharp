@@ -1,6 +1,8 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
+using Serilog;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -28,6 +30,13 @@ public sealed partial class ServerConfigurationPage : Page
 		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
 		base.OnNavigatedTo(e);
+	}
+
+	protected override void OnNavigatedFrom(NavigationEventArgs e)
+	{
+		ApplicationData.ServerSettings[_metadata.Guid].SaveJson(ApplicationData.Configuration.Servers[_metadataIndex].QsmConfigFile);
+
+		base.OnNavigatedFrom(e);
 	}
 
 	private void ConfigurationNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

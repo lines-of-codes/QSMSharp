@@ -137,7 +137,7 @@ public sealed partial class ModrinthImportPage : Page
 		Directory.CreateDirectory(serverDir);
 
 		downloadPage.SetOperation("Extracting .mrpack file...");
-		var extractResult = await MrpackExtractor.Extract(packPath, tempDir);
+		var extractResult = await MrpackExtractor.ExtractAsync(packPath, tempDir);
 
 		var copyOperation = MrpackExtractor.CopyOverrides(extractResult.ExtractLocation, serverDir);
 

@@ -1,11 +1,8 @@
-﻿using CommunityToolkit.WinUI.UI.Controls.TextToolbarSymbols;
-using HappyCoding.Hosting.Desktop.WinUI;
+﻿using HappyCoding.Hosting.Desktop.WinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QSM.Core.ModPluginSource;
-using QSM.Core.ServerSoftware;
 using Serilog;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 

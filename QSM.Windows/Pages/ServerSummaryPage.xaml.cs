@@ -73,7 +73,7 @@ public sealed partial class ServerSummaryPage : Page
 	{
 		if (string.IsNullOrWhiteSpace(ApplicationData.ServerSettings[_metadata.Guid].Java.JavaHome))
 		{
-			Log.Error($"Java install not set for server instance. (Server \"{_metadata.Name}\")");
+			await InfoDialog.CreateDialog("Java Not Selected", $"A Java installation hasn't been selected for this server instance. Please select one in the Configuration › Java menu.", this).ShowAsync();
 			return;
 		}
 
@@ -131,7 +131,10 @@ public sealed partial class ServerSummaryPage : Page
 
 	private void StopButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-		ServerProcessManager.Instance.Processes[_metadata.Guid].StandardInput.WriteLine("stop");
+		if (!ServerProcessManager.Instance.Processes[_metadata.Guid].HasExited)
+		{
+			ServerProcessManager.Instance.Processes[_metadata.Guid].StandardInput.WriteLine("stop");
+		}
 		StopButton.IsEnabled = false;
 	}
 

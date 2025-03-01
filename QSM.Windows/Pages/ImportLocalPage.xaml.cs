@@ -57,7 +57,7 @@ namespace QSM.Windows.Pages
 
 			Directory.CreateDirectory(serverDir);
 
-			var extractResult = await MrpackExtractor.Extract(selected, tempDir);
+			var extractResult = await MrpackExtractor.ExtractAsync(selected, tempDir);
 			var downloader = MrpackExtractor.DownloadMods(extractResult.Index, serverDir);
 
 			await foreach (var operation in downloader)

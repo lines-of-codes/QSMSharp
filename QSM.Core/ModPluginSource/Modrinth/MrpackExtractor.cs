@@ -10,7 +10,7 @@ namespace QSM.Core.ModPluginSource.Modrinth
 	{
 		public static async IAsyncEnumerable<MrpackOperation> Install(string file, string temp, string dest)
 		{
-			var extractResult = await Extract(file, temp);
+			var extractResult = await ExtractAsync(file, temp);
 			
 			var downloader = DownloadMods(extractResult.Index, dest);
 
@@ -34,7 +34,7 @@ namespace QSM.Core.ModPluginSource.Modrinth
 		/// </summary>
 		/// <param name="file">A path to the .mrpack file</param>
 		/// <param name="temp">A path to a folder to store temporary files</param>
-		public static async Task<(MrpackModrinthIndex Index, string ExtractLocation)> Extract(string file, string temp)
+		public static async Task<(MrpackModrinthIndex Index, string ExtractLocation)> ExtractAsync(string file, string temp)
 		{
 			var dest = Path.Combine(temp, Path.GetFileNameWithoutExtension(file));
 
