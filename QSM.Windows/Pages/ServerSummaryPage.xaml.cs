@@ -1,6 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using Org.BouncyCastle.Asn1.Cms;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
 using Serilog;
@@ -73,7 +72,8 @@ public sealed partial class ServerSummaryPage : Page
 	{
 		if (string.IsNullOrWhiteSpace(ApplicationData.ServerSettings[_metadata.Guid].Java.JavaHome))
 		{
-			await InfoDialog.CreateDialog("Java Not Selected", $"A Java installation hasn't been selected for this server instance. Please select one in the Configuration › Java menu.", this).ShowAsync();
+			await InfoDialog.CreateDialog("Java Not Selected", "A Java installation hasn't been selected for this server instance. Please select one in the Configuration › Java menu.", this).ShowAsync();
+			Log.Error($"Java install not set for server instance. (Server \"{_metadata.Name}\")");
 			return;
 		}
 
@@ -104,7 +104,7 @@ public sealed partial class ServerSummaryPage : Page
 		dialog.Hide();
 
 		ServerActiveStatus.Text = "Active";
-		
+
 		process.Exited += OnServerProcessExited;
 		ProcessExitWatched = true;
 	}
@@ -141,5 +141,10 @@ public sealed partial class ServerSummaryPage : Page
 	private void OpenServerFolderButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		Process.Start("explorer.exe", _metadata.ServerPath);
+	}
+
+	private void ChangeVersionButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+	{
+
 	}
 }

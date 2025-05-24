@@ -1,8 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
-using Serilog;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,

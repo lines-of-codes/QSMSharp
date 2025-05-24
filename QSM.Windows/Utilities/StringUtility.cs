@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace QSM.Windows.Utilities;
@@ -28,7 +27,7 @@ internal partial class StringUtility
 			return string.Empty;
 
 		return string.Join(
-			" ", 
+			" ",
 			text.Split('-')
 				.Select(word => char.ToUpper(word[0]) + word.Substring(1).ToLower()));
 	}

@@ -7,78 +7,78 @@ namespace QSM.Core.ServerSoftware;
 /// </summary>
 public class PaperMCFetcher : InfoFetcher
 {
-    internal record class AvailableBuildsRequest(
-        string? project_id = null,
-        string? project_name = null,
-        string? version = null,
-        int[]? builds = null)
-    {
-        public string? ProjectId = project_id;
-        public string? ProjectName = project_name;
-        public string? Version = version;
-        public int[]? Builds = builds;
-    }
+	internal record class AvailableBuildsRequest(
+		string? project_id = null,
+		string? project_name = null,
+		string? version = null,
+		int[]? builds = null)
+	{
+		public string? ProjectId = project_id;
+		public string? ProjectName = project_name;
+		public string? Version = version;
+		public int[]? Builds = builds;
+	}
 
-    internal record class ProjectInformation(
-        string? project_id = null, 
-        string? project_name = null,
-        string[]? version_groups = null,
-        string[]? versions = null)
-    {
-        public string? ProjectId = project_id;
-        public string? ProjectName = project_name;
-        public string[]? VersionGroups = version_groups;
-        public string[]? Versions = versions;
-    }
+	internal record class ProjectInformation(
+		string? project_id = null,
+		string? project_name = null,
+		string[]? version_groups = null,
+		string[]? versions = null)
+	{
+		public string? ProjectId = project_id;
+		public string? ProjectName = project_name;
+		public string[]? VersionGroups = version_groups;
+		public string[]? Versions = versions;
+	}
 
-    string project;
-    HttpClient httpClient;
+	string project;
+	HttpClient httpClient;
 
-    public PaperMCFetcher(string project)
-    {
-        this.project = project;
-        httpClient = new()
-        {
-            BaseAddress = new Uri($"https://api.papermc.io/v2/projects/{project}/")
-        };
-    }
+	public PaperMCFetcher(string project)
+	{
+		this.project = project;
+		httpClient = new()
+		{
+			BaseAddress = new Uri($"https://api.papermc.io/v2/projects/{project}/")
+		};
+	}
 
-    public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
-    {
-        if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
-            return buildInfo;
+	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
+	{
+		if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
+			return buildInfo;
 
-        AvailableBuildsRequest? response = await httpClient.GetFromJsonAsync<AvailableBuildsRequest>($"versions/{minecraftVersion}");
+		AvailableBuildsRequest? response = await httpClient.GetFromJsonAsync<AvailableBuildsRequest>($"versions/{minecraftVersion}");
 
-        if (response == null)
-            throw new NetworkResourceUnavailableException();
+		if (response == null)
+			throw new NetworkResourceUnavailableException();
 
-        string[] builds = Array.ConvertAll(response.Builds!, num => num.ToString());
-        Array.Reverse(builds);
+		string[] builds = Array.ConvertAll(response.Builds!, num => num.ToString());
+		Array.Reverse(builds);
 
-        buildInfoCache[minecraftVersion] = builds;
+		buildInfoCache[minecraftVersion] = builds;
 
-        return builds;
-    }
+		return builds;
+	}
 
-    public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
-    {
-        if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
+	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
+	{
+		if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
 
-        ProjectInformation? response = await httpClient.GetFromJsonAsync<ProjectInformation>("");
+		ProjectInformation? response = await httpClient.GetFromJsonAsync<ProjectInformation>("");
 
-        if (response == null)
-            throw new NetworkResourceUnavailableException();
+		if (response == null)
+			throw new NetworkResourceUnavailableException();
 
-        minecraftVersionsCache = response.Versions!;
+		minecraftVersionsCache = response.Versions!;
 
-        Array.Reverse(minecraftVersionsCache);
+		Array.Reverse(minecraftVersionsCache);
 
-        return minecraftVersionsCache;
-    }
+		return minecraftVersionsCache;
+	}
 
-    public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
-    {
-        return Task.FromResult($"{httpClient.BaseAddress!.ToString()}versions/{minecraftVersion}/builds/{build}/downloads/paper-{minecraftVersion}-{build}.jar");
-    }
+	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
+	{
+		return Task.FromResult($"{httpClient.BaseAddress!.ToString()}versions/{minecraftVersion}/builds/{build}/downloads/paper-{minecraftVersion}-{build}.jar");
+	}
 }

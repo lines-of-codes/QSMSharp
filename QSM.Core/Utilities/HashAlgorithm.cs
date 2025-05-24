@@ -1,8 +1,7 @@
-﻿namespace QSM.Core.Utilities
+﻿namespace QSM.Core.Utilities;
+
+public enum HashAlgorithm
 {
-	public enum HashAlgorithm
-	{
-		SHA256,
-		SHA512
-	}
+	SHA256,
+	SHA512
 }

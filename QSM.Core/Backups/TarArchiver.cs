@@ -10,7 +10,7 @@ namespace QSM.Core.Backups;
 
 public static class TarArchiver
 {
-	public static readonly CompressionFormat[] SupportedCompression = 
+	public static readonly CompressionFormat[] SupportedCompression =
 	[
 		CompressionFormat.None,
 		CompressionFormat.Deflate,
@@ -50,7 +50,7 @@ public static class TarArchiver
 		using var archive = TarArchive.Create();
 		archive.AddAllFromDirectory(folderPath);
 		archive.SaveTo(
-			File.Create(dest), 
+			File.Create(dest),
 			new SharpCompress.Writers.WriterOptions(format switch
 			{
 				CompressionFormat.Deflate => CompressionType.GZip,

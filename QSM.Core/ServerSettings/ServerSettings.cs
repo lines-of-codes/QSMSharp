@@ -18,9 +18,9 @@ public partial class ServerSettings
 	public Task SaveJsonAsync(string filePath)
 	{
 		return File.WriteAllTextAsync(
-			filePath, 
+			filePath,
 			JsonSerializer.Serialize(
-				this, 
+				this,
 				ServerSettingsContext.Default.ServerSettings));
 	}
 
@@ -47,7 +47,7 @@ public partial class ServerSettings
 			return false;
 
 		using var stream = File.OpenRead(filePath);
-		
+
 		try
 		{
 			settings = JsonSerializer.Deserialize(stream, ServerSettingsContext.Default.ServerSettings);

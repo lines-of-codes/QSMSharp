@@ -40,6 +40,7 @@
         </StackPanel>
 
         <Button x:Name="OpenServerFolderButton" Click="OpenServerFolderButton_Click" Content="Open Folder" />
+        <Button x:Name="ChangeVersionButton" Click="ChangeVersionButton_Click" Content="Update/Change Version" />
 
         <Expander
             Header="Dangerous Zone"

@@ -13,7 +13,7 @@ public class MrpackFile
 	/// </summary>
 	[JsonPropertyName("hashes")]
 	public Dictionary<string, string> Hashes { get; set; } = [];
-	
+
 	/// <summary>
 	/// A dictionary containing a "client" and "server" key
 	/// with the possible values being "required", "optional", and "unsupported"

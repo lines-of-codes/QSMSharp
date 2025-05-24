@@ -47,14 +47,14 @@ public sealed partial class ServerBackupsPage : Page
 
 		if (result != ContentDialogResult.Primary)
 			return;
-		
+
 		string name = createPage.BackupName;
 		ArchiveFormat archive = createPage.SelectedArchiveFormat;
 		CompressionFormat compression = createPage.SelectedCompression;
 
 		Cuid2 cuid = new(BackupItem.DefaultCuidLength);
 
-		string backupFileName = 
+		string backupFileName =
 			Path.Combine(
 				ApplicationData.BackupsFolderPath,
 				StringUtility.TurnIntoValidFileName($"{_metadata.Name}_{cuid}_{name}")
@@ -69,9 +69,9 @@ public sealed partial class ServerBackupsPage : Page
 		progressPage.SetOperation("Compressing files...");
 
 		await Compressor.CompressFolderAsync(
-			_metadata.ServerPath, 
-			backupFileName, 
-			archive, 
+			_metadata.ServerPath,
+			backupFileName,
+			archive,
 			compression);
 
 		dialog.Hide();

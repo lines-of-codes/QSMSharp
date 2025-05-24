@@ -33,7 +33,7 @@ public sealed partial class BackupCreationPage : Page
 	private void ArchiveFormatSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		_compressionFormats.Clear();
-		switch(SelectedArchiveFormat)
+		switch (SelectedArchiveFormat)
 		{
 			case ArchiveFormat.Tar:
 				_compressionFormats.AddRange(TarArchiver.SupportedCompression);

@@ -92,12 +92,12 @@ public sealed partial class MultipleFileDownloadPage : Page
 					foreach (var uri in download.DownloadLocations)
 					{
 						var downloadResult = await DownloadFileAsync(uri, download.Destination, index);
-						
+
 						if (!downloadResult)
 							continue;
 
 						var localHash = Hasher.GetFileHash(download.HashAlgorithm, download.Destination);
-						
+
 						// If the hash of the downloaded file doesn't match the hash provided from file provider(s)...
 						if (localHash != download.Hash)
 						{
@@ -132,7 +132,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 	private async Task<bool> DownloadFileAsync(string fileUrl, string dest, byte index)
 	{
 		using HttpResponseMessage response = await _httpClient.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-		
+
 		if (!response.IsSuccessStatusCode)
 		{
 			return false;

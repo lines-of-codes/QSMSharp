@@ -69,7 +69,7 @@ public sealed partial class ModrinthImportPage : Page
 	private async void ModpackSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
 	{
 		var modpacks = (await _modrinth.SearchAsync(
-			sender.Text, 
+			sender.Text,
 			ModrinthProvider.ProjectType.Modpack,
 			FilterCategorySelector.SelectedItems.Select(cat =>
 			{
@@ -106,7 +106,7 @@ public sealed partial class ModrinthImportPage : Page
 		_ = dialog.ShowAsync();
 
 		string packPath = Path.Combine(ApplicationData.DownloadFolderPath, StringUtility.TurnIntoValidFileName(selected.FileName));
-		
+
 		if (!File.Exists(packPath))
 			await downloadPage.DownloadFileAsync(selected.DownloadUri, packPath);
 
@@ -124,7 +124,7 @@ public sealed partial class ModrinthImportPage : Page
 
 		string tempDir = FileSystemUtility.GetTemporaryDirectory();
 		string serverDir = Path.Combine(
-			ApplicationData.ServersFolderPath, 
+			ApplicationData.ServersFolderPath,
 			StringUtility.TurnIntoValidFileName(selectedModpack.Name));
 
 		if (Directory.Exists(serverDir))

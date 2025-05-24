@@ -6,50 +6,49 @@ using Serilog;
 using System.IO;
 using System.Reflection;
 
-namespace QSM.Windows
+namespace QSM.Windows;
+
+public static class Program
 {
-	public static class Program
+	public static IHost Hoster;
+
+	public static void Main(string[] args)
 	{
-		public static IHost Hoster;
+		ApplicationData.EnsureDataFolderExists();
 
-		public static void Main(string[] args)
+		Log.Logger = new LoggerConfiguration()
+			.MinimumLevel.Verbose()
+			.WriteTo.File(
+				Path.Combine(ApplicationData.LogsFolderPath, "WinQSM.txt"),
+				rollingInterval: RollingInterval.Day)
+			.CreateLogger();
+
+		var builder = Host.CreateApplicationBuilder(args);
+
+		builder.Services.AddSerilog();
+
+		builder.Services.AddHttpClient(ModrinthProvider.HttpClientName, client =>
 		{
-			ApplicationData.EnsureDataFolderExists();
+			client.BaseAddress = new System.Uri(ModrinthProvider.BaseAddress);
+			client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"lines-of-codes/WinQSM/{Assembly.GetEntryAssembly()!.GetName().Version} (linesofcodes@dailitation.xyz)");
+		});
 
-			Log.Logger = new LoggerConfiguration()
-				.MinimumLevel.Verbose()
-				.WriteTo.File(
-					Path.Combine(ApplicationData.LogsFolderPath, "WinQSM.txt"),
-					rollingInterval: RollingInterval.Day)
-				.CreateLogger();
+		builder.Services.AddHttpClient(PaperMCHangarProvider.HttpClientName, client =>
+		{
+			client.BaseAddress = new System.Uri(PaperMCHangarProvider.BaseAddress);
+		});
 
-			var builder = Host.CreateApplicationBuilder(args);
+		builder.Services.AddTransient<ModrinthProvider>();
+		builder.Services.AddTransient<PaperMCHangarProvider>();
 
-			builder.Services.AddSerilog();
+		((IHostApplicationBuilder)builder).Properties.Add(
+			key: HostingExtensions.HostingContextKey,
+			value: new HostingContext() { IsLifetimeLinked = true });
 
-			builder.Services.AddHttpClient(ModrinthProvider.HttpClientName, client =>
-			{
-				client.BaseAddress = new System.Uri(ModrinthProvider.BaseAddress);
-				client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"lines-of-codes/WinQSM/{Assembly.GetEntryAssembly()!.GetName().Version} (linesofcodes@dailitation.xyz)");
-			});
+		builder.ConfigureWinUI<App>();
 
-			builder.Services.AddHttpClient(PaperMCHangarProvider.HttpClientName, client =>
-			{
-				client.BaseAddress = new System.Uri(PaperMCHangarProvider.BaseAddress);
-			});
+		Hoster = builder.Build();
 
-			builder.Services.AddTransient<ModrinthProvider>();
-			builder.Services.AddTransient<PaperMCHangarProvider>();
-
-			((IHostApplicationBuilder)builder).Properties.Add(
-				key: HostingExtensions.HostingContextKey,
-				value: new HostingContext() { IsLifetimeLinked = true });
-
-			builder.ConfigureWinUI<App>();
-
-			Hoster = builder.Build();
-
-			Hoster.Run();
-		}
+		Hoster.Run();
 	}
 }

@@ -12,7 +12,7 @@ public partial class Compressor
 				return ".zip";
 			case ArchiveFormat.Tar:
 				StringBuilder sb = new();
-				
+
 				sb.Append(".tar");
 				sb.Append(compressionFormat switch
 				{
