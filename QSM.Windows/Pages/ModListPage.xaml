@@ -20,7 +20,7 @@
                     <FontIcon Glyph="&#xE777;" />
                 </AppBarButton.Icon>
             </AppBarButton>-->
-            <AppBarButton Icon="Add" Label="Add file" />
+            <AppBarButton Icon="Add" Label="Add file" x:Name="AddButton" Click="AddButton_Click" />
             <AppBarButton Icon="Delete" Label="Remove" x:Name="RemoveButton" Click="RemoveButton_Click" />
         </CommandBar>
         <ListView Grid.Row="1" ItemsSource="{x:Bind _mods, Mode=OneWay}" x:Name="ModList" />

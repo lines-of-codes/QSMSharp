@@ -161,7 +161,8 @@ public class ModrinthProvider : ModPluginProvider
 				Dependencies = dependencies.ToArray(),
 				DownloadUri = primaryFile.url,
 				ExternalPageUrl = null,
-				Hash = primaryFile.hashes!.sha512
+				Hash = primaryFile.hashes!.sha512,
+				HashAlgorithm = Utilities.HashAlgorithm.SHA512
 			});
 		}
 

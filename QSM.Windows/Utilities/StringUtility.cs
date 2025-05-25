@@ -29,7 +29,7 @@ internal partial class StringUtility
 		return string.Join(
 			" ",
 			text.Split('-')
-				.Select(word => char.ToUpper(word[0]) + word.Substring(1).ToLower()));
+				.Select(word => char.ToUpper(word[0]) + word.Substring(1).ToLowerInvariant()));
 	}
 
 	public static string ToKebabCase(string text)

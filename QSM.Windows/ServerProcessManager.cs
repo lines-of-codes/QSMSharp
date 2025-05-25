@@ -51,11 +51,11 @@ public class ServerProcessManager
 
 		ProcessOutputs[serverGuid] = [];
 
-		string args = $"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "server.jar")}\" nogui";
+		string args = $"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "server.jar")}\" {programArgs}";
 
 		if (metadata.Software == ServerSoftwares.NeoForge)
 		{
-			args = $"{settings.Java.JvmArgs} @libraries/net/neoforged/neoforge/{metadata.ServerVersion}/win_args.txt nogui";
+			args = $"{settings.Java.JvmArgs} @libraries/net/neoforged/neoforge/{metadata.ServerVersion}/win_args.txt {programArgs}";
 		}
 
 		var startInfo = new ProcessStartInfo
@@ -75,6 +75,8 @@ public class ServerProcessManager
 		{
 			StartInfo = startInfo
 		};
+
+		ProcessOutputs[serverGuid].Add(new(OutputType.Normal, $"Starting server with arguments: {args}"));
 
 		process.OutputDataReceived += (sender, e) => ProcessOutputs[serverGuid].Add(new(OutputType.Normal, e.Data));
 		process.ErrorDataReceived += (sender, e) => ProcessOutputs[serverGuid].Add(new(OutputType.Error, e.Data));

@@ -134,7 +134,8 @@ public class PaperMCHangarProvider : ModPluginProvider
 				DownloadUri = downloadEntry.DownloadUrl,
 				ExternalPageUrl = downloadEntry.ExternalUrl,
 				Dependencies = genericInfo.ToArray(),
-				Hash = downloadEntry.FileInfo.Sha256Hash
+				Hash = downloadEntry.FileInfo.Sha256Hash,
+				HashAlgorithm = Utilities.HashAlgorithm.SHA256
 			});
 		}
 

@@ -3,6 +3,7 @@ using QSM.Core;
 using QSM.Core.ModPluginSource;
 using QSM.Core.Utilities;
 using QSM.Windows.Utilities;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -55,7 +56,9 @@ public sealed partial class MultipleFileDownloadPage : Page
 		Queue<FileDownloadRequest> files = new(mods.Select(mod => new FileDownloadRequest()
 		{
 			Destination = Path.Combine(folderPath, mod.FileName),
-			DownloadLocations = [mod.DownloadUri]
+			DownloadLocations = [mod.DownloadUri],
+			Hash = mod.Hash,
+			HashAlgorithm = mod.HashAlgorithm
 		}));
 
 		return DownloadFiles(files);
@@ -101,6 +104,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 						// If the hash of the downloaded file doesn't match the hash provided from file provider(s)...
 						if (localHash != download.Hash)
 						{
+							Log.Error($"File {Path.GetFileName(download.Destination)} hash checking failed. Expected {download.HashAlgorithm} \"{download.Hash}\", Got \"{localHash}\"");
 							File.Delete(download.Destination);
 							continue;
 						}

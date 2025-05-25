@@ -30,7 +30,7 @@ public static class Program
 		builder.Services.AddHttpClient(ModrinthProvider.HttpClientName, client =>
 		{
 			client.BaseAddress = new System.Uri(ModrinthProvider.BaseAddress);
-			client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"lines-of-codes/WinQSM/{Assembly.GetEntryAssembly()!.GetName().Version} (linesofcodes@dailitation.xyz)");
+			client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"lines-of-codes/QSMSharp/{Assembly.GetEntryAssembly()!.GetName().Version} (linesofcodes@dailitation.xyz)");
 		});
 
 		builder.Services.AddHttpClient(PaperMCHangarProvider.HttpClientName, client =>

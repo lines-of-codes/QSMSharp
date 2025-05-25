@@ -63,7 +63,10 @@ public sealed partial class ServerConsolePage : Page
 		process.OutputDataReceived += (sender, args) =>
 			DispatcherQueue.TryEnqueue(() =>
 			{
-				ProcessOutput.Text += args.Data + Environment.NewLine;
+				ProcessOutput.Inlines.Add(new Run()
+				{
+					Text = args.Data + Environment.NewLine
+				});
 				ScrollToEnd();
 			});
 		process.ErrorDataReceived += (sender, args) => AppendError(args.Data);

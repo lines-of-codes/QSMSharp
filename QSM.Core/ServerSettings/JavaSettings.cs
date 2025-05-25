@@ -26,5 +26,5 @@ public class JavaSettings
 	/// The arguments provided to the program. 
 	/// ("java -jar server.jar {ProgramArgs}")
 	/// </summary>
-	public string ProgramArgs { get; set; } = string.Empty;
+	public string ProgramArgs { get; set; } = "nogui";
 }

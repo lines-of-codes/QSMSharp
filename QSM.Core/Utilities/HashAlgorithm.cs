@@ -2,6 +2,7 @@
 
 public enum HashAlgorithm
 {
+	None,
 	SHA256,
 	SHA512
 }

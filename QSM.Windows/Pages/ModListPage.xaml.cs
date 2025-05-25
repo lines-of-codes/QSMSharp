@@ -1,6 +1,12 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Serilog;
+using System;
 using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -52,5 +58,28 @@ public sealed partial class ModListPage : Page
 		File.Delete(Path.Combine(_modsFolderPath, selected));
 
 		_mods.Remove(selected);
+	}
+
+	private async void AddButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+	{
+		var openPicker = new FileOpenPicker();
+		var window = App.MainWindow;
+		var hWnd = WindowNative.GetWindowHandle(window);
+		InitializeWithWindow.Initialize(openPicker, hWnd);
+
+		openPicker.SuggestedStartLocation = PickerLocationId.Downloads;
+		openPicker.FileTypeFilter.Add(".jar");
+
+		var files = await openPicker.PickMultipleFilesAsync();
+
+		var targetFolder = await StorageFolder.GetFolderFromPathAsync(_modsFolderPath);
+
+		Log.Information("Copying selected mods to target folder...");
+		foreach (var file in files)
+		{
+			Log.Debug($"Copying \"{file.Name}\"...");
+			await file.CopyAsync(targetFolder);
+			_mods.Add(file.Name);
+		}
 	}
 }

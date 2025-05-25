@@ -1,4 +1,6 @@
-﻿namespace QSM.Core.ModPluginSource;
+﻿using QSM.Core.Utilities;
+
+namespace QSM.Core.ModPluginSource;
 
 public class ModPluginDownloadInfo
 {
@@ -23,6 +25,7 @@ public class ModPluginDownloadInfo
 	public string? DownloadUri;
 	public string? ExternalPageUrl;
 	public string? Hash;
+	public HashAlgorithm HashAlgorithm = HashAlgorithm.None;
 	public Dependency[] Dependencies = [];
 
 	public override bool Equals(object? obj)
