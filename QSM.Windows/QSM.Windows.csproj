@@ -25,6 +25,7 @@
     <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ChatAndCommandsConfigPage.xaml" />

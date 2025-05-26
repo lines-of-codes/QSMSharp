@@ -185,7 +185,7 @@ public class MrpackExtractor
 		var fileName = Path.GetFileName(dest);
 		var buffer = new byte[8192];
 		long totalBytesRead = 0;
-		int bytesRead;
+		int bytesRead = 0;
 		double percentage = 0;
 
 		if (totalBytes != -1)

@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -159,7 +158,6 @@ public sealed partial class CreateServerPage : Page
 		StorageFolder folder = await folderPicker.PickSingleFolderAsync();
 		if (folder != null)
 		{
-			StorageApplicationPermissions.FutureAccessList.Add(folder);
 			serverFolderPathInput.Text = folder.Path;
 		}
 	}

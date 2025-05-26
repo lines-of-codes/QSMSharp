@@ -9,7 +9,7 @@ namespace QSM.Windows;
 
 internal class ApplicationData
 {
-	public static string ApplicationDataPath = Path.Combine(AppData.Current.LocalCacheFolder.Path, "Local", "QSM");
+	public static string ApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QSM");
 	public static string DownloadFolderPath = Path.Combine(ApplicationDataPath, "Downloads");
 	public static string ServersFolderPath = Path.Combine(ApplicationDataPath, "Servers");
 	public static string BackupsFolderPath = Path.Combine(ApplicationDataPath, "Backups");
