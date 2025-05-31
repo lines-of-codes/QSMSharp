@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Components;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Components;
 
 namespace QSM.Web.Components.Account;
 
@@ -7,12 +7,9 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 {
 	public const string StatusCookieName = "Identity.StatusMessage";
 
-	private static readonly CookieBuilder StatusCookieBuilder = new()
+	private static readonly CookieBuilder s_statusCookieBuilder = new()
 	{
-		SameSite = SameSiteMode.Strict,
-		HttpOnly = true,
-		IsEssential = true,
-		MaxAge = TimeSpan.FromSeconds(5),
+		SameSite = SameSiteMode.Strict, HttpOnly = true, IsEssential = true, MaxAge = TimeSpan.FromSeconds(5),
 	};
 
 	[DoesNotReturn]
@@ -29,7 +26,8 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 		// During static rendering, NavigateTo throws a NavigationException which is handled by the framework as a redirect.
 		// So as long as this is called from a statically rendered Identity component, the InvalidOperationException is never thrown.
 		navigationManager.NavigateTo(uri);
-		throw new InvalidOperationException($"{nameof(IdentityRedirectManager)} can only be used during static rendering.");
+		throw new InvalidOperationException(
+			$"{nameof(IdentityRedirectManager)} can only be used during static rendering.");
 	}
 
 	[DoesNotReturn]
@@ -43,7 +41,7 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 	[DoesNotReturn]
 	public void RedirectToWithStatus(string uri, string message, HttpContext context)
 	{
-		context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
+		context.Response.Cookies.Append(StatusCookieName, message, s_statusCookieBuilder.Build(context));
 		RedirectTo(uri);
 	}
 

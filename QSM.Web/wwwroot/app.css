@@ -1,5 +1,6 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    letter-spacing: -0.02em;
 }
 
 a, .btn-link {

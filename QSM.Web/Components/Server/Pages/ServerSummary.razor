@@ -1,0 +1,35 @@
+@page "/Server/{Id:int:min(0)}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using QSM.Web.Data
+
+@inject NavigationManager NavigationManager
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+@attribute [Authorize]
+
+<PageTitle>@_server.Name - QSM Web Console</PageTitle>
+
+<h1>@_server.Name</h1>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private ServerInstance _server = new();
+
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        
+        _server = server;
+    }
+
+}

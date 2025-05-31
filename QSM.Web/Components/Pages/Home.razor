@@ -1,7 +1,96 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using QSM.Web.Data
 
-<h1>Hello, world!</h1>
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
-Welcome to your new app.
+@attribute [Authorize]
+
+<PageTitle>Home - QSM Web Console</PageTitle>
+
+<AuthorizeView>
+    <h1 id="greeting">@GetGreeting(context.User.Identity?.Name)</h1>
+    <span class="text-secondary">Server Time Zone: @TimeZoneInfo.Local.DisplayName</span>
+    
+    <p>
+        Welcome to your QSM Web Console instance.
+    </p>
+
+    <table class="table table-hover" id="serverList">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">State</th>
+            <th scope="col">Software</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var server in Servers)
+        {
+            <tr>
+                <th scope="row"><a href="/Server/@server.Id/">@server.Id</a></th>
+                <td><a href="/Server/@server.Id/">@server.Name</a></td>
+                <td><a href="/Server/@server.Id/">@(server.Running ? "Running" : "Stopped")</a></td>
+                <td><a href="/Server/@server.Id/">@server.Software</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (Servers.Count == 0)
+    {
+        <p>You have no servers.</p>
+    }
+</AuthorizeView>
+
+<style>
+    #serverList tbody a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
+
+@code {
+
+    public List<ServerInstance> Servers { get; set; } = [];
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+
+        Servers = ctx.Servers.ToList();
+    }
+
+    /// <summary>
+    /// Retrieves the greeting for the current time of day
+    ///
+    /// This uses the server time because I want to ship less JavaScript.
+    /// </summary>
+    /// <param name="name">Name of the user being greeted (Optional)</param>
+    /// <returns>
+    /// A greeting which can be good morning, afternoon, and
+    /// evening.
+    /// </returns>
+    private string GetGreeting(string? name)
+    {
+        int hours = DateTime.Now.Hour;
+        string greeting;
+
+        if (hours > 19)
+            greeting = "Good evening";
+        else if (hours >= 12)
+            greeting = "Good afternoon";
+        else
+            greeting = "Good morning";
+
+        if (name == null)
+            return greeting + '.';
+
+        return $"{greeting}, {name}.";
+    }
+
+}
