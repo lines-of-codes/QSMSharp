@@ -8,8 +8,9 @@ public enum ServerSoftwares
 	NeoForge,
 	Fabric,
 	Velocity,
+
 	/// <summary>
-	/// Unknown software/Custom JARs
+	///     Unknown software/Custom JARs
 	/// </summary>
 	Custom
 }

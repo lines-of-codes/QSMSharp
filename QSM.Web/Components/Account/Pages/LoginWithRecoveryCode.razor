@@ -1,5 +1,4 @@
 ﻿@page "/Account/LoginWithRecoveryCode"
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using QSM.Web.Data
@@ -24,7 +23,8 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.RecoveryCode" id="Input.RecoveryCode" class="form-control" autocomplete="off" placeholder="RecoveryCode"/>
+                <InputText @bind-Value="Input.RecoveryCode" id="Input.RecoveryCode" class="form-control"
+                           autocomplete="off" placeholder="RecoveryCode"/>
                 <label for="Input.RecoveryCode" class="form-label">Recovery Code</label>
                 <ValidationMessage For="() => Input.RecoveryCode" class="text-danger"/>
             </div>
@@ -37,7 +37,7 @@
     private string? _message;
     private ApplicationUser _user = default!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; } = new();
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
@@ -45,7 +45,7 @@
     {
         // Ensure the user has gone through the username & password screen first
         _user = await SignInManager.GetTwoFactorAuthenticationUserAsync() ??
-               throw new InvalidOperationException("Unable to load two-factor authentication user.");
+                throw new InvalidOperationException("Unable to load two-factor authentication user.");
     }
 
     private async Task OnValidSubmitAsync()

@@ -13,17 +13,36 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'Common Guides',
 					items: [
-						{ label: 'Introduction', slug: 'guides/introduction' },
-						{ label: 'Create new server', slug: 'guides/create-new-server' },
-						{ label: 'Choosing a software', slug: 'guides/choosing-a-software' }
+						{ label: 'Introduction', slug: 'common/guides/introduction' },
+						{ label: 'Choosing a software', slug: 'common/guides/choosing-a-software' }
 					],
 				},
+                {
+                    label: 'QSM.Win Guides',
+                    items: [
+                        { label: 'Introduction', slug: 'qsmwin/guides/introduction'  },
+                        { label: 'Create a server', slug: 'qsmwin/guides/create-new-server'  }
+                    ],
+                },
 				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
+					label: 'QSM.Win Reference',
+                    collapsed: true,
+					autogenerate: { directory: 'QSMWin/reference' },
 				},
+                {
+                    label: 'QSM.Web Guides',
+                    items: [
+                        { label: 'Introduction', slug: 'qsmweb/guides/introduction'  }
+                    ],
+                },
+				{
+					label: 'QSM.Web Reference',
+                    collapsed: true,
+					autogenerate: { directory: 'QSMWeb/reference' },
+				},
+
 			],
 		}),
 	],

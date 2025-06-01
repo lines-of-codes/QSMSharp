@@ -1,5 +1,4 @@
 ﻿@page "/Account/Manage"
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using QSM.Web.Data
@@ -21,7 +20,8 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Choose your username."/>
+                <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control" autocomplete="username"
+                           aria-required="true" placeholder="Choose your username."/>
                 <label for="Input.Username" class="form-label">Username</label>
                 <ValidationMessage For="() => Input.Username" class="text-danger"/>
             </div>
@@ -33,10 +33,10 @@
 @code {
     private ApplicationUser _user = default!;
     private string? _username;
-    
+
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; } = new();
 
     protected override async Task OnInitializedAsync()
     {

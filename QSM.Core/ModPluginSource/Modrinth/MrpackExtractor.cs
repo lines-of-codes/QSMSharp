@@ -10,18 +10,18 @@ public class MrpackExtractor
 {
 	public static async IAsyncEnumerable<MrpackOperation> Install(string file, string temp, string dest)
 	{
-		var extractResult = await ExtractAsync(file, temp);
+		(MrpackModrinthIndex Index, string ExtractLocation) extractResult = await ExtractAsync(file, temp);
 
-		var downloader = DownloadMods(extractResult.Index, dest);
+		IAsyncEnumerable<MrpackOperation> downloader = DownloadMods(extractResult.Index, dest);
 
-		await foreach (var op in downloader)
+		await foreach (MrpackOperation op in downloader)
 		{
 			yield return op;
 		}
 
-		var copyOperation = CopyOverrides(extractResult.ExtractLocation, dest);
+		IEnumerable<MrpackOperation> copyOperation = CopyOverrides(extractResult.ExtractLocation, dest);
 
-		foreach (var op in copyOperation)
+		foreach (MrpackOperation op in copyOperation)
 		{
 			yield return op;
 		}
@@ -30,19 +30,18 @@ public class MrpackExtractor
 	}
 
 	/// <summary>
-	/// 
 	/// </summary>
 	/// <param name="file">A path to the .mrpack file</param>
 	/// <param name="temp">A path to a folder to store temporary files</param>
 	public static async Task<(MrpackModrinthIndex Index, string ExtractLocation)> ExtractAsync(string file, string temp)
 	{
-		var dest = Path.Combine(temp, Path.GetFileNameWithoutExtension(file));
+		string dest = Path.Combine(temp, Path.GetFileNameWithoutExtension(file));
 
 		Directory.CreateDirectory(dest);
 
 		await Task.Run(() => ZipFile.ExtractToDirectory(file, dest));
 
-		var indexFile = Path.Combine(dest, "modrinth.index.json");
+		string indexFile = Path.Combine(dest, "modrinth.index.json");
 
 		if (!File.Exists(indexFile))
 		{
@@ -50,7 +49,8 @@ public class MrpackExtractor
 			throw new MrpackException("The .mrpack does not contain the modrinth.index.json file.");
 		}
 
-		var index = JsonSerializer.Deserialize(File.ReadAllText(indexFile), MrpackContext.Default.MrpackModrinthIndex);
+		MrpackModrinthIndex? index =
+			JsonSerializer.Deserialize(File.ReadAllText(indexFile), MrpackContext.Default.MrpackModrinthIndex);
 
 		if (index is null)
 		{
@@ -65,7 +65,7 @@ public class MrpackExtractor
 	{
 		Queue<FileDownloadRequest> downloads = [];
 
-		foreach (var fileInfo in index.Files)
+		foreach (MrpackFile fileInfo in index.Files)
 		{
 			string fullPath = Path.GetFullPath(fileInfo.Path, dest);
 
@@ -77,10 +77,10 @@ public class MrpackExtractor
 
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 
-			downloads.Enqueue(new()
+			downloads.Enqueue(new FileDownloadRequest
 			{
 				Destination = fullPath,
-				DownloadLocations = fileInfo.Downloads,
+				DownloadLocations = fileInfo.Downloads.ToArray(),
 				HashAlgorithm = HashAlgorithm.SHA512,
 				Hash = fileInfo.Hashes["sha512"]
 			});
@@ -91,7 +91,7 @@ public class MrpackExtractor
 
 	public static async IAsyncEnumerable<MrpackOperation> DownloadMods(MrpackModrinthIndex index, string dest)
 	{
-		foreach (var fileInfo in index.Files)
+		foreach (MrpackFile fileInfo in index.Files)
 		{
 			if (fileInfo.Env["server"] == "unsupported")
 			{
@@ -108,37 +108,40 @@ public class MrpackExtractor
 
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 
-			foreach (var download in fileInfo.Downloads)
+			foreach (string download in fileInfo.Downloads)
 			{
-				var enumerable = DownloadFile(download, fullPath);
-				var error = false;
+				IAsyncEnumerable<MrpackOperation> enumerable = DownloadFile(download, fullPath);
+				bool error = false;
 
-				await foreach (var op in enumerable)
+				await foreach (MrpackOperation op in enumerable)
 				{
 					if (op.Error)
 					{
 						error = true;
 						break;
 					}
+
 					yield return op;
 				}
 
 				if (!error)
 				{
-					using var sha512 = SHA512.Create();
-					var hash = sha512.GetFileHashAsString(fullPath);
+					using SHA512 sha512 = SHA512.Create();
+					string hash = sha512.GetFileHashAsString(fullPath);
 
 					if (hash != fileInfo.Hashes["sha512"])
 					{
 						error = true;
-						yield return new("Checksum doesn't match!");
+						yield return new MrpackOperation("Checksum doesn't match!");
 					}
 				}
 
 				// Try the next download URL if the file can't be downloaded
 				// or the checksum doesn't match.
 				if (error)
+				{
 					continue;
+				}
 
 				// Breaks out of the loop if the file is successfully downloaded
 				break;
@@ -148,19 +151,19 @@ public class MrpackExtractor
 
 	public static IEnumerable<MrpackOperation> CopyOverrides(string extractLocation, string dest)
 	{
-		var overrides = Path.Combine(extractLocation, "overrides");
-		var serverOverrides = Path.Combine(extractLocation, "server-overrides");
-		var destInfo = new DirectoryInfo(dest);
+		string overrides = Path.Combine(extractLocation, "overrides");
+		string serverOverrides = Path.Combine(extractLocation, "server-overrides");
+		DirectoryInfo destInfo = new(dest);
 
 		if (Directory.Exists(overrides))
 		{
-			yield return new("Copying overrides directory...");
+			yield return new MrpackOperation("Copying overrides directory...");
 			CopyDirectoryContents(new DirectoryInfo(overrides), destInfo);
 		}
 
 		if (Directory.Exists(serverOverrides))
 		{
-			yield return new("Copying server overrides directory...");
+			yield return new MrpackOperation("Copying server overrides directory...");
 			CopyDirectoryContents(new DirectoryInfo(serverOverrides), destInfo);
 		}
 	}
@@ -173,24 +176,23 @@ public class MrpackExtractor
 
 		if (!response.IsSuccessStatusCode)
 		{
-			yield return new("HTTP request status code does not indicate success.", true);
+			yield return new MrpackOperation("HTTP request status code does not indicate success.", true);
 			yield break;
 		}
 
 		long totalBytes = response.Content.Headers.ContentLength ?? -1L;
 
-		using var contentStream = await response.Content.ReadAsStreamAsync();
-		using var fileStream = File.Create(dest);
+		await using Stream contentStream = await response.Content.ReadAsStreamAsync();
+		await using FileStream fileStream = File.Create(dest);
 
-		var fileName = Path.GetFileName(dest);
-		var buffer = new byte[8192];
+		string fileName = Path.GetFileName(dest);
+		byte[] buffer = new byte[8192];
 		long totalBytesRead = 0;
-		int bytesRead = 0;
-		double percentage = 0;
+		int bytesRead;
 
 		if (totalBytes != -1)
 		{
-			yield return new($"Downloading {fileName}...", null);
+			yield return new MrpackOperation($"Downloading {fileName}...", null);
 		}
 
 		while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
@@ -200,8 +202,8 @@ public class MrpackExtractor
 
 			if (totalBytes != -1)
 			{
-				percentage = (double)totalBytesRead / totalBytes * 100;
-				yield return new($"Downloading {fileName}...", percentage);
+				double percentage = (double)totalBytesRead / totalBytes * 100;
+				yield return new MrpackOperation($"Downloading {fileName}...", percentage);
 			}
 		}
 	}
@@ -209,9 +211,13 @@ public class MrpackExtractor
 	public static void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo dest)
 	{
 		foreach (DirectoryInfo dir in source.GetDirectories())
+		{
 			CopyDirectoryContents(dir, dest.CreateSubdirectory(dir.Name));
+		}
 
 		foreach (FileInfo file in source.GetFiles())
+		{
 			file.CopyTo(Path.Combine(dest.FullName, file.Name), true);
+		}
 	}
 }

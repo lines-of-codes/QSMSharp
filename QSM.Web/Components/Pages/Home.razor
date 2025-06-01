@@ -1,5 +1,4 @@
 ﻿@page "/"
-
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
@@ -13,7 +12,7 @@
 <AuthorizeView>
     <h1 id="greeting">@GetGreeting(context.User.Identity?.Name)</h1>
     <span class="text-secondary">Server Time Zone: @TimeZoneInfo.Local.DisplayName</span>
-    
+
     <p>
         Welcome to your QSM Web Console instance.
     </p>
@@ -57,7 +56,7 @@
 @code {
 
     public List<ServerInstance> Servers { get; set; } = [];
-    
+
     protected override void OnInitialized()
     {
         using var ctx = DbFactory.CreateDbContext();
@@ -66,18 +65,17 @@
     }
 
     /// <summary>
-    /// Retrieves the greeting for the current time of day
-    ///
-    /// This uses the server time because I want to ship less JavaScript.
+    ///     Retrieves the greeting for the current time of day
+    ///     This uses the server time because I want to ship less JavaScript.
     /// </summary>
     /// <param name="name">Name of the user being greeted (Optional)</param>
     /// <returns>
-    /// A greeting which can be good morning, afternoon, and
-    /// evening.
+    ///     A greeting which can be good morning, afternoon, and
+    ///     evening.
     /// </returns>
     private string GetGreeting(string? name)
     {
-        int hours = DateTime.Now.Hour;
+        var hours = DateTime.Now.Hour;
         string greeting;
 
         if (hours > 19)

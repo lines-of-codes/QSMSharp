@@ -5,9 +5,9 @@ using System.Text.Json;
 namespace QSM.Core.ServerSettings;
 
 /// <summary>
-/// Contains a more in-depth information of a server.
+///     Contains a more in-depth information of a server.
 /// </summary>
-public partial class ServerSettings
+public class ServerSettings
 {
 	public bool FirstRun { get; set; } = true;
 
@@ -34,7 +34,6 @@ public partial class ServerSettings
 	}
 
 	/// <summary>
-	/// 
 	/// </summary>
 	/// <param name="filePath"></param>
 	/// <param name="settings"></param>
@@ -44,9 +43,11 @@ public partial class ServerSettings
 		settings = null;
 
 		if (!File.Exists(filePath))
+		{
 			return false;
+		}
 
-		using var stream = File.OpenRead(filePath);
+		using FileStream stream = File.OpenRead(filePath);
 
 		try
 		{

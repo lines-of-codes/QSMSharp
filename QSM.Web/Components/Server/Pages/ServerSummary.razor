@@ -11,10 +11,34 @@
 <PageTitle>@_server.Name - QSM Web Console</PageTitle>
 
 <h1>@_server.Name</h1>
+<p>@_server.Software (Build @_server.ServerVersion for Minecraft @_server.MinecraftVersion)</p>
+
+<div class="my-2">
+    <b>State</b>
+    <p class="fs-3 lh-1">@(_server.Running ? "Running" : "Stopped")</p>
+</div>
+
+<div class="my-2">
+    <button class="btn btn-primary me-1">Start</button>
+    <button class="btn btn-danger" disabled>Stop</button>
+</div>
+
+<div class="accordion">
+    <details class="accordion-item">
+        <summary class="accordion-button">
+            <div class="accordion-header">
+                Dangerous Zone
+            </div>
+        </summary>
+        
+        <div class="accordion-body">
+            <button class="btn btn-danger">Delete Server</button>
+        </div>
+    </details>
+</div>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+    [Parameter] public int Id { get; set; }
     private ServerInstance _server = new();
 
     protected override void OnInitialized()
@@ -28,7 +52,7 @@
             NavigationManager.NavigateTo("/");
             return;
         }
-        
+
         _server = server;
     }
 

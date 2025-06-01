@@ -11,7 +11,7 @@ public abstract class ModPluginProvider
 	public abstract Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin);
 
 	/// <summary>
-	/// Get available versions for 
+	///     Get available versions for
 	/// </summary>
 	/// <param name="slug">The project's slug</param>
 	/// <returns>Returns a dictionary in a Version:DownloadUrl format</returns>
@@ -20,8 +20,8 @@ public abstract class ModPluginProvider
 	public abstract Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod);
 
 	/// <summary>
-	/// Check for mod/plugin updates.
-	/// This function is on-hold, will implement later. (But contributions are still welcome)
+	///     Check for mod/plugin updates.
+	///     This function is on-hold, will implement later. (But contributions are still welcome)
 	/// </summary>
 	/// <param name="modFiles">The path to the mod files.</param>
 	/// <returns>The download information for available updates.</returns>

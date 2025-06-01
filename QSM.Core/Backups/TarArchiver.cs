@@ -1,6 +1,7 @@
 ﻿using SharpCompress.Archives;
 using SharpCompress.Archives.Tar;
 using SharpCompress.Common;
+using SharpCompress.Writers;
 using System.Formats.Tar;
 using System.IO.Pipelines;
 using ZstdSharp;
@@ -47,32 +48,30 @@ public static class TarArchiver
 
 	public static void SharpCompressTar(string folderPath, string dest, CompressionFormat format)
 	{
-		using var archive = TarArchive.Create();
+		using TarArchive archive = TarArchive.Create();
 		archive.AddAllFromDirectory(folderPath);
 		archive.SaveTo(
 			File.Create(dest),
-			new SharpCompress.Writers.WriterOptions(format switch
+			new WriterOptions(format switch
 			{
 				CompressionFormat.Deflate => CompressionType.GZip,
 				CompressionFormat.BZip2 => CompressionType.BZip2,
 				CompressionFormat.LZMA => CompressionType.LZMA,
 				_ => throw new InvalidOperationException()
-			})
-			{
-				LeaveStreamOpen = false
-			});
+			}) { LeaveStreamOpen = false });
 	}
 
-	public static async Task ZstdCompressTarAsync(string sourceDirectory, string outputFilePath, byte compressionLevel = 11)
+	public static async Task ZstdCompressTarAsync(string sourceDirectory, string outputFilePath,
+		byte compressionLevel = 11)
 	{
-		using var outputFileStream = File.Create(outputFilePath);
-		using var compressionStream = new CompressionStream(outputFileStream, compressionLevel);
-		var pipe = new Pipe();
+		using FileStream outputFileStream = File.Create(outputFilePath);
+		using CompressionStream compressionStream = new(outputFileStream, compressionLevel);
+		Pipe pipe = new();
 
 		compressionStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
 
-		var tarTask = CreateTarArchiveAsync(sourceDirectory, pipe.Writer);
-		var compressTask = pipe.Reader.CopyToAsync(compressionStream);
+		Task tarTask = CreateTarArchiveAsync(sourceDirectory, pipe.Writer);
+		Task compressTask = pipe.Reader.CopyToAsync(compressionStream);
 
 		await Task.WhenAll(tarTask, compressTask);
 	}

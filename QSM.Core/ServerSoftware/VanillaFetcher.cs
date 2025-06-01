@@ -6,14 +6,14 @@ namespace QSM.Core.ServerSoftware;
 
 public class VanillaFetcher : InfoFetcher
 {
-	HttpClient httpClient;
-	PasteMystClient pasteMystClient;
-	Dictionary<string, string> DownloadUrls = new();
+	private readonly Dictionary<string, string> DownloadUrls = new();
+	private readonly PasteMystClient pasteMystClient;
+	private HttpClient httpClient;
 
 	public VanillaFetcher()
 	{
-		httpClient = new();
-		pasteMystClient = new();
+		httpClient = new HttpClient();
+		pasteMystClient = new PasteMystClient();
 	}
 
 	public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
@@ -23,12 +23,17 @@ public class VanillaFetcher : InfoFetcher
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
-		if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
+		if (minecraftVersionsCache.Length != 0)
+		{
+			return minecraftVersionsCache;
+		}
 
-		var paste = await pasteMystClient.GetPasteAsync("1m9xuwik");
+		PasteMystPaste? paste = await pasteMystClient.GetPasteAsync("1m9xuwik");
 
 		if (paste == null)
+		{
 			throw new NetworkResourceUnavailableException();
+		}
 
 		Debug.WriteLine(paste.Pasties[0].Content);
 

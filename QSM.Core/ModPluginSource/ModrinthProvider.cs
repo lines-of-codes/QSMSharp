@@ -1,9 +1,9 @@
 ﻿using QSM.Core.ModPluginSource.Modrinth;
-using QSM.Core.ServerSoftware;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using HashAlgorithm = QSM.Core.Utilities.HashAlgorithm;
 
 namespace QSM.Core.ModPluginSource;
 
@@ -14,6 +14,238 @@ public class ModrinthProvider : ModPluginProvider
 		Mod,
 		Plugin,
 		Modpack
+	}
+
+	public const string HttpClientName = "ModrinthApi";
+	public const string BaseAddress = "https://api.modrinth.com/v2/";
+	private static readonly string[] ignoredDependencyType = ["embedded", "incompatible"];
+
+	private readonly IHttpClientFactory _httpClientFactory;
+
+	public ModrinthProvider(IHttpClientFactory httpClientFactory)
+	{
+		_httpClientFactory = httpClientFactory;
+	}
+
+	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
+	{
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+
+		string queryString = $"project/{slug}/version";
+
+		if (ServerMetadata != null)
+		{
+			queryString += "?loaders=";
+			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.Software.ToString().ToLowerInvariant()}\"]");
+			queryString += "&game_versions=";
+			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.MinecraftVersion}\"]");
+		}
+
+		VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
+		                         ?? throw new NetworkResourceUnavailableException();
+
+		List<ModPluginDownloadInfo> versions = [];
+
+		foreach (VersionInfo info in response)
+		{
+			IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = info.dependencies!.Select(dependency =>
+				new ModPluginDownloadInfo.Dependency
+				{
+					Slug = dependency.version_id ?? string.Empty,
+					Name = dependency.file_name ?? string.Empty,
+					DownloadUri = null,
+					ExternalPageUrl = dependency.dependency_type,
+					Required = dependency.dependency_type == "required"
+				});
+
+			VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0]);
+
+			versions.Add(new ModPluginDownloadInfo
+			{
+				DisplayName = $"{info.name} ({info.version_type})",
+				FileName = primaryFile.filename!,
+				Dependencies = dependencies.ToArray(),
+				DownloadUri = primaryFile.url,
+				ExternalPageUrl = null,
+				Hash = primaryFile.hashes!.sha512,
+				HashAlgorithm = HashAlgorithm.SHA512
+			});
+		}
+
+		return versions.ToArray();
+	}
+
+	public override Task<ModPluginInfo[]> SearchAsync(string query = "")
+	{
+		return SearchAsync(query);
+	}
+
+	public async Task<ModPluginInfo[]> SearchAsync(string query = "", ProjectType projectType = ProjectType.Mod,
+		IEnumerable<string>? categories = null)
+	{
+		string queryString = "search";
+
+		List<List<string>> facets = new();
+
+		List<string> projectTypes = new();
+		if (ServerMetadata?.IsModSupported ?? (false || projectType == ProjectType.Mod))
+		{
+			projectTypes.Add("project_type:mod");
+		}
+
+		if (ServerMetadata?.IsPluginSupported ?? (false || projectType == ProjectType.Plugin))
+		{
+			projectTypes.Add("project_type:plugin");
+		}
+
+		if (projectType == ProjectType.Modpack)
+		{
+			projectTypes.Add("project_type:modpack");
+		}
+
+		facets.Add(projectTypes);
+
+		if (ServerMetadata != null)
+		{
+			facets.Add([$"versions:{ServerMetadata.MinecraftVersion}"]);
+			facets.Add([$"categories:{ServerMetadata.Software.ToString().ToLowerInvariant()}"]);
+		}
+
+		categories ??= Array.Empty<string>();
+
+		foreach (string category in categories)
+		{
+			facets.Add([$"categories:{category}"]);
+		}
+
+		facets.Add(["server_side!=unsupported"]);
+
+		StringBuilder sb = new();
+
+		sb.Append('[');
+		foreach (List<string> facet in facets)
+		{
+			sb.Append('[');
+			foreach (string entry in facet)
+			{
+				sb.Append($"\"{entry}\"");
+			}
+
+			sb.Append("],");
+		}
+
+		sb.Remove(sb.Length - 1, 1); // Remove the last trailing comma
+		sb.Append(']');
+
+		queryString += "?facets=";
+		queryString += WebUtility.UrlEncode(sb.ToString());
+
+		if (!string.IsNullOrWhiteSpace(query))
+		{
+			queryString += "&query=";
+			queryString += WebUtility.UrlEncode(query);
+		}
+
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
+		                         ?? throw new NetworkResourceUnavailableException();
+
+		List<ModPluginInfo> modPlugins = [];
+
+		foreach (ProjectResult project in response.Hits!)
+		{
+			modPlugins.Add(new ModPluginInfo
+			{
+				IconUrl = project.icon_url,
+				License = project.license!,
+				Name = project.title!,
+				Owner = project.author!,
+				Slug = project.slug!,
+				DownloadCount = (uint)project.downloads!,
+				LicenseUrl =
+					project.license!.StartsWith("LicenseRef")
+						? string.Empty
+						: $"https://spdx.org/licenses/{project.license}",
+				Description = project.description!
+			});
+		}
+
+		return modPlugins.ToArray();
+	}
+
+	public override async Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
+	{
+		ModPluginDownloadInfo.Dependency[] resolvedDependencies = await Task.WhenAll(
+			mod.Dependencies.Select(async dependency =>
+			{
+				Uri? downloadUri = null;
+
+				if (!ignoredDependencyType.Contains(dependency.ExternalPageUrl))
+				{
+					using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+					VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
+					                       ?? throw new NetworkResourceUnavailableException();
+
+					downloadUri = new Uri(response.files!.First(file => (bool)file.primary!).url!);
+				}
+
+				return new ModPluginDownloadInfo.Dependency
+				{
+					Slug = dependency.Slug,
+					Name = dependency.Name,
+					DownloadUri = downloadUri,
+					ExternalPageUrl = null,
+					Required = dependency.Required
+				};
+			}));
+
+		mod.Dependencies = resolvedDependencies;
+
+		return mod;
+	}
+
+	public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
+	{
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		DetailedProjectResult? project =
+			await client.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
+
+		if (string.IsNullOrEmpty(modPlugin.LicenseUrl))
+		{
+			modPlugin.LicenseUrl = project!.license!.url!;
+		}
+
+		modPlugin.LongDescription = project!.body!;
+
+		return modPlugin;
+	}
+
+	public override Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
+	{
+		List<string> hashes = [];
+
+		foreach (string fileName in modFiles)
+		{
+			using FileStream file = File.OpenRead(fileName);
+			using SHA512 hasher = SHA512.Create();
+			byte[] hashed = hasher.ComputeHash(file);
+			StringBuilder sb = new();
+
+			foreach (byte b in hashed)
+			{
+				sb.Append(b.ToString("x2"));
+			}
+
+			hashes.Add(sb.ToString());
+		}
+
+		return Task.FromResult(Array.Empty<ModPluginDownloadInfo>());
+	}
+
+	public async Task<Category[]> ListCategories()
+	{
+		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		return (await client.GetFromJsonAsync<Category[]>("tag/category"))!;
 	}
 
 	internal record class VersionDependency(
@@ -108,227 +340,8 @@ public class ModrinthProvider : ModPluginProvider
 		int? total_hits = null)
 	{
 		public ProjectResult[]? Hits = hits;
-		public int? Offset = offset;
 		public int? Limit = limit;
+		public int? Offset = offset;
 		public int? TotalHits = total_hits;
-	}
-
-	public const string HttpClientName = "ModrinthApi";
-	public const string BaseAddress = "https://api.modrinth.com/v2/";
-
-	readonly IHttpClientFactory _httpClientFactory;
-	private static readonly string[] ignoredDependencyType = ["embedded", "incompatible"];
-
-	public ModrinthProvider(IHttpClientFactory httpClientFactory) =>
-		_httpClientFactory = httpClientFactory;
-
-	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
-	{
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
-
-		string queryString = $"project/{slug}/version";
-
-		if (ServerMetadata != null)
-		{
-			queryString += "?loaders=";
-			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.Software.ToString().ToLowerInvariant()}\"]");
-			queryString += "&game_versions=";
-			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.MinecraftVersion}\"]");
-		}
-
-		VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
-										?? throw new NetworkResourceUnavailableException();
-
-		List<ModPluginDownloadInfo> versions = [];
-
-		foreach (VersionInfo info in response)
-		{
-			var dependencies = info.dependencies!.Select(dependency => new ModPluginDownloadInfo.Dependency()
-			{
-				Slug = dependency.version_id ?? string.Empty,
-				Name = dependency.file_name ?? string.Empty,
-				DownloadUri = null,
-				ExternalPageUrl = dependency.dependency_type,
-				Required = dependency.dependency_type == "required"
-			});
-
-			VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0]);
-
-			versions.Add(new()
-			{
-				DisplayName = $"{info.name} ({info.version_type})",
-				FileName = primaryFile.filename!,
-				Dependencies = dependencies.ToArray(),
-				DownloadUri = primaryFile.url,
-				ExternalPageUrl = null,
-				Hash = primaryFile.hashes!.sha512,
-				HashAlgorithm = Utilities.HashAlgorithm.SHA512
-			});
-		}
-
-		return versions.ToArray();
-	}
-
-	public override Task<ModPluginInfo[]> SearchAsync(string query = "")
-	{
-		return SearchAsync(query);
-	}
-
-	public async Task<ModPluginInfo[]> SearchAsync(string query = "", ProjectType projectType = ProjectType.Mod, IEnumerable<string>? categories = null)
-	{
-		string queryString = "search";
-
-		List<List<string>> facets = new();
-
-		List<string> projectTypes = new();
-		if (ServerMetadata?.IsModSupported ?? false || projectType == ProjectType.Mod)
-		{
-			projectTypes.Add("project_type:mod");
-		}
-
-		if (ServerMetadata?.IsPluginSupported ?? false || projectType == ProjectType.Plugin)
-		{
-			projectTypes.Add("project_type:plugin");
-		}
-
-		if (projectType == ProjectType.Modpack)
-		{
-			projectTypes.Add("project_type:modpack");
-		}
-
-		facets.Add(projectTypes);
-
-		if (ServerMetadata != null)
-		{
-			facets.Add([$"versions:{ServerMetadata.MinecraftVersion}"]);
-			facets.Add([$"categories:{ServerMetadata.Software.ToString().ToLowerInvariant()}"]);
-		}
-
-		categories ??= Array.Empty<string>();
-
-		foreach (var category in categories)
-		{
-			facets.Add([$"categories:{category}"]);
-		}
-
-		facets.Add(["server_side!=unsupported"]);
-
-		StringBuilder sb = new();
-
-		sb.Append('[');
-		foreach (var facet in facets)
-		{
-			sb.Append('[');
-			foreach (var entry in facet)
-			{
-				sb.Append($"\"{entry}\"");
-			}
-			sb.Append("],");
-		}
-		sb.Remove(sb.Length - 1, 1); // Remove the last trailing comma
-		sb.Append(']');
-
-		queryString += "?facets=";
-		queryString += WebUtility.UrlEncode(sb.ToString());
-
-		if (!string.IsNullOrWhiteSpace(query))
-		{
-			queryString += "&query=";
-			queryString += WebUtility.UrlEncode(query);
-		}
-
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
-		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
-										?? throw new NetworkResourceUnavailableException();
-
-		List<ModPluginInfo> modPlugins = [];
-
-		foreach (var project in response.Hits!)
-		{
-			modPlugins.Add(new()
-			{
-				IconUrl = project.icon_url,
-				License = project.license!,
-				Name = project.title!,
-				Owner = project.author!,
-				Slug = project.slug!,
-				DownloadCount = (uint)project.downloads!,
-				LicenseUrl = project.license!.StartsWith("LicenseRef") ? string.Empty : $"https://spdx.org/licenses/{project.license}",
-				Description = project.description!
-			});
-		}
-
-		return modPlugins.ToArray();
-	}
-
-	public override async Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
-	{
-		var resolvedDependencies = (await Task.WhenAll(mod.Dependencies.Select(async dependency =>
-		{
-			Uri? downloadUri = null;
-
-			if (!ignoredDependencyType.Contains(dependency.ExternalPageUrl))
-			{
-				using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
-				VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
-										?? throw new NetworkResourceUnavailableException();
-
-				downloadUri = new Uri(response.files!.First(file => (bool)file.primary!).url!);
-			}
-
-			return new ModPluginDownloadInfo.Dependency()
-			{
-				Slug = dependency.Slug,
-				Name = dependency.Name,
-				DownloadUri = downloadUri,
-				ExternalPageUrl = null,
-				Required = dependency.Required
-			};
-		})));
-
-		mod.Dependencies = resolvedDependencies;
-
-		return mod;
-	}
-
-	public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
-	{
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
-		var project = await client.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
-
-		if (string.IsNullOrEmpty(modPlugin.LicenseUrl))
-		{
-			modPlugin.LicenseUrl = project!.license!.url!;
-		}
-
-		modPlugin.LongDescription = project!.body!;
-
-		return modPlugin;
-	}
-
-	public override Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
-	{
-		List<string> hashes = [];
-
-		foreach (var fileName in modFiles)
-		{
-			using var file = File.OpenRead(fileName);
-			using var hasher = SHA512.Create();
-			var hashed = hasher.ComputeHash(file);
-			StringBuilder sb = new();
-
-			foreach (byte b in hashed)
-				sb.Append(b.ToString("x2"));
-
-			hashes.Add(sb.ToString());
-		}
-
-		return Task.FromResult(Array.Empty<ModPluginDownloadInfo>());
-	}
-
-	public async Task<Category[]> ListCategories()
-	{
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
-		return (await client.GetFromJsonAsync<Category[]>("tag/category"))!;
 	}
 }

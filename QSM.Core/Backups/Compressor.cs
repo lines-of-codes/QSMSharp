@@ -2,7 +2,7 @@
 
 namespace QSM.Core.Backups;
 
-public partial class Compressor
+public class Compressor
 {
 	public static string GetFileExtension(ArchiveFormat archiveFormat, CompressionFormat compressionFormat)
 	{
@@ -29,7 +29,8 @@ public partial class Compressor
 		}
 	}
 
-	public static async Task CompressFolderAsync(string folderPath, string destinationPath, ArchiveFormat archiveFormat, CompressionFormat compressionFormat)
+	public static async Task CompressFolderAsync(string folderPath, string destinationPath, ArchiveFormat archiveFormat,
+		CompressionFormat compressionFormat)
 	{
 		switch (archiveFormat)
 		{

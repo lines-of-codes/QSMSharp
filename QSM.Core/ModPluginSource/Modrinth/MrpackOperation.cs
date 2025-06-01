@@ -2,9 +2,9 @@
 
 public class MrpackOperation
 {
-	public string Operation = string.Empty;
-	public double? Progress = null;
 	public bool Error;
+	public string Operation = string.Empty;
+	public double? Progress;
 
 	public MrpackOperation(string operation)
 	{

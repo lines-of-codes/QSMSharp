@@ -4,39 +4,33 @@ namespace QSM.Core.ModPluginSource;
 
 public class ModPluginDownloadInfo
 {
-	public class Dependency
-	{
-		/// <summary>
-		/// A unique name/identity to the dependency.
-		/// </summary>
-		public string Slug = string.Empty;
-		public required string Name;
-		public Uri? DownloadUri;
-		public string? ExternalPageUrl;
-		public bool Required;
-	}
+	public Dependency[] Dependencies = [];
+	public string DisplayName = string.Empty;
 
 	/// <summary>
-	/// A boolean specifying whether or not this mod should be downloaded
+	///     A boolean specifying whether or not this mod should be downloaded
 	/// </summary>
 	public bool Download = true;
-	public string DisplayName = string.Empty;
-	public string FileName = string.Empty;
+
 	public string? DownloadUri;
 	public string? ExternalPageUrl;
+	public string FileName = string.Empty;
 	public string? Hash;
 	public HashAlgorithm HashAlgorithm = HashAlgorithm.None;
-	public Dependency[] Dependencies = [];
 
 	public override bool Equals(object? obj)
 	{
 		if (obj == null)
+		{
 			return false;
+		}
 
 		if (obj.GetType() != typeof(ModPluginDownloadInfo))
+		{
 			return false;
+		}
 
-		var info = (ModPluginDownloadInfo)obj;
+		ModPluginDownloadInfo info = (ModPluginDownloadInfo)obj;
 
 		return DisplayName == info.DisplayName && FileName == info.FileName && Hash == info.Hash;
 	}
@@ -44,5 +38,18 @@ public class ModPluginDownloadInfo
 	public override int GetHashCode()
 	{
 		return DisplayName.GetHashCode() + FileName.GetHashCode() + Hash?.GetHashCode() ?? 0;
+	}
+
+	public class Dependency
+	{
+		public Uri? DownloadUri;
+		public string? ExternalPageUrl;
+		public required string Name;
+		public bool Required;
+
+		/// <summary>
+		///     A unique name/identity to the dependency.
+		/// </summary>
+		public string Slug = string.Empty;
 	}
 }

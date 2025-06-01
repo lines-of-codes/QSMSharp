@@ -5,14 +5,6 @@ namespace QSM.Core.Backups;
 public class BackupItem
 {
 	public const byte DefaultCuidLength = 8;
-	public string Id { get; set; }
-	public string Name { get; set; }
-	public DateTime SavedDate { get; set; }
-	/// <summary>
-	/// The Uri to the backup
-	/// </summary>
-	public Uri Uri { get; set; }
-	public bool IsSavedOnline { get; set; }
 
 	public BackupItem(Cuid2 id, string name, Uri uri, bool isSavedOnline = false)
 	{
@@ -40,4 +32,15 @@ public class BackupItem
 		Uri = new Uri("about:blank");
 		IsSavedOnline = false;
 	}
+
+	public string Id { get; set; }
+	public string Name { get; set; }
+	public DateTime SavedDate { get; set; }
+
+	/// <summary>
+	///     The Uri to the backup
+	/// </summary>
+	public Uri Uri { get; set; }
+
+	public bool IsSavedOnline { get; set; }
 }

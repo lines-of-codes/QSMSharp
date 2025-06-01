@@ -6,34 +6,42 @@ namespace QSM.Core.ServerSoftware;
 
 public partial class NeoForgeFetcher : InfoFetcher
 {
-	internal record class NeoForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
+	private readonly HttpClient httpClient;
+	private readonly Regex majorMinorVersionMatch = MajorMinorVersionMatch();
 
-	string[] availableVersionsCache = [];
-	Regex majorMinorVersionMatch = MajorMinorVersionMatch();
-	HttpClient httpClient;
+	private string[] availableVersionsCache = [];
 
 	public NeoForgeFetcher()
 	{
-		httpClient = new();
+		httpClient = new HttpClient();
 	}
+
+	public override string FirstRunArgs => "--install-server";
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
-		if (minecraftVersionsCache.Length != 0) return minecraftVersionsCache;
+		if (minecraftVersionsCache.Length != 0)
+		{
+			return minecraftVersionsCache;
+		}
 
-		NeoForgeVersions? response = await httpClient.GetFromJsonAsync<NeoForgeVersions>("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge");
+		NeoForgeVersions? response =
+			await httpClient.GetFromJsonAsync<NeoForgeVersions>(
+				"https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge");
 
 		availableVersionsCache = response!.Versions!;
 
 		List<string> supportedVersions = [];
 
-		foreach (var version in availableVersionsCache)
+		foreach (string version in availableVersionsCache)
 		{
-			var matched = majorMinorVersionMatch.Match(version).Value;
-			var minecraftVersion = $"1.{matched}";
+			string matched = majorMinorVersionMatch.Match(version).Value;
+			string minecraftVersion = $"1.{matched}";
 
 			if (!supportedVersions.Contains(minecraftVersion))
+			{
 				supportedVersions.Add(minecraftVersion);
+			}
 		}
 
 		minecraftVersionsCache = supportedVersions.ToArray();
@@ -44,13 +52,15 @@ public partial class NeoForgeFetcher : InfoFetcher
 
 	public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
-		if (buildInfoCache.TryGetValue(minecraftVersion, out var buildInfo))
+		if (buildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
+		{
 			return Task.FromResult(buildInfo);
+		}
 
-		var majorMinorVersion = minecraftVersion.Substring(2);
+		string majorMinorVersion = minecraftVersion.Substring(2);
 		List<string> versions = [];
 
-		foreach (var version in availableVersionsCache)
+		foreach (string version in availableVersionsCache)
 		{
 			if (version.StartsWith(majorMinorVersion))
 			{
@@ -70,21 +80,23 @@ public partial class NeoForgeFetcher : InfoFetcher
 
 	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		return Task.FromResult($"https://maven.neoforged.net/releases/net/neoforged/neoforge/{build}/neoforge-{build}-installer.jar");
+		return Task.FromResult(
+			$"https://maven.neoforged.net/releases/net/neoforged/neoforge/{build}/neoforge-{build}-installer.jar");
 	}
 
-	public override string FirstRunArgs => "--install-server";
-
-	public async Task InitializeOnFirstRun(ServerMetadata metadata, ServerSettings.ServerSettings settings, DataReceivedEventHandler outputReceived)
+	public async Task InitializeOnFirstRun(ServerMetadata metadata, ServerSettings.ServerSettings settings,
+		DataReceivedEventHandler outputReceived)
 	{
 		string serverJar = Path.Combine(metadata.ServerPath, "server.jar");
 		string installerJar = Path.Combine(metadata.ServerPath, "installer.jar");
 
 		// If installer jar doesn't exist, assume server.jar is the installer jar.
 		if (!File.Exists(installerJar))
+		{
 			File.Move(serverJar, installerJar);
+		}
 
-		var startInfo = new ProcessStartInfo
+		ProcessStartInfo startInfo = new()
 		{
 			CreateNoWindow = true,
 			UseShellExecute = false,
@@ -92,14 +104,12 @@ public partial class NeoForgeFetcher : InfoFetcher
 			RedirectStandardOutput = true,
 			FileName = Path.Combine(settings.Java.JavaHome, "bin", "javaw.exe"),
 			WindowStyle = ProcessWindowStyle.Hidden,
-			Arguments = $"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "installer.jar")}\" {FirstRunArgs}",
+			Arguments =
+				$"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "installer.jar")}\" {FirstRunArgs}",
 			WorkingDirectory = metadata.ServerPath
 		};
 
-		var process = new Process
-		{
-			StartInfo = startInfo
-		};
+		Process process = new() { StartInfo = startInfo };
 
 		process.OutputDataReceived += outputReceived;
 		process.ErrorDataReceived += outputReceived;
@@ -110,4 +120,6 @@ public partial class NeoForgeFetcher : InfoFetcher
 
 		await process.WaitForExitAsync();
 	}
+
+	internal record class NeoForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
 }

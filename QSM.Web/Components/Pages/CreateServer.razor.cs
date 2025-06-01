@@ -10,27 +10,6 @@ namespace QSM.Web.Components.Pages;
 [UsedImplicitly]
 public partial class CreateServer : ComponentBase
 {
-	private sealed class NewServerModel
-	{
-		[Required] public string? Name { get; set; }
-
-		[Required] public ServerSoftwares Software { get; set; } = ServerSoftwares.Paper;
-
-		public string? MinecraftVersion { get; set; }
-
-		public string? ServerBuild { get; set; }
-
-		[Required] public string? Path { get; set; }
-	}
-
-	[SupplyParameterFromForm] private NewServerModel Model { get; set; } = new();
-
-	private string[] MinecraftVersions { get; set; } = [];
-	private string[] AvailableBuilds { get; set; } = [];
-	private string _targetFolderPreview = string.Empty;
-	private string _processingMessage = string.Empty;
-	private bool _isProcessing;
-
 	private readonly Dictionary<ServerSoftwares, InfoFetcher> _infoFetchers = new()
 	{
 		{ ServerSoftwares.Paper, new PaperMCFetcher("paper") },
@@ -41,20 +20,37 @@ public partial class CreateServer : ComponentBase
 		{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") }
 	};
 
+	private bool _isProcessing;
+	private string _processingMessage = string.Empty;
+	private string _targetFolderPreview = string.Empty;
+
+	[SupplyParameterFromForm] private NewServerModel Model { get; set; } = new();
+
+	private string[] _minecraftVersions = [];
+	private string[] _availableBuilds = [];
+
 	protected override void OnInitialized()
 	{
 		Model.Path = GetDefaultServerPath();
 		_targetFolderPreview = Model.Path;
 	}
 
-	string GetDefaultServerPath()
+	private string GetDefaultServerPath()
 	{
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+		{
 			return "/var/lib/qsm-web/servers/";
+		}
+
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+		{
 			return "/usr/local/etc/qsm-web/servers/";
+		}
+
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+		{
 			return "C:\\ProgramData\\QSMWeb\\Servers\\";
+		}
 		// TODO: Add default path for macOS
 
 		return string.Empty;
@@ -63,7 +59,7 @@ public partial class CreateServer : ComponentBase
 	protected override async Task OnInitializedAsync()
 	{
 		await FetchMinecraftVersions();
-		await FetchAvailableBuilds(MinecraftVersions[0]);
+		await FetchAvailableBuilds(_minecraftVersions[0]);
 	}
 
 	private async Task OnValidSubmit()
@@ -74,9 +70,9 @@ public partial class CreateServer : ComponentBase
 		Directory.CreateDirectory(_targetFolderPreview);
 
 		_processingMessage = "Downloading server file...";
-		var downloadUrl = await _infoFetchers[Model.Software]
-			.GetDownloadUrlAsync(Model.MinecraftVersion ?? MinecraftVersions[0],
-				Model.ServerBuild ?? AvailableBuilds[0]);
+		string downloadUrl = await _infoFetchers[Model.Software]
+			.GetDownloadUrlAsync(Model.MinecraftVersion ?? _minecraftVersions[0],
+				Model.ServerBuild ?? _availableBuilds[0]);
 
 		using (HttpClient client = new())
 		{
@@ -89,14 +85,14 @@ public partial class CreateServer : ComponentBase
 		_processingMessage = "Registering server...";
 		await using (ApplicationDbContext ctx = await DbFactory.CreateDbContextAsync())
 		{
-			var newServer = new ServerInstance()
+			ServerInstance newServer = new()
 			{
-				MinecraftVersion = Model.MinecraftVersion ?? MinecraftVersions[0],
+				MinecraftVersion = Model.MinecraftVersion ?? _minecraftVersions[0],
 				Software = Model.Software,
 				Name = Model.Name,
 				Running = false,
 				ServerPath = _targetFolderPreview,
-				ServerVersion = Model.ServerBuild ?? AvailableBuilds[0],
+				ServerVersion = Model.ServerBuild ?? _availableBuilds[0]
 			};
 			ctx.Servers.Add(newServer);
 			await ctx.SaveChangesAsync();
@@ -108,40 +104,49 @@ public partial class CreateServer : ComponentBase
 
 	private async Task FetchMinecraftVersions(ServerSoftwares software = ServerSoftwares.Paper)
 	{
-		MinecraftVersions = await _infoFetchers[software].FetchAvailableMinecraftVersionsAsync();
+		_minecraftVersions = await _infoFetchers[software].FetchAvailableMinecraftVersionsAsync();
 	}
 
 	private async Task FetchAvailableBuilds(string minecraftVersion)
 	{
-		var software = Model.Software;
+		ServerSoftwares software = Model.Software;
 
-		if (software == ServerSoftwares.Custom) return;
+		if (software == ServerSoftwares.Custom)
+		{
+			return;
+		}
 
-		AvailableBuilds = await _infoFetchers[software].FetchAvailableBuildsAsync(minecraftVersion);
+		_availableBuilds = await _infoFetchers[software].FetchAvailableBuildsAsync(minecraftVersion);
 	}
 
 	private async Task SoftwareSelectionChanged(ChangeEventArgs args)
 	{
-		var parseResult = Enum.TryParse(typeof(ServerSoftwares), (string)args.Value!, false, out var software);
+		bool parseResult = Enum.TryParse(typeof(ServerSoftwares), (string)args.Value!, false, out object? software);
 
-		if (!parseResult || (ServerSoftwares)software! == ServerSoftwares.Custom) return;
+		if (!parseResult || (ServerSoftwares)software! == ServerSoftwares.Custom)
+		{
+			return;
+		}
 
 		await FetchMinecraftVersions((ServerSoftwares)software);
-		await FetchAvailableBuilds(MinecraftVersions[0]);
+		await FetchAvailableBuilds(_minecraftVersions[0]);
 	}
 
 	private async Task MinecraftVersionChanged(ChangeEventArgs args)
 	{
-		var version = (string?)args.Value;
+		string? version = (string?)args.Value;
 
-		if (version == null) return;
+		if (version == null)
+		{
+			return;
+		}
 
 		await FetchAvailableBuilds(version);
 	}
 
 	private void SetTargetFolderPreview(string path, string folderName)
 	{
-		var invalidChars = Path.GetInvalidFileNameChars();
+		char[] invalidChars = Path.GetInvalidFileNameChars();
 
 		if (folderName.IndexOfAny(invalidChars) != -1)
 		{
@@ -158,19 +163,38 @@ public partial class CreateServer : ComponentBase
 
 	private void NameInputChanged(ChangeEventArgs args)
 	{
-		var newName = (string?)args.Value;
+		string? newName = (string?)args.Value;
 
-		if (newName == null) return;
+		if (newName == null)
+		{
+			return;
+		}
 
 		SetTargetFolderPreview(Model.Path!, newName);
 	}
 
 	private void PathInputChanged(ChangeEventArgs args)
 	{
-		var newPath = (string?)args.Value;
+		string? newPath = (string?)args.Value;
 
-		if (newPath == null) return;
+		if (newPath == null)
+		{
+			return;
+		}
 
 		SetTargetFolderPreview(newPath, Model.Name!);
+	}
+
+	private sealed class NewServerModel
+	{
+		[Required] public string? Name { get; set; }
+
+		[Required] public ServerSoftwares Software { get; set; } = ServerSoftwares.Paper;
+
+		public string? MinecraftVersion { get; set; }
+
+		public string? ServerBuild { get; set; }
+
+		[Required] public string? Path { get; set; }
 	}
 }

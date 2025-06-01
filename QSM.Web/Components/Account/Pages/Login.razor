@@ -1,5 +1,4 @@
 ﻿@page "/Account/Login"
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
@@ -24,12 +23,14 @@
                 <hr/>
                 <ValidationSummary class="text-danger" role="alert"/>
                 <div class="form-floating mb-2">
-                    <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="JohnDoe"/>
+                    <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control"
+                               autocomplete="username" aria-required="true" placeholder="JohnDoe"/>
                     <label for="Input.Username" class="form-label">Username</label>
                     <ValidationMessage For="() => Input.Username" class="text-danger"/>
                 </div>
                 <div class="form-floating mb-2">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder=""/>
+                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
+                               autocomplete="current-password" aria-required="true" placeholder=""/>
                     <label for="Input.Password" class="form-label">Password</label>
                     <ValidationMessage For="() => Input.Password" class="text-danger"/>
                 </div>
@@ -50,8 +51,8 @@
             <h3>Account Issues</h3>
             <hr/>
             <p>
-                If you forgot your password or doesn't have an account, Please 
-                contact the server's administrator. If you are the administrator 
+                If you forgot your password or doesn't have an account, Please
+                contact the server's administrator. If you are the administrator
                 and you forgot the password, you'll have to reset QSM's database.
             </p>
         </section>
@@ -63,7 +64,7 @@
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; } = new();
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
@@ -75,7 +76,7 @@
         {
             NavigationManager.NavigateTo("Account/Register");
         }
-        
+
         base.OnInitialized();
     }
 
@@ -92,7 +93,7 @@
     {
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        var result = await SignInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, false);
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
@@ -102,7 +103,7 @@
         {
             RedirectManager.RedirectTo(
                 "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+                new Dictionary<string, object?> { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
         }
         else if (result.IsLockedOut)
         {
