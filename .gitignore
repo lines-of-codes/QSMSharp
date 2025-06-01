@@ -398,3 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 !/QSM.Core/Backups
+
+./QSM.Web/Data/app.db
+
