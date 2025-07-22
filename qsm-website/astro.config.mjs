@@ -8,9 +8,9 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'QSM',
-			social: {
-				github: 'https://github.com/lines-of-codes/QSMSharp',
-			},
+			social: [
+				{ icon: 'github', label: 'GitHub', href: "https://github.com/lines-of-codes/QSMSharp" },
+			],
 			sidebar: [
 				{
 					label: 'Common Guides',
