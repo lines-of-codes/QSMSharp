@@ -1,0 +1,105 @@
+@page "/Server/{Id:int:min(0)}/Settings/Performance"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<h3>Server Performance</h3>
+
+<EditForm Model="Input" FormName="PerformanceOptions" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.MaxPlayers" id="Input.MaxPlayers" class="form-control"
+                             aria-required="true" placeholder="" min="0"/>
+                <label for="Input.MaxPlayers" class="form-label">Max Players</label>
+                <ValidationMessage For="() => Input.MaxPlayers" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.ViewDistance" id="Input.ViewDistance" class="form-control"
+                             aria-required="true" placeholder="" min="3" max="32"/>
+                <label for="Input.ViewDistance" class="form-label">View Distance</label>
+                <ValidationMessage For="() => Input.ViewDistance" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.SimulationDistance" id="Input.SimulationDistance" class="form-control"
+                             aria-required="true" placeholder="" min="3" max="32"/>
+                <label for="Input.SimulationDistance" class="form-label">Simulation Distance</label>
+                <ValidationMessage For="() => Input.SimulationDistance" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.EntityBroadcastRangePercentage" id="Input.EntityBroadcastRangePercentage" class="form-control"
+                             aria-required="true" placeholder="" min="10" max="1000"/>
+                <label for="Input.EntityBroadcastRangePercentage" class="form-label">Entity Broadcast Range Percentage</label>
+                <ValidationMessage For="() => Input.EntityBroadcastRangePercentage" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.MaxTickTime" id="Input.MaxTickTime" class="form-control"
+                             aria-required="true" placeholder="" min="-1"/>
+                <label for="Input.MaxTickTime" class="form-label">Max Tick Time (ms)</label>
+                <ValidationMessage For="() => Input.MaxTickTime" class="text-danger"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm] private PerformanceSettings Input { get; set; } = new();
+    
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+    }
+
+    class PerformanceSettings : PropertyModificationModel
+    {
+        [ServerProperty("max-players")]
+        public int MaxPlayers { get; set; } = 20;
+        
+        [ServerProperty("view-distance")]
+        [Range(3, 32)]
+        public int ViewDistance { get; set; } = 10;
+        
+        [ServerProperty("simulation-distance")]
+        [Range(3, 32)]
+        public int SimulationDistance { get; set; } = 10;
+        
+        [ServerProperty("entity-broadcast-range-percentage")]
+        [Range(10, 1000)]
+        public int EntityBroadcastRangePercentage { get; set; } = 100;
+        
+        [ServerProperty("max-tick-time")]
+        public int MaxTickTime { get; set; } = 60_000;
+    }
+
+    private void SaveChanges()
+    {
+        Input.Apply(_properties);
+        _properties.Save();
+    }
+
+}

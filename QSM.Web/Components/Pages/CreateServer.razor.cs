@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
+using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
 using QSM.Web.Data;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +18,8 @@ public partial class CreateServer : ComponentBase
 		{ ServerSoftwares.Vanilla, new VanillaFetcher() },
 		{ ServerSoftwares.Fabric, new FabricFetcher() },
 		{ ServerSoftwares.NeoForge, new NeoForgeFetcher() },
-		{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") }
+		{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") },
+		{ ServerSoftwares.Folia, new PaperMCFetcher("folia") },
 	};
 
 	private bool _isProcessing;
@@ -96,6 +98,9 @@ public partial class CreateServer : ComponentBase
 			};
 			ctx.Servers.Add(newServer);
 			await ctx.SaveChangesAsync();
+			
+			_processingMessage = "Creating configuration file...";
+			await new ServerSettings().SaveJsonAsync(newServer.ConfigPath);
 		}
 
 		_isProcessing = false;

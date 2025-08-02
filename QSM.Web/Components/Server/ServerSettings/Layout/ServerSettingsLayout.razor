@@ -1,0 +1,51 @@
+@using QSM.Web.Components.Server.Layout
+@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <ServerNavMenu Id="@Id" />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://lines-of-codes.github.io/QSMSharp/" target="_blank" class="link-primary">Help</a>
+        </div>
+
+        <article class="content px-4">
+            <h1>Server Settings</h1>
+            <hr/>
+
+            <div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <ServerSettingsNavMenu Id="@Id" />
+                    </div>
+                    <div class="col-lg-9">
+                        @Body
+                    </div>
+                </div>
+            </div>
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+
+    private int Id { get; set; }
+    
+    protected override void OnParametersSet()
+    {
+        if ((Body?.Target as RouteView)?.RouteData.RouteValues.TryGetValue("Id", out var id) ?? false)
+        {
+            if (id == null) return;
+            Id = (int)id;
+        }
+    }
+
+}

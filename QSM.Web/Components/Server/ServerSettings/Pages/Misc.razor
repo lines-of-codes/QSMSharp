@@ -1,0 +1,115 @@
+@page "/Server/{Id:int:min(0)}/Settings/Misc"
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<h3>Miscellaneous</h3>
+
+<EditForm Model="Input" FormName="MiscOptions" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.MOTD" id="Input.MOTD" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.MOTD" class="form-label">MOTD</label>
+                <ValidationMessage For="() => Input.MOTD" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.ResourcePack" id="Input.ResourcePack" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.ResourcePack" class="form-label">Resource Pack</label>
+                <ValidationMessage For="() => Input.ResourcePack" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.ResourcePackSha1" id="Input.ResourcePackSha1" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.ResourcePackSha1" class="form-label">Resource Pack SHA1</label>
+                <ValidationMessage For="() => Input.ResourcePackSha1" class="text-danger"/>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.RequireResourcePack" id="Input.RequireResourcePack" class="form-check-input" aria-required="true"/>
+                <label for="Input.RequireResourcePack" class="form-check-label">Require Resource Pack</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.EnableJmxMonitoring" id="Input.EnableJmxMonitoring" class="form-check-input" aria-required="true"/>
+                <label for="Input.EnableJmxMonitoring" class="form-check-label">Enable JMX Monitoring</label>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.PlayerIdleTimeout" id="Input.PlayerIdleTimeout" class="form-control"
+                             aria-required="true" placeholder="" min="0"/>
+                <label for="Input.PlayerIdleTimeout" class="form-label">Player Idle Timeout (minutes)</label>
+                <ValidationMessage For="() => Input.PlayerIdleTimeout" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.RateLimit" id="Input.RateLimit" class="form-control"
+                             aria-required="true" placeholder="" min="0"/>
+                <label for="Input.RateLimit" class="form-label">Rate Limit</label>
+                <ValidationMessage For="() => Input.RateLimit" class="text-danger"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm] private MiscOptions Input { get; set; } = new();
+    
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+    }
+
+    private void SaveChanges()
+    {
+        Input.Apply(_properties);
+        _properties.Save();
+    }
+
+    class MiscOptions : PropertyModificationModel
+    {
+        [ServerProperty("motd")]
+        public string MOTD { get; set; } = "A Minecraft Server";
+        
+        [ServerProperty("resource-pack")]
+        public string ResourcePack { get; set; } = string.Empty;
+        
+        [ServerProperty("resource-pack-sha1")]
+        public string ResourcePackSha1 { get; set; } = string.Empty;
+        
+        [ServerProperty("require-resource-pack")]
+        public bool RequireResourcePack { get; set; }
+        
+        [ServerProperty("enable-jmx-monitoring")]
+        public bool EnableJmxMonitoring { get; set; }
+        
+        [ServerProperty("player-idle-timeout")]
+        public int PlayerIdleTimeout { get; set; }
+        
+        [ServerProperty("rate-limit")]
+        public int RateLimit { get; set; }
+    }
+    
+}

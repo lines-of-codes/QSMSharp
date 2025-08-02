@@ -1,0 +1,90 @@
+@page "/Server/{Id:int:min(0)}/Settings/Interactions"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<h3>Player Interactions</h3>
+
+<EditForm Model="Input" FormName="InteractionOptions" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.SpawnProtection" id="Input.SpawnProtection" class="form-control"
+                             aria-required="true" placeholder="" min="0" />
+                <label for="Input.SpawnProtection" class="form-label">Spawn Protection</label>
+                <ValidationMessage For="() => Input.SpawnProtection" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.OpPermissionLevel" id="Input.OpPermissionLevel" class="form-control"
+                             aria-required="true" placeholder="" min="-1"/>
+                <label for="Input.OpPermissionLevel" class="form-label">OP Permission Level</label>
+                <ValidationMessage For="() => Input.OpPermissionLevel" class="text-danger"/>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.Whitelist" id="Input.Whitelist" class="form-check-input" aria-required="true"/>
+                <label for="Input.Whitelist" class="form-check-label">Whitelist</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.EnforceWhitelist" id="Input.EnforceWhitelist" class="form-check-input" aria-required="true"/>
+                <label for="Input.EnforceWhitelist" class="form-check-label">Enforce Whitelist</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm] private InteractionSettings Input { get; set; } = new();
+    
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+    }
+
+    private void SaveChanges()
+    {
+        Input.Apply(_properties);
+        _properties.Save();
+    }
+
+    class InteractionSettings : PropertyModificationModel
+    {
+        [ServerProperty("op-permission-level")]
+        [Range(0, 4)]
+        public int OpPermissionLevel { get; set; } = 4;
+        
+        [ServerProperty("spawn-protection")]
+        public int SpawnProtection { get; set; } = 16;
+        
+        [ServerProperty("white-list")]
+        public bool Whitelist { get; set; }
+        
+        [ServerProperty("enforce-whitelist")]
+        public bool EnforceWhitelist { get; set; }
+    }
+
+}

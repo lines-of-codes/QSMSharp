@@ -6,14 +6,12 @@ namespace QSM.Core.ServerSoftware;
 
 public class VanillaFetcher : InfoFetcher
 {
-	private readonly Dictionary<string, string> DownloadUrls = new();
-	private readonly PasteMystClient pasteMystClient;
-	private HttpClient httpClient;
+	private readonly Dictionary<string, string> _downloadUrls = new();
+	private readonly PasteMystClient _pasteMystClient;
 
 	public VanillaFetcher()
 	{
-		httpClient = new HttpClient();
-		pasteMystClient = new PasteMystClient();
+		_pasteMystClient = new PasteMystClient();
 	}
 
 	public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
@@ -28,7 +26,7 @@ public class VanillaFetcher : InfoFetcher
 			return minecraftVersionsCache;
 		}
 
-		PasteMystPaste? paste = await pasteMystClient.GetPasteAsync("1m9xuwik");
+		PasteMystPaste? paste = await _pasteMystClient.GetPasteAsync("1m9xuwik");
 
 		if (paste == null)
 		{
@@ -43,9 +41,9 @@ public class VanillaFetcher : InfoFetcher
 
 		for (ushort i = 1; i < response!.Length; i++)
 		{
-			string[] entry = response![i];
+			string[] entry = response[i];
 			versions.Add(entry[0]);
-			DownloadUrls[entry[0]] = entry[1];
+			_downloadUrls[entry[0]] = entry[1];
 		}
 
 		minecraftVersionsCache = versions.ToArray();
@@ -55,6 +53,6 @@ public class VanillaFetcher : InfoFetcher
 
 	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		return Task.FromResult(DownloadUrls[minecraftVersion]);
+		return Task.FromResult(_downloadUrls[minecraftVersion]);
 	}
 }

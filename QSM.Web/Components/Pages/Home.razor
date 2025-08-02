@@ -33,7 +33,7 @@
                 <th scope="row"><a href="/Server/@server.Id/">@server.Id</a></th>
                 <td><a href="/Server/@server.Id/">@server.Name</a></td>
                 <td><a href="/Server/@server.Id/">@(server.Running ? "Running" : "Stopped")</a></td>
-                <td><a href="/Server/@server.Id/">@server.Software</a></td>
+                <td><a href="/Server/@server.Id/">@server.Software @server.ServerVersion (Minecraft @server.MinecraftVersion)</a></td>
             </tr>
         }
         </tbody>

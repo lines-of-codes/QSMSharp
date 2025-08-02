@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace QSM.Core.ServerSoftware;
@@ -102,7 +103,7 @@ public partial class NeoForgeFetcher : InfoFetcher
 			UseShellExecute = false,
 			RedirectStandardError = true,
 			RedirectStandardOutput = true,
-			FileName = Path.Combine(settings.Java.JavaHome, "bin", "javaw.exe"),
+			FileName = Path.Combine(settings.Java.JavaHome, "bin", RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "javaw.exe" : "java"),
 			WindowStyle = ProcessWindowStyle.Hidden,
 			Arguments =
 				$"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "installer.jar")}\" {FirstRunArgs}",

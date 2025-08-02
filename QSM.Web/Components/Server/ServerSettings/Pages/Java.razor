@@ -1,0 +1,128 @@
+@page "/Server/{Id:int:min(0)}/Settings/Java"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject ApplicationConfig AppConfig
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<h3>Java</h3>
+
+<EditForm Model="Input" FormName="MiscOptions" OnValidSubmit="OptionsSubmitted">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-2">
+                <label for="Input.JavaHome" class="form-label">Java Install</label>
+                <InputSelect class="form-select" id="Input.JavaHome" @bind-Value="Input.JavaHome">
+                    @foreach (var install in AppConfig.JavaInstalls)
+                    {
+                        <option>@install</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Input.JavaHome" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.InitMemoryPoolSize" id="Input.InitMemoryPoolSize" class="form-control"
+                             aria-required="true" placeholder="" min="0"/>
+                <label for="Input.InitMemoryPoolSize" class="form-label">Initial Memory Size (GiB)</label>
+                <ValidationMessage For="() => Input.InitMemoryPoolSize" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.MaxMemoryPoolSize" id="Input.MaxMemoryPoolSize" class="form-control"
+                             aria-required="true" placeholder="" min="0"/>
+                <label for="Input.MaxMemoryPoolSize" class="form-label">Max Memory Size (GiB)</label>
+                <ValidationMessage For="() => Input.MaxMemoryPoolSize" class="text-danger"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="Input.JvmArgs">Java Arguments</label>
+                    <div>
+                        <InputSelect class="form-select" id="JvmArgsPreset" title="JVM Argument Presets" TValue="string" Value="CurrentArgPreset" ValueExpression="@(() => CurrentArgPreset)" ValueChanged="PresetSelected">
+                            @foreach (var k in JvmArgPresets.Keys)
+                            {
+                                <option>@k</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+                <InputTextArea @bind-Value="Input.JvmArgs" id="Input.JvmArgs" class="form-control"
+                           aria-required="true" placeholder="" rows="6" />
+                <ValidationMessage For="() => Input.JvmArgs" class="text-danger"/>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    static readonly Dictionary<string, string> JvmArgPresets = new()
+    {
+        { "None", string.Empty },
+        { "Aikar's Flags", "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true" },
+        { "Aikar's Flags (12GB+)", "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=40 -XX:G1MaxNewSizePercent=50 -XX:G1HeapRegionSize=16M -XX:G1ReservePercent=15 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=20 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true" },
+        { "Shenandoah GC", "-XX:+UnlockExperimentalVMOptions -XX:+UseShenandoahGC" },
+        { "ZGC", "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC" }
+    };
+    static readonly Dictionary<string, string> JvmArgPresetInverse = JvmArgPresets.ToDictionary(x => x.Value, x => x.Key);
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm] private JavaSettings Input { get; set; } = new();
+
+    string CurrentArgPreset { get; set; } = "None";
+    
+    ServerInstance? _server;
+    ServerSettings? _settings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+        _server = await ctx.Servers.FindAsync(Id);
+
+        if (_server == null || !ServerSettings.TryLoadJson(_server.ConfigPath, out _settings)) return;
+
+        Input = _settings!.Java;
+
+        if (Input.JavaHome == string.Empty)
+        {
+            Input.JavaHome = AppConfig.DefaultJavaInstall ?? AppConfig.JavaInstalls.FirstOrDefault() ?? string.Empty;
+        }
+
+        if (JvmArgPresetInverse.TryGetValue(Input.JvmArgs, out var preset))
+        {
+            CurrentArgPreset = preset;
+        }
+    }
+
+    private async Task OptionsSubmitted()
+    {
+        if (_server == null) return;
+                
+        if (_settings == null)
+        {
+            _settings = new ServerSettings();
+        }
+
+        _settings.Java = Input;
+        
+        await _settings.SaveJsonAsync(_server.ConfigPath);
+    }
+
+    private void PresetSelected(string value)
+    {
+        if (JvmArgPresets.TryGetValue(value, out var args))
+        {
+            Input.JvmArgs = args;
+        }
+
+        CurrentArgPreset = value;
+    }
+
+}

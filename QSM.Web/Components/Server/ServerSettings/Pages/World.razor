@@ -1,0 +1,111 @@
+@page "/Server/{Id:int:min(0)}/Settings/World"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<h3>World Generation</h3>
+
+<EditForm Model="Input" FormName="WorldOptions" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.LevelName" id="Input.LevelName" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.LevelName" class="form-label">Level Name</label>
+                <ValidationMessage For="() => Input.LevelName" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.LevelSeed" id="Input.LevelSeed" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.LevelSeed" class="form-label">Level Seed</label>
+                <ValidationMessage For="() => Input.LevelSeed" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.GeneratorSettings" id="Input.GeneratorSettings" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.GeneratorSettings" class="form-label">Generator Settings</label>
+                <ValidationMessage For="() => Input.GeneratorSettings" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.MaxWorldSize" id="Input.MaxWorldSize" class="form-control"
+                             aria-required="true" placeholder="" min="1" max="29999984"/>
+                <label for="Input.MaxWorldSize" class="form-label">Max World Size</label>
+                <ValidationMessage For="() => Input.MaxWorldSize" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.LevelType" id="Input.LevelType" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.LevelName" class="form-label">Level Type</label>
+                <ValidationMessage For="() => Input.LevelType" class="text-danger"/>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.GenerateStructures" id="Input.GenerateStructures" class="form-check-input" aria-required="true"/>
+                <label for="Input.GenerateStructures" class="form-check-label">Generate Structures</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private WorldSettings Input { get; set; } = new();
+
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
+
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+    }
+
+    class WorldSettings : PropertyModificationModel
+    {
+        [ServerProperty("level-name")]
+        public string LevelName { get; set; } = "world";
+
+        [ServerProperty("level-seed")]
+        public string LevelSeed { get; set; } = string.Empty;
+
+        [ServerProperty("generator-settings")]
+        public string GeneratorSettings { get; set; } = "{}";
+        
+        [ServerProperty("max-world-size")]
+        [Range(1, 29999984)]
+        public int MaxWorldSize { get; set; } = 29999984;
+        
+        [ServerProperty("level-type")]
+        public string LevelType { get; set; } = "minecraft:normal";
+
+        [ServerProperty("generate-structures")]
+        public bool GenerateStructures { get; set; } = true;
+    }
+
+    private void SaveChanges()
+    {
+        Input.Apply(_properties);
+        _properties.Save();
+    }
+
+}

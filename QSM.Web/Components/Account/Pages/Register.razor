@@ -5,6 +5,7 @@
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
+@inject RoleManager<IdentityRole> RoleManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Register> Logger
 @inject IdentityRedirectManager RedirectManager
@@ -59,7 +60,7 @@
 @code {
     private IEnumerable<IdentityError>? _identityErrors;
 
-    [SupplyParameterFromForm] private InputModel Input { get; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
@@ -90,10 +91,26 @@
             return;
         }
 
+        await CreateRolesAsync();
+        await UserManager.AddToRoleAsync(user, "Owner");
         Logger.LogInformation("User created a new account with password.");
 
         await SignInManager.SignInAsync(user, false);
         RedirectManager.RedirectTo(ReturnUrl);
+    }
+    
+    private async Task CreateRolesAsync()
+    {
+        string[] roleNames = ["Owner", "Manager"];
+
+        foreach (var roleName in roleNames)
+        {
+            var roleExists  = await RoleManager.RoleExistsAsync(roleName);
+            if (!roleExists)
+            {
+                await RoleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
     }
 
     private ApplicationUser CreateUser()

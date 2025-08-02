@@ -22,4 +22,19 @@ public class ServerInstance
 	[MaxLength(4096)] public string? ServerPath { get; set; }
 
 	public ServerSoftwares Software { get; set; }
+	
+	public string PropertiesPath => Path.Join(ServerPath, "server.properties");
+
+	public string ConfigPath => Path.Join(ServerPath, "config.qsm.json");
+
+	public static implicit operator ServerMetadata(ServerInstance instance)
+	{
+		return new ServerMetadata(
+			instance.Name ?? string.Empty,
+			instance.Software,
+			instance.MinecraftVersion ?? string.Empty,
+			instance.ServerVersion ?? string.Empty,
+			instance.ServerPath ?? string.Empty
+		);
+	}
 }

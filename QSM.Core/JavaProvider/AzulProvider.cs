@@ -110,10 +110,7 @@ public class AzulProvider : IJavaProvider
 			_ = downloadUrlCache.TryAdd(version, runtime.download_url!);
 		}
 
-		if (!DownloadURLCache.ContainsKey(javaMajorRelease))
-		{
-			DownloadURLCache.Add(javaMajorRelease, downloadUrlCache);
-		}
+		DownloadURLCache.TryAdd(javaMajorRelease, downloadUrlCache);
 
 		return jres.ToArray();
 	}

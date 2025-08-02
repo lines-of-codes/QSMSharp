@@ -4,11 +4,12 @@ namespace QSM.Core.ServerSoftware;
 
 public class PurpurFetcher : InfoFetcher
 {
+	private const string prefixPath = "/v2/purpur/";
 	private readonly HttpClient httpClient;
 
 	public PurpurFetcher()
 	{
-		httpClient = new HttpClient { BaseAddress = new Uri("https://api.purpurmc.org/v2/purpur/") };
+		httpClient = new HttpClient { BaseAddress = new Uri("https://api.purpurmc.org/") };
 	}
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
@@ -18,7 +19,7 @@ public class PurpurFetcher : InfoFetcher
 			return buildInfo;
 		}
 
-		BuildInfoRequest? response = await httpClient.GetFromJsonAsync<BuildInfoRequest>(minecraftVersion);
+		BuildInfoRequest? response = await httpClient.GetFromJsonAsync<BuildInfoRequest>(prefixPath + minecraftVersion);
 
 		if (response == null)
 		{
@@ -49,7 +50,7 @@ public class PurpurFetcher : InfoFetcher
 			return minecraftVersionsCache;
 		}
 
-		ProjectInfoRequest? response = await httpClient.GetFromJsonAsync<ProjectInfoRequest>("");
+		ProjectInfoRequest? response = await httpClient.GetFromJsonAsync<ProjectInfoRequest>(prefixPath);
 
 		if (response == null)
 		{

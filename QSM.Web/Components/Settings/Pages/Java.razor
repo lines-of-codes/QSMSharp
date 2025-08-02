@@ -1,0 +1,109 @@
+@page "/Settings/Java"
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+@using QSM.Web.Data
+@using QSM.Web.Utilities
+
+@attribute [Authorize(Roles = "Owner")]
+
+@inject ILogger<Java> Logger
+@inject ApplicationConfig AppConfig
+
+<PageTitle>Java - QSM Web Console</PageTitle>
+
+<h2>Java</h2>
+
+<EditForm FormName="JavaInstallCreation" Model="Input" class="my-2" OnValidSubmit="AddJavaInstallSubmit">
+    <DataAnnotationsValidator/>
+    <div class="d-flex gap-2">
+        <InputText id="Input.JavaPath" class="form-control" @bind-Value="Input.JavaPath"
+                   placeholder="Java Installation Path" name="Input.JavaPath"/>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+    <ValidationMessage For="() => Input.JavaPath" class="text-danger"/>
+</EditForm>
+
+<table class="table align-middle">
+    <thead>
+    <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Version</th>
+        <th scope="col">Path</th>
+        <th scope="col">Default</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for (var i = 0; i < AppConfig.JavaInstalls.Count; i++)
+    {
+        var install = AppConfig.JavaInstalls[i];
+        <tr>
+            <th scope="row">@(i + 1)</th>
+            <td>@_installInfo[i]</td>
+            <td>@install</td>
+            <td>@(install == AppConfig.DefaultJavaInstall)</td>
+            <td>
+                @{
+                    var j = i;
+                }
+                <button class="btn btn-primary" @onclick="() => MakeDefault(j)">Make Default</button>
+                <button class="btn btn-danger" @onclick="() => RemoveInstall(j)">Remove</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    private List<string> _installInfo = [];
+
+    protected override void OnInitialized()
+    {
+        _installInfo = new List<string>(new string[AppConfig.JavaInstalls.Count]);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        for (var i = 0; i < AppConfig.JavaInstalls.Count; i++)
+        {
+            var install = AppConfig.JavaInstalls[i];
+            var installInfo = await JavaCheck.CheckJavaInstallationAsync(install);
+            _installInfo[i] = $"{installInfo.Vendor} {installInfo.Version}";
+        }
+    }
+
+    class InputModel
+    {
+        [Required] public string? JavaPath { get; set; }
+    }
+
+    private async Task AddJavaInstallSubmit()
+    {
+        var install = Input.JavaPath!;
+        var installInfo = await JavaCheck.CheckJavaInstallationAsync(install);
+        _installInfo.Add($"{installInfo.Vendor} {installInfo.Version}");
+        AppConfig.JavaInstalls.Add(install);
+        AppConfig.SaveConfig();
+        Input.JavaPath = null;
+    }
+
+    private void MakeDefault(int index)
+    {
+        Logger.LogInformation($"Making {AppConfig.JavaInstalls[index]} the default...");
+        AppConfig.DefaultJavaInstall = AppConfig.JavaInstalls[index];
+        AppConfig.SaveConfig();
+    }
+
+    private void RemoveInstall(int index)
+    {
+        if (AppConfig.DefaultJavaInstall == AppConfig.JavaInstalls[index])
+            AppConfig.DefaultJavaInstall = null;
+
+        AppConfig.JavaInstalls.RemoveAt(index);
+        AppConfig.SaveConfig();
+    }
+
+}

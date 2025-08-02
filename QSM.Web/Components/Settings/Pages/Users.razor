@@ -1,0 +1,152 @@
+@page "/Settings/Users"
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using QSM.Web.Data
+
+@attribute [Authorize(Roles = "Owner")]
+
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<PageTitle>Users - QSM Web Console</PageTitle>
+
+<h2>Users</h2>
+
+<EditForm Model="Input" FormName="AddUser" OnValidSubmit="AddUser">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    @if (_identityErrorList != null)
+    {
+        <div class="alert alert-danger">
+            <ul>
+                @foreach (var error in _identityErrorList)
+                {
+                    <li>@error.Code: @error.Description</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="d-flex flex-column flex-md-row gap-2">
+        <InputText class="form-control" name="Input.Username" placeholder="Username" @bind-Value="Input.Username"
+                   aria-required="true"/>
+        <InputText class="form-control" name="Input.Password" type="password" placeholder="Password"
+                   @bind-Value="Input.Password"
+                   aria-required="true"/>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+</EditForm>
+
+<table class="table align-middle">
+    <thead>
+    <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Username</th>
+        <th scope="col">Role</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in _users)
+    {
+        <tr>
+            <th scope="row">@user.Id</th>
+            <td>@user.UserName</td>
+            <td>@(_userRoles[user.Id])</td>
+            <td>
+                <button class="btn btn-primary" title="Change Password"
+                        onclick="document.getElementById('changePasswordDialog').showModal();document.getElementById('NewPasswordInput.Id').value = '@user.Id';">
+                    <i class="bi bi-key"></i></button>
+                <button class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<dialog id="changePasswordDialog" class="rounded modal">
+    <div class="modal-dialog">
+        <EditForm Model="NewPasswordInput" class="modal-content" OnValidSubmit="NewPassword">
+            <DataAnnotationsValidator/>
+            <div class="modal-header">
+                <h5 class="modal-title">Password Change</h5>
+                <button
+                    class="btn-close"
+                    onclick="document.getElementById('changePasswordDialog').close()"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ValidationSummary class="danger" role="alert"/>
+                <InputText class="form-control mb-2" id="NewPasswordInput.Id" name="NewPasswordInput.Id"
+                           @bind-Value="NewPasswordInput.Id" aria-required="true" placeholder="User ID"/>
+                <InputText class="form-control" name="NewPasswordInput.Password" @bind-Value="NewPasswordInput.Password"
+                           aria-required="true" placeholder="New Password"/>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('changePasswordDialog').close()">Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">Change</button>
+            </div>
+        </EditForm>
+    </div>
+</dialog>
+
+@code {
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private PasswordInputModel NewPasswordInput { get; set; } = new();
+    private List<ApplicationUser> _users = [];
+    private Dictionary<string, string> _userRoles = [];
+    private IEnumerable<IdentityError>? _identityErrorList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _users = UserManager.Users.ToList();
+        foreach (var user in _users)
+        {
+            _userRoles[user.Id] = string.Join(", ", await UserManager.GetRolesAsync(user));
+        }
+    }
+
+    private class InputModel
+    {
+        [Required] public string? Username { get; set; }
+        [Required] public string? Password { get; set; }
+    }
+
+    private class PasswordInputModel
+    {
+        [Required] public string? Id { get; set; }
+        [Required] public string? Password { get; set; }
+    }
+
+    private async Task AddUser()
+    {
+        ApplicationUser user = new()
+        {
+            UserName = Input.Username!
+        };
+        
+        var result = await UserManager.CreateAsync(user, Input.Password!);
+
+        if (!result.Succeeded)
+        {
+            _identityErrorList = result.Errors;
+            return;
+        }
+
+        _users.Add(user);
+        _userRoles[user.Id] = string.Empty;
+    }
+
+    private void NewPassword()
+    {
+        throw new NotImplementedException();
+    }
+
+}

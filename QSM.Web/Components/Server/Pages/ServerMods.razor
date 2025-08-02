@@ -1,0 +1,9 @@
+@page "/Server/{Id:int:min(0)}/Mods"
+
+<PageTitle>Mods - QSM Web Console</PageTitle>
+
+<h1>Mods/Plugins</h1>
+
+@code {
+    [Parameter] public int Id { get; set; }
+}

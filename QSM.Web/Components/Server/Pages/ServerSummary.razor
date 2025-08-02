@@ -1,45 +1,115 @@
 @page "/Server/{Id:int:min(0)}"
+@implements IDisposable
+@rendermode InteractiveServer
+
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
 
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject ProcessManager ProcessManager
+@inject ILogger<ServerSummary> Logger
 
 @attribute [Authorize]
 
 <PageTitle>@_server.Name - QSM Web Console</PageTitle>
 
-<h1>@_server.Name</h1>
-<p>@_server.Software (Build @_server.ServerVersion for Minecraft @_server.MinecraftVersion)</p>
-
-<div class="my-2">
-    <b>State</b>
-    <p class="fs-3 lh-1">@(_server.Running ? "Running" : "Stopped")</p>
-</div>
-
-<div class="my-2">
-    <button class="btn btn-primary me-1">Start</button>
-    <button class="btn btn-danger" disabled>Stop</button>
-</div>
-
-<div class="accordion">
-    <details class="accordion-item">
-        <summary class="accordion-button">
-            <div class="accordion-header">
-                Dangerous Zone
-            </div>
-        </summary>
-        
-        <div class="accordion-body">
-            <button class="btn btn-danger">Delete Server</button>
+<div class="col-md-6">
+    @if (_errorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @_errorMessage
         </div>
-    </details>
+    }
+
+    <h1>@_server.Name</h1>
+    <p>@_server.Software (Build @_server.ServerVersion for Minecraft @_server.MinecraftVersion)</p>
+    
+    
+    <div id="eulaConfirmDialog" class="alert alert-primary" hidden="@(!_eulaPrompt)">
+        <h2>Do you agree to the Minecraft EULA?</h2>
+        <p>
+            If you <i>do not</i> agree to the Minecraft EULA, Your server won't run.
+            For more information about the Minecraft EULA, Visit 
+            <a href="https://aka.ms/MinecraftEULA" target="_blank">
+                https://aka.ms/MinecraftEULA
+            </a>
+        </p>
+        <button class="btn btn-primary me-1" @onclick="EulaAgreed">Agree</button>
+        <button class="btn btn-danger" @onclick="EulaDisagreed">Disagree</button>
+    </div>
+
+    <div class="my-2">
+        <b>State</b>
+        <p class="fs-3 lh-1">@(_server.Running ? "Running" : "Stopped")</p>
+    </div>
+
+    <p class="my-2 bg-body-secondary rounded px-2 font-monospace">
+        @_lastOutput
+    </p>
+
+    <div class="my-3">
+        <button class="btn btn-primary me-1" @onclick="StartButtonClicked" disabled="@_stateSwitching">@(_server.Running ? "Restart" : "Start")</button>
+        <button class="btn btn-danger" @onclick="StopButtonClicked" disabled="@(!_server.Running || _stateSwitching)">Stop</button>
+    </div>
+
+    <div class="accordion">
+        <details class="accordion-item">
+            <summary class="accordion-button">
+                <div class="accordion-header">
+                    Dangerous Zone
+                </div>
+            </summary>
+
+            <div class="accordion-body">
+                <button
+                    class="btn btn-danger"
+                    onclick="document.getElementById('deletionConfirmDialog').showModal()">
+                    Delete Server
+                </button>
+            </div>
+        </details>
+    </div>
 </div>
+
+<dialog id="deletionConfirmDialog" class="rounded modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Deletion Confirmation</h5>
+                <button 
+                    class="btn-close" 
+                    onclick="document.getElementById('deletionConfirmDialog').close()" 
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Are you sure you want to delete the server? This action is 
+                    irreversible and the server data will be lost forever.
+                    @if (_server.Running)
+                    {
+                        <span>Your server will be stopped before deletion.</span>
+                    }
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('deletionConfirmDialog').close()">Cancel</button>
+                <button class="btn btn-danger" disabled="@_isDeleting" @onclick="DeleteButtonClicked">Confirm</button>
+            </div>
+        </div>
+    </div>
+</dialog>
 
 @code {
     [Parameter] public int Id { get; set; }
     private ServerInstance _server = new();
+    private string _lastOutput = "Server not running.";
+    private string? _errorMessage;
+    private bool _isDeleting;
+    private bool _stateSwitching;
+    private bool _outputListened;
+    private bool _eulaPrompt;
 
     protected override void OnInitialized()
     {
@@ -54,6 +124,139 @@
         }
 
         _server = server;
+
+        if (server.Running && (!ProcessManager.Processes.TryGetValue(server.Id, out var process) || process.HasExited))
+        {
+            server.Running = false;
+            ctx.Servers.Update(server);
+            ctx.SaveChanges();
+        }
+
+        var lastMessageExist = ProcessManager.ServerOutput.TryGetValue(server.Id, out var messageList);
+
+        if (lastMessageExist)
+        {
+            var lastMessage = messageList?.LastOrDefault((msg) => msg.Message != string.Empty)?.Message;
+            _lastOutput = lastMessage ?? string.Empty;
+        } else if (server.Running)
+        {
+            _lastOutput = "...";
+        }
+    }
+
+    private async Task DeleteButtonClicked()
+    {
+        _stateSwitching = true;
+        _isDeleting = true;
+
+        if (_server.Running)
+        {
+            await ProcessManager.StopAsync(_server.Id);
+        }
+        
+        if (Directory.Exists(_server.ServerPath))
+            Directory.Delete(_server.ServerPath!, true);
+        
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+        ctx.Servers.Remove(_server);
+        await ctx.SaveChangesAsync();
+        
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async Task StartButtonClicked()
+    {
+        _errorMessage = null;
+        _stateSwitching = true;
+        _server.Running = true;
+
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+        ctx.Update(_server);
+        await ctx.SaveChangesAsync();
+
+        try
+        {
+            await ProcessManager.Run(_server);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.ToString());
+            _errorMessage = ex.Message;
+            _stateSwitching = false;
+            
+            _server.Running = false;
+            ctx.Update(_server);
+            await ctx.SaveChangesAsync();
+            
+            return;
+        }
+        
+        ProcessManager.OutputReceived += OutputHandler;
+        
+        _outputListened = true;
+        _stateSwitching = false;
+    }
+
+    private async Task StopButtonClicked()
+    {
+        _stateSwitching = true;
+        await ProcessManager.StopAsync(_server.Id);
+        
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+        _server.Running = false;
+        ctx.Update(_server);
+        await ctx.SaveChangesAsync();
+        
+        _stateSwitching = false;
+    }
+
+    public void Dispose()
+    {
+        if (_outputListened)
+        {
+            ProcessManager.OutputReceived -= OutputHandler;
+        }
+    }
+
+    private async void OutputHandler(int serverId, ProcessManager.OutputCache data)
+    {
+        try
+        {
+            if (serverId != _server.Id) return;
+
+            if (data.Message == string.Empty) return;
+
+            if (data.Message.Contains("You need to agree to the EULA in order to run the server. Go to eula.txt for more info."))
+                _eulaPrompt = true;
+        
+            _lastOutput = data.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception e)
+        {
+            _errorMessage = e.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task EulaAgreed()
+    {
+        var process = ProcessManager.Processes[_server.Id];
+        if (!process.HasExited)
+            await process.WaitForExitAsync();
+        
+        var path = Path.Combine(_server.ServerPath!, "eula.txt");
+        var newContents = (await File.ReadAllTextAsync(path)).Replace("eula=false", "eula=true");
+        await File.WriteAllTextAsync(path, newContents);
+
+        _eulaPrompt = false;
+        await StartButtonClicked();
+    }
+
+    private async Task EulaDisagreed()
+    {
+        _eulaPrompt = false;
+        await StopButtonClicked();
     }
 
 }

@@ -1,0 +1,116 @@
+@page "/Server/{Id:int:min(0)}/Settings/Network"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<h3>Network Settings</h3>
+
+<EditForm Model="Input" FormName="NetworkOptions" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.ServerIp" id="Input.ServerIp" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.ServerIp" class="form-label">Server IP</label>
+                <ValidationMessage For="() => Input.ServerIp" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.ServerPort" id="Input.ServerPort" class="form-control"
+                             aria-required="true" placeholder="" min="1" max="65534"/>
+                <label for="Input.ServerPort" class="form-label">Server Port</label>
+                <ValidationMessage For="() => Input.ServerPort" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.NetworkCompressionThreshold" id="Input.NetworkCompressionThreshold" class="form-control"
+                             aria-required="true" placeholder="" min="-1"/>
+                <label for="Input.NetworkCompressionThreshold" class="form-label">Network Compression Threshold</label>
+                <ValidationMessage For="() => Input.NetworkCompressionThreshold" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputNumber @bind-Value="Input.QueryPort" id="Input.QueryPort" class="form-control"
+                             aria-required="true" placeholder="" min="1" max="65534"/>
+                <label for="Input.ServerPort" class="form-label">Query Port</label>
+                <ValidationMessage For="() => Input.QueryPort" class="text-danger"/>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.EnableStatus" id="Input.EnableStatus" class="form-check-input" aria-required="true"/>
+                <label for="Input.EnableStatus" class="form-check-label">Enable Status</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.EnableQuery" id="Input.EnableQuery" class="form-check-input" aria-required="true"/>
+                <label for="Input.EnableQuery" class="form-check-label">Enable Query</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.UseNativeTransport" id="Input.UseNativeTransport" class="form-check-input" aria-required="true"/>
+                <label for="Input.UseNativeTransport" class="form-check-label">Use Native Transport</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm] private NetworkSettings Input { get; set; } = new();
+    
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+    }
+
+    class NetworkSettings : PropertyModificationModel
+    {
+        [ServerProperty("server-ip")]
+        public string ServerIp { get; set; } = string.Empty;
+        
+        [ServerProperty("server-port")]
+        [Range(1, 65534)]
+        public int ServerPort { get; set; } = 25565;
+        
+        [ServerProperty("query.port")]
+        [Range(1, 65534)]
+        public int QueryPort { get; set; } = 25565;
+
+        [ServerProperty("network-compression-threshold")]
+        public int NetworkCompressionThreshold { get; set; } = 256;
+
+        [ServerProperty("enable-status")]
+        public bool EnableStatus { get; set; } = true;
+        
+        [ServerProperty("enable-query")]
+        public bool EnableQuery { get; set; }
+        
+        [ServerProperty("use-native-transport")]
+        public bool UseNativeTransport { get; set; } = true;
+    }
+
+    private void SaveChanges()
+    {
+        Input.Apply(_properties);
+        _properties.Save();
+    }
+
+}

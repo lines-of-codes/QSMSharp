@@ -8,7 +8,7 @@ public class FabricFetcher : InfoFetcher
 
 	public FabricFetcher()
 	{
-		httpClient = new HttpClient { BaseAddress = new Uri("https://meta.fabricmc.net/v2/") };
+		httpClient = new HttpClient { BaseAddress = new Uri("https://meta.fabricmc.net/") };
 	}
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
@@ -19,7 +19,7 @@ public class FabricFetcher : InfoFetcher
 		}
 
 		AvailableFabricVersion[]? response =
-			await httpClient.GetFromJsonAsync<AvailableFabricVersion[]>($"versions/loader/{minecraftVersion}");
+			await httpClient.GetFromJsonAsync<AvailableFabricVersion[]>($"/v2/versions/loader/{minecraftVersion}");
 
 		List<string> loaders = [];
 
@@ -41,7 +41,7 @@ public class FabricFetcher : InfoFetcher
 		}
 
 		SupportedMinecraftVersion[]? response =
-			await httpClient.GetFromJsonAsync<SupportedMinecraftVersion[]>("versions/game");
+			await httpClient.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game");
 
 		if (response == null)
 		{
@@ -65,7 +65,7 @@ public class FabricFetcher : InfoFetcher
 
 	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		FabricInstaller[]? response = await httpClient.GetFromJsonAsync<FabricInstaller[]>("versions/installer");
+		FabricInstaller[]? response = await httpClient.GetFromJsonAsync<FabricInstaller[]>("/v2/versions/installer");
 
 		if (response == null)
 		{

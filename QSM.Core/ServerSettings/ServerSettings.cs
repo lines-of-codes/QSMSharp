@@ -34,11 +34,12 @@ public class ServerSettings
 	}
 
 	/// <summary>
+	/// Try and load a server settings file
 	/// </summary>
-	/// <param name="filePath"></param>
-	/// <param name="settings"></param>
+	/// <param name="filePath">The path to the configuration file</param>
+	/// <param name="settings">Output of the JSON loading. Will be null if failed to load.</param>
 	/// <returns>`true` on load success, `false` on load fail</returns>
-	public static bool TryLoadJson(string filePath, out ServerSettings? settings, JsonSerializerOptions? options = null)
+	public static bool TryLoadJson(string filePath, out ServerSettings? settings)
 	{
 		settings = null;
 

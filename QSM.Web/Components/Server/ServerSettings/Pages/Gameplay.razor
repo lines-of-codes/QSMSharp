@@ -1,0 +1,110 @@
+@page "/Server/{Id:int:min(0)}/Settings/Gameplay"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<h3>Gameplay Settings</h3>
+
+<EditForm Model="Input" FormName="GameplayOptions" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.GameMode" id="Input.GameMode" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.GameMode" class="form-label">Game mode</label>
+                <ValidationMessage For="() => Input.GameMode" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Input.Difficulty" id="Input.Difficulty" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Input.Difficulty" class="form-label">Difficulty</label>
+                <ValidationMessage For="() => Input.Difficulty" class="text-danger"/>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.ForceGameMode" id="Input.ForceGameMode" class="form-check-input" aria-required="true"/>
+                <label for="Input.ForceGameMode" class="form-check-label">Force game mode</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.Hardcore" id="Input.Hardcore" class="form-check-input" aria-required="true"/>
+                <label for="Input.Hardcore" class="form-check-label">Hardcore</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.PvP" id="Input.PvP" class="form-check-input" aria-required="true"/>
+                <label for="Input.PvP" class="form-check-label">PvP</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.AllowFlight" id="Input.AllowFlight" class="form-check-input" aria-required="true"/>
+                <label for="Input.AllowFlight" class="form-check-label">Allow Flight</label>
+            </div>
+            <div class="form-check mb-2">
+                <InputCheckbox @bind-Value="Input.AllowNether" id="Input.AllowNether" class="form-check-input" aria-required="true"/>
+                <label for="Input.AllowNether" class="form-check-label">Allow Nether</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm] private GameplaySettings Input { get; set; } = new();
+    
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+    }
+
+    class GameplaySettings : PropertyModificationModel
+    {
+        [ServerProperty("gamemode")]
+        [Required] public string GameMode { get; set; } = "survival";
+        
+        [ServerProperty("difficulty")]
+        [Required] public string Difficulty { get; set; } = "easy";
+        
+        [ServerProperty("force-gamemode")]
+        public bool ForceGameMode { get; set; }
+        
+        [ServerProperty("hardcore")]
+        public bool Hardcore { get; set; }
+        
+        [ServerProperty("pvp")]
+        public bool PvP { get; set; } = true;
+        
+        [ServerProperty("allow-flight")]
+        public bool AllowFlight { get; set; }
+        
+        [ServerProperty("allow-nether")]
+        public bool AllowNether { get; set; } = true;
+    }
+
+    private void SaveChanges()
+    {
+        Input.Apply(_properties);
+        _properties.Save();
+    }
+
+}

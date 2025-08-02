@@ -1,0 +1,130 @@
+@page "/Server/{Id:int:min(0)}/Console"
+@rendermode InteractiveServer
+
+@using QSM.Web.Data
+@implements IDisposable
+
+@inject ProcessManager ProcessManager
+@inject ILogger<ServerConsole> Logger
+@inject IJSRuntime Js
+
+<PageTitle>Console - QSM Web Console</PageTitle>
+
+<h1>Console</h1>
+
+<div class="overflow-scroll" id="outputList">
+    <pre>
+    @foreach (var entry in _outputList)
+    {
+        <div class=@(entry.Type == ProcessManager.OutputType.Error ? "text-danger" : "")>@entry.Message</div>
+    }
+    </pre>
+</div>
+
+<EditForm Model="Input" class="mt-2" OnSubmit="CommandSubmitted">
+    <InputText class="form-control" @bind-Value="Input.Command" autocomplete="off" />
+</EditForm>
+
+<style>
+    #outputList {
+        height: 72vh;
+        max-width: 80vw;
+    }
+</style>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    private List<ProcessManager.OutputCache> _outputList = [];
+    private Timer? _updateTimer;
+    private bool _outputListModified;
+    private bool _outputListened;
+    private bool _outputFirstAdded;
+
+    protected override void OnInitialized()
+    {
+        var outputListExist = ProcessManager.ServerOutput.TryGetValue(Id, out var outputList);
+
+        if (!outputListExist) return;
+
+        _outputList = outputList!;
+
+        _updateTimer = new Timer(UpdatePendingOutput, null, 100, 100);
+    }
+
+    private void UpdatePendingOutput(object? state)
+    {
+        if (!_outputListModified) return;
+        
+        InvokeAsync(async () =>
+        {
+            StateHasChanged();
+            await Js.InvokeVoidAsync("scrollToBottom");
+        });
+        _outputListModified = false;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        if (!_outputListened)
+        {
+            ProcessManager.OutputReceived += OnOutputReceived;
+            _outputListened = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Js.InvokeVoidAsync("scrollToBottom");
+    }
+
+    private void OnOutputReceived(int serverId, ProcessManager.OutputCache newOutput)
+    {
+        try
+        {
+            if (serverId != Id) return;
+            
+            // This check has to be added because for an unknown reason, This 
+            // is called twice even though only one event listener is added.
+            if (!_outputFirstAdded)
+            {
+                _outputList.Add(newOutput);
+                _outputFirstAdded = true;
+                _outputListModified = true;
+            }
+            else
+                _outputFirstAdded = false;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_outputListened)
+        {
+            ProcessManager.OutputReceived -= OnOutputReceived;
+        }
+
+        _updateTimer?.Dispose();
+    }
+
+    class InputModel
+    {
+        public string? Command { get; set; }
+    }
+
+    private void CommandSubmitted()
+    {
+        if (ProcessManager.Processes[Id].HasExited) return;
+        
+        ProcessManager.Processes[Id].StandardInput.WriteLine(Input.Command);
+
+        Input.Command = "";
+    }
+
+}

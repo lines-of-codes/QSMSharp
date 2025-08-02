@@ -7,14 +7,14 @@ namespace QSM.Core.ServerSoftware;
 /// </summary>
 public class PaperMCFetcher : InfoFetcher
 {
-	private readonly HttpClient httpClient;
+	private readonly HttpClient _httpClient;
 
-	private string project;
+	private readonly string _prefixPath;
 
 	public PaperMCFetcher(string project)
 	{
-		this.project = project;
-		httpClient = new HttpClient { BaseAddress = new Uri($"https://api.papermc.io/v2/projects/{project}/") };
+		_httpClient = new HttpClient { BaseAddress = new Uri($"https://fill.papermc.io/") };
+		_prefixPath = $"/v3/projects/{project}";
 	}
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
@@ -25,7 +25,7 @@ public class PaperMCFetcher : InfoFetcher
 		}
 
 		AvailableBuildsRequest? response =
-			await httpClient.GetFromJsonAsync<AvailableBuildsRequest>($"versions/{minecraftVersion}");
+			await _httpClient.GetFromJsonAsync<AvailableBuildsRequest>($"{_prefixPath}/versions/{minecraftVersion}");
 
 		if (response == null)
 		{
@@ -33,7 +33,6 @@ public class PaperMCFetcher : InfoFetcher
 		}
 
 		string[] builds = Array.ConvertAll(response.Builds!, num => num.ToString());
-		Array.Reverse(builds);
 
 		buildInfoCache[minecraftVersion] = builds;
 
@@ -47,47 +46,39 @@ public class PaperMCFetcher : InfoFetcher
 			return minecraftVersionsCache;
 		}
 
-		ProjectInformation? response = await httpClient.GetFromJsonAsync<ProjectInformation>("");
+		ProjectInformation? response = await _httpClient.GetFromJsonAsync<ProjectInformation>(_prefixPath);
 
 		if (response == null)
-		{
 			throw new NetworkResourceUnavailableException();
-		}
 
-		minecraftVersionsCache = response.Versions!;
+		var versionList = response.Versions!.Select(pair => pair.Value).SelectMany(arr => arr);
 
-		Array.Reverse(minecraftVersionsCache);
+		minecraftVersionsCache = versionList.ToArray();
 
 		return minecraftVersionsCache;
 	}
 
-	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
+	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		return Task.FromResult(
-			$"{httpClient.BaseAddress!.ToString()}versions/{minecraftVersion}/builds/{build}/downloads/paper-{minecraftVersion}-{build}.jar");
+		BuildInfo? response = await _httpClient.GetFromJsonAsync<BuildInfo>($"{_prefixPath}/versions/{minecraftVersion}/builds/{build}");
+
+		if (response == null)
+			throw new NetworkResourceUnavailableException();
+
+		return response.Downloads?.First().Value.Url ?? throw new NetworkResourceUnavailableException();
 	}
 
-	internal record class AvailableBuildsRequest(
-		string? project_id = null,
-		string? project_name = null,
-		string? version = null,
-		int[]? builds = null)
-	{
-		public int[]? Builds = builds;
-		public string? ProjectId = project_id;
-		public string? ProjectName = project_name;
-		public string? Version = version;
-	}
+	internal record AvailableBuildsRequest(
+		int[]? Builds = null);
 
-	internal record class ProjectInformation(
-		string? project_id = null,
-		string? project_name = null,
-		string[]? version_groups = null,
-		string[]? versions = null)
-	{
-		public string? ProjectId = project_id;
-		public string? ProjectName = project_name;
-		public string[]? VersionGroups = version_groups;
-		public string[]? Versions = versions;
-	}
+	internal record ProjectInformation(
+		Dictionary<string, string[]>? Versions);
+
+	internal record BuildInfo(Dictionary<string, BuildFileInfo>? Downloads);
+
+	internal record BuildFileInfo(
+		string? Name,
+		Dictionary<string, string>? Checksums,
+		int? Size,
+		string? Url);
 }

@@ -8,13 +8,13 @@ public class JavaSettings
 	///     The initial memory allocation pool size
 	///     of the Java instance in GiB. (-Xms)
 	/// </summary>
-	public double InitMemoryPoolSize { get; set; }
+	public float InitMemoryPoolSize { get; set; }
 
 	/// <summary>
 	///     The maximum memory allocation pool size
 	///     of the Java instance in GiB. (-Xmx)
 	/// </summary>
-	public double MaxMemoryPoolSize { get; set; }
+	public float MaxMemoryPoolSize { get; set; }
 
 	/// <summary>
 	///     The arguments provided to the JVM.
