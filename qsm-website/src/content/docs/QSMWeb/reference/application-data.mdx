@@ -1,0 +1,24 @@
+---
+title: Application Data
+description: Where QSM Web stores its data.
+---
+
+import { FileTree } from "@astrojs/starlight/components";
+
+QSM Web store its data at the following location on various operating systems:
+
+- Linux: `/var/lib/qsm-web`
+- FreeBSD: `/usr/local/etc/qsm-web/`
+- Windows: `C:\ProgramData\QSMWeb\`
+- macOS: Does not have a static location. Please help and contribute by adding a proper path to store data [here](https://github.com/lines-of-codes/QSMSharp/blob/c204ea5082e591fcaed1a1ed96cb89d880b7a64e/QSM.Web/Data/ApplicationConfig.cs#L11).
+
+## Directory Structure
+
+<FileTree>
+    
+    - config.json Application-wide settings
+    - servers
+        - [server_name]
+            - config.qsm.json Server-specific QSM-only configuration
+    
+</FileTree>

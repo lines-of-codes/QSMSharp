@@ -7,6 +7,8 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
+<PageTitle>World Generation - @_server.Name Settings</PageTitle>
+
 <h3>World Generation</h3>
 
 <EditForm Model="Input" FormName="WorldOptions" OnValidSubmit="SaveChanges">
@@ -78,6 +80,7 @@
         _server = server;
         _properties = new ServerProperties(_server.PropertiesPath);
         _properties.Load();
+        Input.Load(_properties);
     }
 
     class WorldSettings : PropertyModificationModel

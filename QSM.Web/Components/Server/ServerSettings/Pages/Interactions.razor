@@ -7,6 +7,8 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
+<PageTitle>Interactions - @_server.Name Settings</PageTitle>
+
 <h3>Player Interactions</h3>
 
 <EditForm Model="Input" FormName="InteractionOptions" OnValidSubmit="SaveChanges">
@@ -63,6 +65,7 @@
         _server = server;
         _properties = new ServerProperties(_server.PropertiesPath);
         _properties.Load();
+        Input.Load(_properties);
     }
 
     private void SaveChanges()

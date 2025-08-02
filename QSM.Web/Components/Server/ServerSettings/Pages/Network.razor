@@ -7,6 +7,8 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
+<PageTitle>Network - @_server.Name Settings</PageTitle>
+
 <h3>Network Settings</h3>
 
 <EditForm Model="Input" FormName="NetworkOptions" OnValidSubmit="SaveChanges">
@@ -79,6 +81,7 @@
         _server = server;
         _properties = new ServerProperties(_server.PropertiesPath);
         _properties.Load();
+        Input.Load(_properties);
     }
 
     class NetworkSettings : PropertyModificationModel

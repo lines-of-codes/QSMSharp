@@ -25,4 +25,11 @@ In the solution, There are three projects including:
 
 - QSM.Core: Common classes shared between projects
 - QSM.Web: Cross-platform web version of the management software
-- QSM.Windows: Original Windows-only version, More complete
+- QSM.Windows: Original Windows-only version, More complete. In maintenance mode.
+
+### QSM.Windows
+
+QSM.Windows will only receive bugfixes and no new features unless the need for 
+it arises again. PRs with new features are still accepted, however.
+
+This is also because I've moved away from using Windows as a development OS.

@@ -7,6 +7,8 @@
 @inject ApplicationConfig AppConfig
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 
+<PageTitle>Java - @(_server?.Name ?? string.Empty) Settings</PageTitle>
+
 <h3>Java</h3>
 
 <EditForm Model="Input" FormName="MiscOptions" OnValidSubmit="OptionsSubmitted">

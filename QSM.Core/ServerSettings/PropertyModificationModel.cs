@@ -18,6 +18,14 @@ public abstract class PropertyModificationModel
 			_properties[attr.Name] = prop;
 		}
 	}
+
+	public void Load(ServerProperties props)
+	{
+		foreach (var pair in _properties)
+		{
+			pair.Value.SetValue(this, Convert.ChangeType(props.Properties[pair.Key], pair.Value.PropertyType));
+		}
+	}
 	
 	public void Apply(ServerProperties props)
 	{
