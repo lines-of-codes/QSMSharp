@@ -35,7 +35,7 @@ public class ProcessManager
 	/// </summary>
 	/// <param name="server">Server information</param>
 	/// <exception cref="Exception">Failure to load the server's configuration</exception>
-	public async Task Run(ServerInstance server)
+	public async Task RunAsync(ServerInstance server)
 	{
 		if (Processes.TryGetValue(server.Id, out var process) && !process.HasExited)
 		{

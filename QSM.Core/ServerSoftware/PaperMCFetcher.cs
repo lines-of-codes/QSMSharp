@@ -13,7 +13,7 @@ public class PaperMCFetcher : InfoFetcher
 
 	public PaperMCFetcher(string project)
 	{
-		_httpClient = new HttpClient { BaseAddress = new Uri($"https://fill.papermc.io/") };
+		_httpClient = new HttpClient { BaseAddress = new Uri("https://fill.papermc.io/") };
 		_prefixPath = $"/v3/projects/{project}";
 	}
 
