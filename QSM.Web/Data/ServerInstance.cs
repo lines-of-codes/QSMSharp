@@ -27,6 +27,10 @@ public class ServerInstance
 
 	public string ConfigPath => Path.Join(ServerPath, "config.qsm.json");
 
+	public bool ModSupport => ServerMetadata.SupportMods.Contains(Software);
+
+	public string ModFolder => Path.Combine(ServerPath ?? "", ModSupport ? "mods" : "plugins");
+
 	public static implicit operator ServerMetadata(ServerInstance instance)
 	{
 		return new ServerMetadata(

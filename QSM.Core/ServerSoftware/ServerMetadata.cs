@@ -7,13 +7,13 @@ public class ServerMetadata
 {
 	public static ServerMetadata? Selected = null;
 
-	private static readonly ServerSoftwares[] SupportMods =
+	public static readonly ServerSoftwares[] SupportMods =
 	[
 		ServerSoftwares.Fabric,
 		ServerSoftwares.NeoForge
 	];
 
-	private static readonly ServerSoftwares[] SupportPlugins =
+	public static readonly ServerSoftwares[] SupportPlugins =
 	[
 		ServerSoftwares.Paper,
 		ServerSoftwares.Purpur,

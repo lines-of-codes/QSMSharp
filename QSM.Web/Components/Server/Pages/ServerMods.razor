@@ -1,9 +1,105 @@
 @page "/Server/{Id:int:min(0)}/Mods"
+@using Microsoft.EntityFrameworkCore
+@using QSM.Web.Data
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject ILogger<ServerMods> Logger
 
 <PageTitle>Mods - QSM Web Console</PageTitle>
 
 <h1>Mods/Plugins</h1>
 
+<table class="table table-hover" id="serverList">
+    <thead>
+    <tr>
+        <th scope="col">Enabled</th>
+        <th scope="col">Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var mod in _files)
+    {
+        <tr>
+            <td><input type="checkbox" checked="@(_modsEnabled[mod])" @onchange="evt => ToggleMod(evt, mod)" /></td>
+            <td>@(Path.GetFileName(mod))</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
 @code {
+    const string DisabledSuffix = ".disabled";
+    
     [Parameter] public int Id { get; set; }
+    
+    private ServerInstance _server = new();
+    private string[] _files = [];
+    private Dictionary<string, bool> _modsEnabled = [];
+
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+
+        var files = Directory.EnumerateFiles(_server.ModFolder).ToArray();
+
+        _modsEnabled = files
+            .Select(filepath => new KeyValuePair<string, bool>(TrimPath(filepath), !filepath.EndsWith(DisabledSuffix)))
+            .ToDictionary();
+
+        _files = _modsEnabled.Keys.ToArray();
+    }
+
+    private string TrimPath(string path)
+    {
+        return path.EndsWith(DisabledSuffix) ? path[..^DisabledSuffix.Length] : path;
+    }
+
+    private void DisableMod(int index)
+    {
+        var originalPath = _files[index];
+        var directory = Path.GetDirectoryName(originalPath);
+
+        if (directory == null)
+        {
+            Logger.LogError("Got null when finding the mod's directory while disabling it.");
+            return;
+        }
+        
+        var newFileName = Path.GetFileName(originalPath) + DisabledSuffix;
+        
+        File.Move(originalPath, Path.Combine(directory, newFileName));
+    }
+
+    private void EnableMod(int index)
+    {
+        var path = _files[index];
+        
+        File.Move(path + DisabledSuffix, path);
+    }
+
+    private void ToggleMod(ChangeEventArgs evt, string mod)
+    {
+        var newValue = (bool?)evt.Value;
+        var index = Array.FindIndex(_files, path => path == mod);
+        
+        if (newValue == false)
+        {
+            DisableMod(index);
+            return;
+        }
+        EnableMod(index);
+    }
+
 }
