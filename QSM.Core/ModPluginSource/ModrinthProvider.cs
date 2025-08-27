@@ -85,15 +85,15 @@ public class ModrinthProvider : ModPluginProvider
 	{
 		string queryString = "search";
 
-		List<List<string>> facets = new();
+		List<List<string>> facets = [];
 
-		List<string> projectTypes = new();
-		if (ServerMetadata?.IsModSupported ?? (false || projectType == ProjectType.Mod))
+		List<string> projectTypes = [];
+		if (ServerMetadata?.IsModSupported ?? projectType == ProjectType.Mod)
 		{
 			projectTypes.Add("project_type:mod");
 		}
 
-		if (ServerMetadata?.IsPluginSupported ?? (false || projectType == ProjectType.Plugin))
+		if (ServerMetadata?.IsPluginSupported ?? projectType == ProjectType.Plugin)
 		{
 			projectTypes.Add("project_type:plugin");
 		}
@@ -111,7 +111,7 @@ public class ModrinthProvider : ModPluginProvider
 			facets.Add([$"categories:{ServerMetadata.Software.ToString().ToLowerInvariant()}"]);
 		}
 
-		categories ??= Array.Empty<string>();
+		categories ??= [];
 
 		foreach (string category in categories)
 		{
@@ -248,17 +248,17 @@ public class ModrinthProvider : ModPluginProvider
 		return (await client.GetFromJsonAsync<Category[]>("tag/category"))!;
 	}
 
-	internal record class VersionDependency(
+	internal record VersionDependency(
 		string? version_id = null,
 		string? project_id = null,
 		string? file_name = null,
 		string? dependency_type = null);
 
-	internal record class VersionFileHashes(
+	internal record VersionFileHashes(
 		string? sha512 = null,
 		string? sha1 = null);
 
-	internal record class VersionFile(
+	internal record VersionFile(
 		VersionFileHashes? hashes = null,
 		string? url = null,
 		string? filename = null,
@@ -266,7 +266,7 @@ public class ModrinthProvider : ModPluginProvider
 		int? size = null,
 		string? file_type = null);
 
-	internal record class VersionInfo(
+	internal record VersionInfo(
 		string? name = null,
 		string? version_number = null,
 		string? changelog = null,
@@ -275,7 +275,7 @@ public class ModrinthProvider : ModPluginProvider
 		bool? featured = null,
 		VersionFile[]? files = null);
 
-	internal record class ProjectResult(
+	internal record ProjectResult(
 		string? slug = null,
 		string? title = null,
 		string? description = null,
@@ -297,12 +297,12 @@ public class ModrinthProvider : ModPluginProvider
 		string[]? gallery = null,
 		string? featured_gallery = null);
 
-	internal record class LicenseDetails(
+	internal record LicenseDetails(
 		string? id = null,
 		string? name = null,
 		string? url = null);
 
-	internal record class GalleryImage(
+	internal record GalleryImage(
 		string? url = null,
 		bool? featured = null,
 		string? title = null,
@@ -310,7 +310,7 @@ public class ModrinthProvider : ModPluginProvider
 		DateTime? created = null,
 		int? ordering = null);
 
-	internal record class DetailedProjectResult(
+	internal record DetailedProjectResult(
 		string? slug = null,
 		string? title = null,
 		string? description = null,
@@ -333,7 +333,7 @@ public class ModrinthProvider : ModPluginProvider
 		GalleryImage[]? gallery = null,
 		string? featured_gallery = null);
 
-	internal record class SearchRequest(
+	internal record SearchRequest(
 		ProjectResult[]? hits = null,
 		int? offset = null,
 		int? limit = null,
