@@ -1,6 +1,49 @@
-@page "/Backups"
+@page "/Server/{Id:int:min(0)}/Settings/Backups"
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSettings
+@using QSM.Web.Data
+@using QSM.Web.Utilities
+@rendermode InteractiveServer
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager Navigation
+
+<PageTitle>Backups - @_server.Name Settings</PageTitle>
+
 <h3>Backups</h3>
 
+@if (!_installed)
+{
+    <div>
+        QBSGo is not installed. Please visit the 
+        <a href="/Settings/BackupSystem">Server Settings</a> page to install it.
+    </div>
+}
+
 @code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool _installed = false;
+    private ServerInstance _server = new();
+    private ServerProperties _properties = null!;
     
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+        _properties = new ServerProperties(_server.PropertiesPath);
+        _properties.Load();
+        // Input.Load(_properties);
+
+        _installed = File.Exists(QuickBackupSystem.InstallPath());
+    }
 }

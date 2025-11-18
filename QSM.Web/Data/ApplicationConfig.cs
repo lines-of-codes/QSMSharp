@@ -8,7 +8,7 @@ public class ApplicationConfig
 	public List<string> JavaInstalls { get; set; } = [];
 	public string? DefaultJavaInstall { get; set; }
 	
-	private static string GetDefaultAppDataFolder()
+	public static string GetDefaultAppDataFolder()
 	{
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 			return "/var/lib/qsm-web/";

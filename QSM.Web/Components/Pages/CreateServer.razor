@@ -15,6 +15,12 @@
 <EditForm Model="Model" FormName="NewServer" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator/>
     <ValidationSummary class="text-danger" role="alert"/>
+    @if (_errorMessage != string.Empty)
+    {
+        <div class="alert alert-danger" role="alert">
+            @_errorMessage
+        </div>
+    }
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating mb-2">

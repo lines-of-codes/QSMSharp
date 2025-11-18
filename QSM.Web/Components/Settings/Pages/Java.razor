@@ -92,7 +92,7 @@
 
     private void MakeDefault(int index)
     {
-        Logger.LogInformation($"Making {AppConfig.JavaInstalls[index]} the default...");
+        Logger.LogInformation("Making {JavaInstall} the default...", AppConfig.JavaInstalls[index]);
         AppConfig.DefaultJavaInstall = AppConfig.JavaInstalls[index];
         AppConfig.SaveConfig();
     }

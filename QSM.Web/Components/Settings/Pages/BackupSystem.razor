@@ -1,0 +1,173 @@
+@page "/Settings/BackupSystem"
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using System.Diagnostics
+@using System.Formats.Tar
+@using System.IO.Compression
+@using System.Runtime.InteropServices
+@using Microsoft.AspNetCore.Authorization
+@using Octokit
+@using QSM.Web.Data
+@using ZstdSharp
+
+@attribute [Authorize(Roles = "Owner")]
+
+<PageTitle>Backup System - QSM Web Console</PageTitle>
+
+<h2>Backup System</h2>
+
+<p>
+    The Quick Backup System (QBS) program is used as the main backup system for QSM.
+</p>
+
+@if (_installed)
+{
+    <div>QBS @_installedVersion is installed!</div>
+}
+else
+{
+    <div>QBS is not installed.</div>
+}
+
+<EditForm FormName="InstallForm" Model="InstallFormData" class="d-flex gap-2" OnSubmit="Install">
+    <select @bind="InstallFormData.Version" class="form-select">
+        @foreach (var rel in _availableVersions)
+        {
+            <option value="@rel.TagName">@rel.TagName</option>
+        }
+    </select>
+    <button class="btn btn-primary" disabled="@_installing">Install</button>
+</EditForm>
+    
+@if (_installing)
+{
+    <p class="mt-2">Installing QBSGo, Please do not leave this page until the process is finished.</p>
+}
+
+@code {
+    [SupplyParameterFromForm] private InstallForm InstallFormData { get; set; } = new();
+
+    IReadOnlyList<Release> _availableVersions = [];
+    string _installPath = string.Empty;
+    string _installedVersion = string.Empty;
+    bool _installed;
+    bool _installing;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _installPath = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "qbs/qbsgo");
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _installPath += ".exe";
+        }
+
+        _installed = File.Exists(_installPath);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_installed)
+        {
+            await CheckVersion();
+        }
+        var client = new GitHubClient(new ProductHeaderValue("QSMSharp"));
+        var releases = await client.Repository.Release.GetAll("lines-of-codes", "qbsgo");
+        _availableVersions = releases;
+    }
+
+    async Task CheckVersion()
+    {
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = _installPath,
+            Arguments = "-version",
+            RedirectStandardError = true,
+        };
+        var process = Process.Start(startInfo)!;
+        await process.WaitForExitAsync();
+        var output = await process.StandardError.ReadToEndAsync();
+
+        output = output.Split(" ")[3];
+
+        _installedVersion = output;
+    }
+
+    async Task Install()
+    {
+        _installing = true;
+        
+        var release = _availableVersions.FirstOrDefault(r => r.TagName == InstallFormData.Version, _availableVersions[0]);
+
+        var arch = RuntimeInformation.OSArchitecture switch
+        {
+            Architecture.Arm => "arm",
+            Architecture.Arm64 => "arm64",
+            Architecture.X64 => "amd64",
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        string os;
+        string archiveFormat = "tar.zst";
+        if (OperatingSystem.IsWindows())
+        {
+            os = "windows";
+            archiveFormat = "zip";
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            os = "linux";
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            os = "darwin";
+        }
+        else
+        {
+            throw new InvalidOperationException("Unsupported Operating System");
+        }
+
+        var assetName = $"qbsgo_{release.TagName[1..]}_{os}_{arch}.{archiveFormat}";
+
+        var asset = release.Assets.First(r => r.Name == assetName);
+        var directory = Path.GetDirectoryName(_installPath)!;
+
+        Directory.CreateDirectory(directory);
+        
+        using (HttpClient client = new())
+        {
+            await using var stream = await client.GetStreamAsync(asset.BrowserDownloadUrl);
+
+            if (os == "windows")
+            {
+                await ZipFile.ExtractToDirectoryAsync(stream, directory, true);
+            }
+            else
+            {
+                await using var compStream = new DecompressionStream(stream);
+                await TarFile.ExtractToDirectoryAsync(compStream, directory, true);
+            }
+        }
+
+        var extractedDir = Path.Join(directory, $"qbsgo_{os}_{arch}");
+        foreach (var file in Directory.EnumerateFiles(extractedDir))
+        {
+            File.Copy(file, Path.Join(directory, Path.GetFileName(file)));
+        }
+        
+        Directory.Delete(extractedDir, true);
+        
+        _installing = false;
+        _installed = true;
+        await CheckVersion();
+    }
+
+    class InstallForm
+    {
+        [Required] public string? Version { get; set; }
+    }
+
+}

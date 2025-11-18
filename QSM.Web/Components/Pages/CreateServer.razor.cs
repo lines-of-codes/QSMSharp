@@ -25,6 +25,7 @@ public partial class CreateServer : ComponentBase
 	private bool _isProcessing;
 	private string _processingMessage = string.Empty;
 	private string _targetFolderPreview = string.Empty;
+	private string _errorMessage = string.Empty;
 
 	[SupplyParameterFromForm] private NewServerModel Model { get; set; } = new();
 
@@ -51,7 +52,7 @@ public partial class CreateServer : ComponentBase
 
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
-			return "C:\\ProgramData\\QSMWeb\\Servers\\";
+			return @"C:\ProgramData\QSMWeb\Servers\";
 		}
 		// TODO: Add default path for macOS
 
@@ -68,7 +69,21 @@ public partial class CreateServer : ComponentBase
 	{
 		_isProcessing = true;
 
+		try
+		{
+			await Create();
+		}
+		catch (Exception ex)
+		{
+			_isProcessing = false;
+			_errorMessage = ex.Message;
+		}
+	}
+
+	private async Task Create()
+	{
 		_processingMessage = "Creating folder...";
+
 		Directory.CreateDirectory(_targetFolderPreview);
 
 		_processingMessage = "Downloading server file...";
