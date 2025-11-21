@@ -8,16 +8,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="16">
-        <TextBox Header="Server IP:" />
-        <NumberBox Header="Server Port:" Minimum="1" />
+    <StackPanel Spacing="16" Margin="30,20">
+        <TextBox Header="Server IP:" Text="{x:Bind _settings.ServerIp, Mode=TwoWay}" />
+        <NumberBox Header="Server Port:" Minimum="1" Maximum="65534"
+                   Value="{x:Bind _settings.ServerPort, Mode=TwoWay}" />
         
         <StackPanel>
-            <CheckBox Content="Enable Status" />
-            <CheckBox Content="Enable Query" />
+            <CheckBox Content="Enable Status" IsChecked="{x:Bind _settings.EnableStatus, Mode=TwoWay}" />
+            <CheckBox Content="Use Native Transport" IsChecked="{x:Bind _settings.UseNativeTransport, Mode=TwoWay}" />
+            <CheckBox Content="Enable Query" IsChecked="{x:Bind _settings.EnableQuery, Mode=TwoWay}" />
         </StackPanel>
         
-        <NumberBox Header="Query Port:" Minimum="1" />
-        <NumberBox Header="Network Compression Threshold:" />
+        <NumberBox Header="Query Port:" Minimum="1" Maximum="65534" Value="{x:Bind _settings.QueryPort, Mode=TwoWay}" />
+        <NumberBox Header="Network Compression Threshold:" Value="{x:Bind _settings.NetworkCompressionThreshold}" />
     </StackPanel>
 </Page>

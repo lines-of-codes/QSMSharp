@@ -29,7 +29,7 @@ public sealed partial class ServerManagementPage : Page
 		_metadataIndex = (int)e.Parameter;
 		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
-		if (ServerSettings.TryLoadJson(_metadata.QsmConfigFile, out var settings, ApplicationData.SerializerOptions))
+		if (ServerSettings.TryLoadJson(_metadata.QsmConfigFile, out var settings))
 			ApplicationData.ServerSettings[_metadata.Guid] = settings;
 
 		ConfigurationNavigationView.SelectedItem = SummaryTab;

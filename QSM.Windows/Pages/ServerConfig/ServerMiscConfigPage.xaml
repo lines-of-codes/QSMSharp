@@ -8,12 +8,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="16">
-        <TextBox Header="MOTD:" />
-        <NumberBox Header="Player Idle Timeout (Minutes):" />
-        <NumberBox Header="Rate Limit:" />
-        <TextBox Header="Resource Pack:" />
-        <TextBox Header="Resource Pack SHA1:" />
-        <CheckBox Content="Require Resource Pack" />
+    <StackPanel Spacing="16" Margin="30,20">
+        <TextBox Header="MOTD:" Text="{x:Bind _settings.MOTD, Mode=TwoWay}" />
+        <NumberBox Header="Player Idle Timeout (Minutes):" 
+                   Value="{x:Bind _settings.PlayerIdleTimeout, Mode=TwoWay}" />
+        <NumberBox Header="Rate Limit:" Value="{x:Bind _settings.RateLimit, Mode=TwoWay}" />
+        <TextBox Header="Resource Pack:" Text="{x:Bind _settings.ResourcePack, Mode=TwoWay}" />
+        <TextBox Header="Resource Pack SHA1:" Text="{x:Bind _settings.ResourcePackSha1, Mode=TwoWay}" />
+        <CheckBox Content="Require Resource Pack" 
+                  IsChecked="{x:Bind _settings.RequireResourcePack, Mode=TwoWay}" />
     </StackPanel>
 </Page>

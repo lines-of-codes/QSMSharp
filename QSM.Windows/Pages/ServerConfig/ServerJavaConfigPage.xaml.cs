@@ -66,6 +66,13 @@ public sealed partial class ServerJavaConfigPage : Page
 		else
 			JavaLabel.Text = "None selected.";
 
+		JvmArgsInput.Text = ServerSettings.Java.JvmArgs;
+
+		if (s_jvmArgPresetInverse.TryGetValue(JvmArgsInput.Text, out string presetName))
+		{
+			JvmArgPresetSelector.SelectedItem = presetName;
+		}
+
 		base.OnNavigatedTo(e);
 	}
 
@@ -82,6 +89,7 @@ public sealed partial class ServerJavaConfigPage : Page
 		{
 			if (JvmArgsInput == null) return;
 			JvmArgsInput.Text = args;
+			ServerSettings.Java.JvmArgs = args;
 		}
 	}
 
@@ -106,6 +114,9 @@ public sealed partial class ServerJavaConfigPage : Page
 		if (result == ContentDialogResult.None)
 			return;
 
+		if (picker.SelectedInstallation == null)
+			return;
+
 		Log.Information($"Selected {picker.SelectedInstallation.Vendor} {picker.SelectedInstallation.Version}");
 		JavaLabel.Text = $"{picker.SelectedInstallation.Vendor} {picker.SelectedInstallation.Version}";
 		ServerSettings.Java.JavaHome = picker.SelectedInstallation.Path;
@@ -116,7 +127,7 @@ public sealed partial class ServerJavaConfigPage : Page
 		if (_serverGuid == Guid.Empty)
 			return;
 
-		ServerSettings.Java.MaxMemoryPoolSize = e.NewValue;
+		ServerSettings.Java.MaxMemoryPoolSize = (float)e.NewValue;
 	}
 
 	private void InitMemorySizeSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
@@ -124,6 +135,6 @@ public sealed partial class ServerJavaConfigPage : Page
 		if (_serverGuid == Guid.Empty)
 			return;
 
-		ServerSettings.Java.InitMemoryPoolSize = e.NewValue;
+		ServerSettings.Java.InitMemoryPoolSize = (float)e.NewValue;
 	}
 }

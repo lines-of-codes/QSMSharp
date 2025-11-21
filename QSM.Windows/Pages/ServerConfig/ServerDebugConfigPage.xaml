@@ -8,8 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
-        <CheckBox Content="Debug" />
-        <CheckBox Content="Enable JMX Monitoring" />
+    <StackPanel Margin="30,20">
+        <CheckBox Content="Debug" IsChecked="{x:Bind _settings.Debug, Mode=TwoWay}" />
+        <CheckBox Content="Enable JMX Monitoring" 
+                  IsChecked="{x:Bind _settings.EnableJmxMonitoring, Mode=TwoWay}" />
     </StackPanel>
 </Page>

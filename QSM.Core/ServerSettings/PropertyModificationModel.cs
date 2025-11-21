@@ -23,7 +23,10 @@ public abstract class PropertyModificationModel
 	{
 		foreach (var pair in _properties)
 		{
-			pair.Value.SetValue(this, Convert.ChangeType(props.Properties[pair.Key], pair.Value.PropertyType));
+			if (!props.Properties.TryGetValue(pair.Key, out string? value))
+				continue;
+
+			pair.Value.SetValue(this, Convert.ChangeType(value, pair.Value.PropertyType));
 		}
 	}
 	

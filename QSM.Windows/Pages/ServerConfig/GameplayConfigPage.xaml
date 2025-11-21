@@ -8,15 +8,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="16">
-        <ComboBox Header="Gamemode:">
+    <StackPanel Spacing="16" Margin="30,20">
+        <ComboBox Header="Gamemode:" x:Name="Gamemode" SelectedValue="{x:Bind _settingsData.Gamemode, Mode=TwoWay}">
             <x:String>survival</x:String>
             <x:String>creative</x:String>
             <x:String>adventure</x:String>
             <x:String>spectator</x:String>
         </ComboBox>
 
-        <ComboBox Header="Difficulty:">
+        <ComboBox Header="Difficulty:" x:Name="Difficulty" SelectedValue="{x:Bind _settingsData.Difficulty, Mode=TwoWay}">
             <x:String>peaceful</x:String>
             <x:String>easy</x:String>
             <x:String>normal</x:String>
@@ -24,11 +24,11 @@
         </ComboBox>
 
         <StackPanel>
-            <CheckBox Content="Force Gamemode" />
-            <CheckBox Content="Hardcore" />
-            <CheckBox Content="PvP" />
-            <CheckBox Content="Allow Flight" />
-            <CheckBox Content="Allow Nether" />
+            <CheckBox Content="Force Gamemode" x:Name="ForceGamemode" IsChecked="{x:Bind _settingsData.ForceGameMode, Mode=TwoWay}" />
+            <CheckBox Content="Hardcore" x:Name="Hardcore" IsChecked="{x:Bind _settingsData.Hardcore, Mode=TwoWay}" />
+            <CheckBox Content="PvP" x:Name="PvP" IsChecked="{x:Bind _settingsData.PvP, Mode=TwoWay}" />
+            <CheckBox Content="Allow Flight" x:Name="AllowFlight" IsChecked="{x:Bind _settingsData.AllowFlight, Mode=TwoWay}" />
+            <CheckBox Content="Allow Nether" x:Name="AllowNether" IsChecked="{x:Bind _settingsData.AllowNether, Mode=TwoWay}" />
         </StackPanel>
     </StackPanel>
 </Page>

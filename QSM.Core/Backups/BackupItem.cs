@@ -4,7 +4,7 @@ namespace QSM.Core.Backups;
 
 public class BackupItem
 {
-	private const byte DefaultCuidLength = 8;
+	public const byte DefaultCuidLength = 8;
 
 	public BackupItem(Cuid2 id, string name, Uri uri, bool isSavedOnline = false)
 	{

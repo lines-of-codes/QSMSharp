@@ -1,6 +1,6 @@
 namespace QSM.Core.ServerSettings;
 
-[AttributeUsage(System.AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Property)]
 public class ServerPropertyAttribute(string name) : Attribute
 {
 	/// <summary>

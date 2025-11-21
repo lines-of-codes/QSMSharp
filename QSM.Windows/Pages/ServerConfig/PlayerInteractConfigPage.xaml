@@ -8,13 +8,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="16">
-        <NumberBox Header="Spawn Protection:" />
-        <NumberBox Header="OP Permission Level:" Minimum="0" Maximum="4" />
+    <StackPanel Spacing="16" Margin="30,20">
+        <NumberBox Header="Spawn Protection:" Value="{x:Bind _settings.SpawnProtection, Mode=TwoWay}" />
+        <NumberBox Header="OP Permission Level:" Minimum="0" Maximum="4"
+                   Value="{x:Bind _settings.OpPermissionLevel, Mode=TwoWay}" />
 
         <StackPanel>
-            <CheckBox Content="Whitelist" />
-            <CheckBox Content="Enforce Whitelist" />
+            <CheckBox Content="Whitelist" IsChecked="{x:Bind _settings.Whitelist, Mode=TwoWay}" />
+            <CheckBox Content="Enforce Whitelist" IsChecked="{x:Bind _settings.EnforceWhitelist, Mode=TwoWay}" />
         </StackPanel>
     </StackPanel>
 </Page>

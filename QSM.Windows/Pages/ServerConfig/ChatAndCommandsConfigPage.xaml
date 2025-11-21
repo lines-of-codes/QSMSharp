@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
+    <StackPanel Margin="30,20">
         <CheckBox Content="Broadcast Console to OPs" />
         <CheckBox Content="Broadcast rcon to OPs" />
         <CheckBox Content="Enable rcon" />

@@ -29,6 +29,6 @@
             <NavigationViewItem Content="Miscellaneous" x:Name="MiscTab" />
         </NavigationView.MenuItems>
 
-        <Frame x:Name="ConfigurationFrame" Margin="30,20" />
+        <Frame x:Name="ConfigurationFrame" />
     </NavigationView>
 </Page>

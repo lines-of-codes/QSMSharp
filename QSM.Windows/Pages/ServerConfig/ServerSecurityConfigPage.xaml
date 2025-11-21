@@ -8,10 +8,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
-        <CheckBox Content="Online Mode" />
-        <CheckBox Content="Prevent Proxy Connections" />
-        <CheckBox Content="Use Native Transport" />
-        <CheckBox Content="Enable Command Blocks" />
+    <StackPanel Margin="30,20">
+        <CheckBox Content="Online Mode" IsChecked="{x:Bind _settings.OnlineMode, Mode=TwoWay}" />
+        <CheckBox Content="Prevent Proxy Connections" 
+                  IsChecked="{x:Bind _settings.PreventProxyConnections, Mode=TwoWay}" />
+        <CheckBox Content="Enable Command Blocks" x:Name="EnableCommandBlocks" 
+                  IsChecked="{x:Bind _settings.EnableCommandBlocks, Mode=TwoWay}" />
     </StackPanel>
 </Page>

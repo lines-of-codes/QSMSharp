@@ -8,11 +8,26 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="16">
-        <NumberBox Header="Max Players:" Minimum="0" />
-        <NumberBox Header="View Distance:" Minimum="3" Maximum="32" />
-        <NumberBox Header="Simulation Distance:" Minimum="3" Maximum="32" />
-        <NumberBox Header="Entity Broadcast Range Percentage:" Minimum="10" Maximum="1000" />
-        <NumberBox Header="Max Tick Time:" Minimum="-1" />
+    <StackPanel Spacing="16" Margin="30,20">
+        <Grid ColumnSpacing="12" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <NumberBox Header="Max Players:" Minimum="0" Value="{x:Bind _settings.MaxPlayers, Mode=TwoWay}" />
+            <NumberBox Header="View Distance:" Minimum="3" Maximum="32" Grid.Row="1"
+                       Value="{x:Bind _settings.ViewDistance, Mode=TwoWay}" />
+            <NumberBox Header="Simulation Distance:" Minimum="3" Maximum="32" Grid.Column="1"
+                       Value="{x:Bind _settings.SimulationDistance, Mode=TwoWay}" />
+            <NumberBox Header="Max Tick Time:" Minimum="-1" Value="{x:Bind _settings.MaxTickTime, Mode=TwoWay}"
+                       Grid.Row="1" Grid.Column="1" />
+        </Grid>
+        <NumberBox Header="Entity Broadcast Range Percentage:" Minimum="10" Maximum="1000"
+                   Value="{x:Bind _settings.EntityBroadcastRangePercentage, Mode=TwoWay}" />
     </StackPanel>
 </Page>

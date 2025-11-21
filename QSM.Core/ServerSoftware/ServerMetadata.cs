@@ -45,4 +45,6 @@ public class ServerMetadata
 	public bool IsPluginSupported => SupportPlugins.Contains(Software);
 
 	public string QsmConfigFile => Path.Combine(ServerPath, "config.qsm.json");
+
+	public string ServerPropertiesFile => Path.Combine(ServerPath, "server.properties");
 }

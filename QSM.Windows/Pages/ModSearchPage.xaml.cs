@@ -129,6 +129,12 @@ public sealed partial class ModSearchPage : Page
 		AvailableVersions.AddRange(versions);
 		VersionSelector.SelectedIndex = 0;
 
+		if (versions.Length == 0)
+		{
+			SelectButton.IsEnabled = false;
+			return;
+		}
+
 		SelectButton.IsEnabled = true;
 		ConfirmButton.IsEnabled = true;
 	}

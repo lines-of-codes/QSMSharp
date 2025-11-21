@@ -2,7 +2,7 @@ namespace QSM.Core.ServerSettings;
 
 public class ServerProperties(string path)
 {
-	public Dictionary<string, string> Properties { get; } = new();
+	public Dictionary<string, string> Properties { get; } = [];
 	
 	/// <summary>
 	/// A block of comments at the top of the file,

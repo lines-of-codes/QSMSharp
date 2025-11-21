@@ -8,81 +8,70 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid ColumnSpacing="24" RowSpacing="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="30,20">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Java Executable:" />
+                <TextBlock x:Name="JavaLabel" />
+                <Button 
+                    x:Name="JavaSelectButton" 
+                    Content="Select" 
+                    Style="{StaticResource AccentButtonStyle}" 
+                    Click="JavaSelectButton_Click" />
+            </StackPanel>
 
-        <StackPanel Spacing="8">
-            <TextBlock Text="Java Executable:" />
-            <TextBlock x:Name="JavaLabel" />
-            <Button 
-                x:Name="JavaSelectButton" 
-                Content="Select" 
-                Style="{StaticResource AccentButtonStyle}" 
-                Click="JavaSelectButton_Click" />
+            <Slider 
+                x:Name="InitMemorySizeSlider" 
+                Minimum="0.5" 
+                Header="Initial Memory Allocation (GiB):" 
+                StepFrequency="0.5"
+                TickFrequency="0.5"
+                TickPlacement="BottomRight"
+                ValueChanged="InitMemorySizeSlider_ValueChanged" />
+
+            <Slider 
+                x:Name="MaxMemorySizeSlider" 
+                Minimum="0.5" 
+                Header="Maximum Memory Allocation (GiB):" 
+                StepFrequency="0.5"
+                TickFrequency="0.5" 
+                TickPlacement="BottomRight"
+                ValueChanged="MaxMemorySizeSlider_ValueChanged" />
+
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Custom JVM Arguments" VerticalAlignment="Center" />
+                <ComboBox 
+                    x:Name="JvmArgPresetSelector"
+                    SelectionChanged="JvmArgPresetSelector_SelectionChanged"
+                    Grid.Column="1" 
+                    VerticalAlignment="Center" 
+                    HorizontalAlignment="Right" 
+                    SelectedIndex="0">
+                    <x:String>None</x:String>
+                    <x:String>Aikar's Flags</x:String>
+                    <x:String>Aikar's Flags (12GB+)</x:String>
+                    <x:String>Shenandoah GC</x:String>
+                    <x:String>ZGC</x:String>
+                    <x:String>Custom</x:String>
+                </ComboBox>
+
+                <TextBox 
+                    x:Name="JvmArgsInput"
+                    TextChanged="JvmArgsInput_TextChanged"
+                    TextWrapping="Wrap" 
+                    AcceptsReturn="True"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2" />
+            </Grid>
         </StackPanel>
-
-        <Slider 
-            x:Name="InitMemorySizeSlider" 
-            Minimum="0.5" 
-            Header="Initial Memory Allocation (GiB):" 
-            StepFrequency="0.5"
-            Grid.Row="0" 
-            Grid.Column="1"
-            TickFrequency="0.5"
-            TickPlacement="BottomRight"
-            ValueChanged="InitMemorySizeSlider_ValueChanged" />
-
-        <Slider 
-            x:Name="MaxMemorySizeSlider" 
-            Minimum="0.5" 
-            Header="Maximum Memory Allocation (GiB):" 
-            StepFrequency="0.5"
-            Grid.Row="1"
-            Grid.Column="1"
-            TickFrequency="0.5" 
-            TickPlacement="BottomRight"
-            ValueChanged="MaxMemorySizeSlider_ValueChanged" />
-
-        <Grid Grid.Row="1" RowSpacing="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Text="Custom JVM Arguments" VerticalAlignment="Center" />
-            <ComboBox 
-                x:Name="JvmArgPresetSelector"
-                SelectionChanged="JvmArgPresetSelector_SelectionChanged"
-                Grid.Column="1" 
-                VerticalAlignment="Center" 
-                HorizontalAlignment="Right" 
-                SelectedIndex="0">
-                <x:String>None</x:String>
-                <x:String>Aikar's Flags</x:String>
-                <x:String>Aikar's Flags (12GB+)</x:String>
-                <x:String>Shenandoah GC</x:String>
-                <x:String>ZGC</x:String>
-                <x:String>Custom</x:String>
-            </ComboBox>
-
-            <TextBox 
-                x:Name="JvmArgsInput"
-                TextChanged="JvmArgsInput_TextChanged"
-                TextWrapping="Wrap" 
-                AcceptsReturn="True" 
-                Grid.Row="1" 
-                Grid.ColumnSpan="2" />
-        </Grid>
-    </Grid>
+    </ScrollViewer>
 </Page>

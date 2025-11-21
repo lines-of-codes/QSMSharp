@@ -8,17 +8,21 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="16">
-        <TextBox Header="Level Name:" x:Name="LevelNameInput" />
+    <StackPanel Spacing="16" Margin="30,20">
+        <TextBox Header="Level Name:" x:Name="LevelNameInput" Text="{x:Bind _worldSettings.LevelName, Mode=TwoWay}" />
 
-        <TextBox Header="Level Seed:" x:Name="LevelSeedInput" />
+        <TextBox Header="Level Seed:" x:Name="LevelSeedInput" Text="{x:Bind _worldSettings.LevelSeed, Mode=TwoWay}" />
         
-        <TextBox Header="Generator Settings:" x:Name="GeneratorSettingsInput" />
+        <TextBox Header="Generator Settings:" x:Name="GeneratorSettingsInput"
+                 Text="{x:Bind _worldSettings.GeneratorSettings, Mode=TwoWay}" />
 
-        <NumberBox Header="Max World Size:" Maximum="29999984" Minimum="1" x:Name="MaxWorldSizeInput" />
+        <NumberBox Header="Max World Size:" Maximum="29999984" Minimum="1" x:Name="MaxWorldSizeInput"
+                   Value="{x:Bind _worldSettings.MaxWorldSize, Mode=TwoWay}"/>
 
-        <ComboBox Header="Level Type:" ItemsSource="{x:Bind levelTypes, Mode=OneWay}" x:Name="LevelTypeComboBox" />
+        <ComboBox Header="Level Type:" ItemsSource="{x:Bind _levelTypes, Mode=OneWay}"
+                  SelectedItem="{x:Bind _worldSettings.LevelType, Mode=TwoWay}" x:Name="LevelTypeComboBox" />
 
-        <CheckBox Content="Generate Structures" x:Name="GenerateStructuresCheckbox" />
+        <CheckBox Content="Generate Structures" x:Name="GenerateStructuresCheckbox"
+                  IsChecked="{x:Bind _worldSettings.GenerateStructures, Mode=TwoWay}" />
     </StackPanel>
 </Page>
