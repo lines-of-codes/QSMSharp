@@ -13,4 +13,5 @@ public enum ServerSoftwares
 	Fabric,
 	Velocity,
 	Folia,
+	Forge,
 }

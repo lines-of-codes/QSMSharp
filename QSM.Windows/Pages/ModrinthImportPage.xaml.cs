@@ -168,6 +168,7 @@ public sealed partial class ModrinthImportPage : Page
 		{
 			ServerSoftwares.Fabric => new FabricFetcher(),
 			ServerSoftwares.NeoForge => new NeoForgeFetcher(),
+			ServerSoftwares.Forge => new ForgeFetcher(),
 			_ => throw new InvalidOperationException("Unsupported Minecraft server software.")
 		};
 		string url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);

@@ -52,6 +52,11 @@ public sealed partial class CreateServerPage : Page
 			Name = "Velocity",
 			Icon = "/Assets/ServerSoftware/velocity-blue.svg",
 			InfoFetcher = new PaperMCFetcher("velocity")
+		},
+		new() {
+			Name = "Forge",
+			Icon = "/Assets/ServerSoftware/forge.png",
+			InfoFetcher = new ForgeFetcher()
 		}
 	];
 
@@ -62,7 +67,8 @@ public sealed partial class CreateServerPage : Page
 		{ "Vanilla", ServerSoftwares.Vanilla },
 		{ "Fabric", ServerSoftwares.Fabric },
 		{ "NeoForge", ServerSoftwares.NeoForge },
-		{ "Velocity", ServerSoftwares.Velocity }
+		{ "Velocity", ServerSoftwares.Velocity },
+		{ "Forge", ServerSoftwares.Forge },
 	};
 
 	ExtendedObservableCollection<string> MinecraftVersions { get; set; } = [];

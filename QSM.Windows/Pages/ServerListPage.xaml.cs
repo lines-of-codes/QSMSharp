@@ -24,7 +24,8 @@ public sealed partial class ServerListPage : Page
 		{ ServerSoftwares.Vanilla, "ms-appx:///Assets/ServerSoftware/minecraft_logo.svg" },
 		{ ServerSoftwares.Fabric, "ms-appx:///Assets/ServerSoftware/Fabric.png" },
 		{ ServerSoftwares.NeoForge, "ms-appx:///Assets/ServerSoftware/NeoForged.png" },
-		{ ServerSoftwares.Velocity, "ms-appx:///Assets/ServerSoftware/velocity-blue.svg" }
+		{ ServerSoftwares.Velocity, "ms-appx:///Assets/ServerSoftware/velocity-blue.svg" },
+		{ ServerSoftwares.Forge, "ms-appx:///Assets/ServerSoftware/forge.png" }
 	};
 	private readonly ObservableCollection<WinServerInfo> FooterItems = [
 		new WinServerInfo(new(Symbol.Add), new()

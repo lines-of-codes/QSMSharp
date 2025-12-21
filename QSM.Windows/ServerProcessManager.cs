@@ -57,6 +57,10 @@ public class ServerProcessManager
 		{
 			args = $"{settings.Java.JvmArgs} @libraries/net/neoforged/neoforge/{metadata.ServerVersion}/win_args.txt {programArgs}";
 		}
+		else if (metadata.Software == ServerSoftwares.Forge)
+		{
+			args = $"{settings.Java.JvmArgs} @libraries/net/minecraftforge/forge/{metadata.ServerVersion}/win_args.txt {programArgs}";
+		}
 
 		var startInfo = new ProcessStartInfo
 		{
