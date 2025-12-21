@@ -59,7 +59,7 @@ public class ServerProcessManager
 		}
 		else if (metadata.Software == ServerSoftwares.Forge)
 		{
-			args = $"{settings.Java.JvmArgs} @libraries/net/minecraftforge/forge/{metadata.ServerVersion}/win_args.txt {programArgs}";
+			args = $"{settings.Java.JvmArgs} @libraries/net/minecraftforge/forge/{metadata.MinecraftVersion}-{metadata.ServerVersion}/win_args.txt {programArgs}";
 		}
 
 		var startInfo = new ProcessStartInfo

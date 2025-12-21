@@ -17,7 +17,7 @@ public partial class ForgeFetcher : InfoFetcher
 		httpClient = new HttpClient();
 	}
 
-	public override string FirstRunArgs => "--install-server";
+	public override string FirstRunArgs => "--installServer";
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
