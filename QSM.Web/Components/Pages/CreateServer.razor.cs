@@ -20,6 +20,7 @@ public partial class CreateServer : ComponentBase
 		{ ServerSoftwares.NeoForge, new NeoForgeFetcher() },
 		{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") },
 		{ ServerSoftwares.Folia, new PaperMCFetcher("folia") },
+		{ ServerSoftwares.Forge, new ForgeFetcher() }
 	};
 
 	private bool _isProcessing;

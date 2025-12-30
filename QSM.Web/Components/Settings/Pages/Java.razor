@@ -18,7 +18,7 @@
 <EditForm FormName="JavaInstallCreation" Model="Input" class="my-2" OnValidSubmit="AddJavaInstallSubmit">
     <DataAnnotationsValidator/>
     <div class="d-flex gap-2">
-        <InputText id="Input.JavaPath" class="form-control" @bind-Value="Input.JavaPath"
+        <InputText id="Input.JavaPath" class="form-control" @bind-Value="Input!.JavaPath"
                    placeholder="Java Installation Path" name="Input.JavaPath"/>
         <button type="submit" class="btn btn-primary">Add</button>
     </div>
@@ -57,11 +57,12 @@
 </table>
 
 @code {
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
     private List<string> _installInfo = [];
 
     protected override void OnInitialized()
     {
+        Input ??= new InputModel();
         _installInfo = new List<string>(new string[AppConfig.JavaInstalls.Count]);
     }
 
@@ -82,12 +83,12 @@
 
     private async Task AddJavaInstallSubmit()
     {
-        var install = Input.JavaPath!;
+        var install = Input?.JavaPath!;
         var installInfo = await JavaCheck.CheckJavaInstallationAsync(install);
         _installInfo.Add($"{installInfo.Vendor} {installInfo.Version}");
         AppConfig.JavaInstalls.Add(install);
         AppConfig.SaveConfig();
-        Input.JavaPath = null;
+        Input?.JavaPath = null;
     }
 
     private void MakeDefault(int index)

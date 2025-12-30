@@ -66,6 +66,14 @@ public class ProcessManager
 					_serverOutput[server.Id].Add(output);
 					OutputReceived?.Invoke(server.Id, output);
 				});
+			} else if (server.Software == ServerSoftwares.Forge)
+			{
+				await new ForgeFetcher().InitializeOnFirstRun(server, settings, (_, e) =>
+				{
+					OutputCache output = new(OutputType.Normal, e.Data ?? string.Empty);
+					_serverOutput[server.Id].Add(output);
+					OutputReceived?.Invoke(server.Id, output);
+				});
 			}
 			settings.FirstRun = false;
 			await settings.SaveJsonAsync(server.ConfigPath);
@@ -87,6 +95,10 @@ public class ProcessManager
 			string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
 			args =
 				$"{settings.Java.JvmArgs} @libraries/net/neoforged/neoforge/{server.ServerVersion}/{argsFile} {settings.Java.ProgramArgs}";
+		} else if (server.Software == ServerSoftwares.Forge)
+		{
+			string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
+			args = $"{settings.Java.JvmArgs} @libraries/net/minecraftforge/forge/{server.MinecraftVersion}-{server.ServerVersion}/{argsFile} {settings.Java.ProgramArgs}";
 		}
 
 		var startInfo = new ProcessStartInfo

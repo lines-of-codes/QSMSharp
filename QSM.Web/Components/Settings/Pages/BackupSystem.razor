@@ -31,7 +31,7 @@ else
 }
 
 <EditForm FormName="InstallForm" Model="InstallFormData" class="d-flex gap-2" OnSubmit="Install">
-    <select @bind="InstallFormData.Version" class="form-select">
+    <select @bind="InstallFormData?.Version" class="form-select">
         @foreach (var rel in _availableVersions)
         {
             <option value="@rel.TagName">@rel.TagName</option>
@@ -39,14 +39,14 @@ else
     </select>
     <button class="btn btn-primary" disabled="@_installing">Install</button>
 </EditForm>
-    
+
 @if (_installing)
 {
     <p class="mt-2">Installing QBSGo, Please do not leave this page until the process is finished.</p>
 }
 
 @code {
-    [SupplyParameterFromForm] private InstallForm InstallFormData { get; set; } = new();
+    [SupplyParameterFromForm] private InstallForm? InstallFormData { get; set; }
 
     IReadOnlyList<Release> _availableVersions = [];
     string _installPath = string.Empty;
@@ -57,6 +57,8 @@ else
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        InstallFormData ??= new InstallForm();
 
         _installPath = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "qbs/qbsgo");
 
@@ -100,7 +102,7 @@ else
     {
         _installing = true;
         
-        var release = _availableVersions.FirstOrDefault(r => r.TagName == InstallFormData.Version, _availableVersions[0]);
+        var release = _availableVersions.FirstOrDefault(r => r.TagName == InstallFormData?.Version, _availableVersions[0]);
 
         var arch = RuntimeInformation.OSArchitecture switch
         {
