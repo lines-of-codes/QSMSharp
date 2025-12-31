@@ -16,21 +16,18 @@
         IsSettingsVisible="False"
         PaneDisplayMode="Top">
         <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="CreateTab" Icon="Add">
-                Create
-            </NavigationViewItem>
-            <NavigationViewItem x:Name="ModrinthTab">
+			<NavigationViewItem x:Name="CreateTab" Icon="Add" x:Uid="/CreateServer/CreateTab" />
+			<NavigationViewItem x:Name="ModrinthTab">
                 <NavigationViewItem.Icon>
                     <ImageIcon Source="/Assets/ModPluginProvider/modrinth-logo.svg" />
                 </NavigationViewItem.Icon>
                 Modrinth
             </NavigationViewItem>
-            <NavigationViewItem x:Name="ManualImportTab">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE8B5;" />
-                </NavigationViewItem.Icon>
-                Manual Import
-            </NavigationViewItem>
+            <NavigationViewItem x:Name="ManualImportTab" x:Uid="/CreateServer/ManualImportTab">
+				<NavigationViewItem.Icon>
+					<FontIcon Glyph="&#xE8B5;" />
+				</NavigationViewItem.Icon>
+			</NavigationViewItem>
         </NavigationView.MenuItems>
 
         <Frame x:Name="ContentFrame" />

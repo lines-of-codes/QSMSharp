@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using QSM.Core.ServerSoftware;
+using Serilog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -27,12 +28,6 @@ public sealed partial class ServerListPage : Page
 		{ ServerSoftwares.Velocity, "ms-appx:///Assets/ServerSoftware/velocity-blue.svg" },
 		{ ServerSoftwares.Forge, "ms-appx:///Assets/ServerSoftware/forge.png" }
 	};
-	private readonly ObservableCollection<WinServerInfo> FooterItems = [
-		new WinServerInfo(new(Symbol.Add), new()
-		{
-			Name = "Create new server"
-		})
-	];
 
 	public ServerListPage()
 	{
@@ -53,7 +48,7 @@ public sealed partial class ServerListPage : Page
 
 		if (serverListView.SelectedItem == serverEntry)
 		{
-			serverListView.SelectedItem = FooterItems[0];
+			serverListView.SelectedItem = CreateNewServer;
 		}
 
 		ServerList.Remove(serverEntry);
@@ -74,7 +69,7 @@ public sealed partial class ServerListPage : Page
 		{
 			contentFrame.Navigate(typeof(SettingsPage));
 		}
-		else if (((WinServerInfo)args.SelectedItem).Metadata.Name == "Create new server")
+		else if (args.SelectedItem is NavItem navItem && navItem.Text == CreateNewServer.Text)
 		{
 			contentFrame.Navigate(typeof(NewServerPage));
 		}
@@ -87,12 +82,25 @@ public sealed partial class ServerListPage : Page
 	}
 }
 
+public class NavItem
+{
+	public string Text { get; set; }
+	public IconElement Icon { get; set; }
+}
+
 [ContentProperty(Name = "ItemTemplate")]
 partial class MenuItemTemplateSelector : DataTemplateSelector
 {
 	public DataTemplate ItemTemplate { get; set; }
+	public DataTemplate NavItemTemplate { get; set; }
+
 	protected override DataTemplate SelectTemplateCore(object item)
 	{
+		if (item is NavItem)
+		{
+			return NavItemTemplate;
+		}
+
 		return ItemTemplate;
 	}
 }

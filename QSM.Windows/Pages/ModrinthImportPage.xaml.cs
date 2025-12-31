@@ -19,9 +19,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace QSM.Windows.Pages;
 
 /// <summary>
@@ -68,23 +65,7 @@ public sealed partial class ModrinthImportPage : Page
 
 	private async void ModpackSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
 	{
-		var modpacks = (await _modrinth.SearchAsync(
-			sender.Text,
-			ModrinthProvider.ProjectType.Modpack,
-			FilterCategorySelector.SelectedItems.Select(cat =>
-			{
-				return StringUtility.ToKebabCase(((Category)cat).name);
-			}))).Select(modpack =>
-			{
-				if (string.IsNullOrWhiteSpace(modpack.IconUrl))
-				{
-					modpack.IconUrl = "ms-appx://Square44x44Logo.scale-200.png";
-				}
-				return modpack;
-			});
-
-		SearchResults.Clear();
-		SearchResults.AddRange(modpacks);
+		await FilteredSearch();
 	}
 
 	private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -252,7 +233,7 @@ public sealed partial class ModrinthImportPage : Page
 
 	async Task FilteredSearch()
 	{
-		var modpacks = await _modrinth.SearchAsync(
+		var modpacks = (await _modrinth.SearchAsync(
 			ModpackSearchBox.Text,
 			ModrinthProvider.ProjectType.Modpack,
 			FilterCategorySelector.SelectedItems.Select(cat =>
@@ -261,7 +242,14 @@ public sealed partial class ModrinthImportPage : Page
 			}).Concat(ModLoaderSelector.SelectedItems.Select(loader =>
 			{
 				return ((string)loader).ToLowerInvariant();
-			})));
+			})))).Select(modpack =>
+			{
+				if (string.IsNullOrWhiteSpace(modpack.IconUrl))
+				{
+					modpack.IconUrl = "ms-appx://Square44x44Logo.scale-200.png";
+				}
+				return modpack;
+			});
 
 		SearchResults.Clear();
 		SearchResults.AddRange(modpacks);

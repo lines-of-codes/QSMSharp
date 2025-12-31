@@ -12,33 +12,40 @@
     mc:Ignorable="d">
 
     <StackPanel Margin="50,20" Spacing="4">
-        <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,10" />
+        <TextBlock x:Uid="/Settings/Title" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,10" />
 
         <controls:SettingsCard
-            Header="Monospace Font">
+            x:Name="MonospaceFontCard"
+            x:Uid="/Settings/MonospaceFontCard">
             <AutoSuggestBox 
                 x:Name="MonospaceFontSelector"
                 TextChanged="MonospaceFontSelector_TextChanged"
                 SuggestionChosen="MonospaceFontSelector_SuggestionChosen"
                 MinWidth="200" />
         </controls:SettingsCard>
-        
-        <controls:SettingsCard 
-            Header="Manage Java Installations"
-            Description="Install/Import Java installations.">
-            <Button 
-                x:Name="OpenJavaWindowButton" 
-                Click="OpenJavaWindowButton_Click"
-                Content="Manage" />
-        </controls:SettingsCard>
 
-        <controls:SettingsCard
-            Header="Reset Configuration File"
-            Description="Removes the configuration file and create it again. Do use this if configuring things doesn't work properly after a version update.">
-            <Button 
-                x:Name="ResetConfigButton"
-                Click="ResetConfigButton_Click"
-                Content="Reset Configuration" />
-        </controls:SettingsCard>
+		<controls:SettingsCard 
+            x:Name="OpenJavaWindowCard"
+            x:Uid="/Settings/OpenJavaWindowCard"
+            ActionIcon="{ui:FontIcon Glyph=&#xE8A7;}"
+            IsClickEnabled="True"
+            Click="OpenJavaWindowCard_Click">
+		</controls:SettingsCard>
+
+		<controls:SettingsCard
+            x:Name="ResetConfigCard"
+            x:Uid="/Settings/ResetConfigCard"
+            IsClickEnabled="True"
+            Click="ResetConfigCard_Click">
+			<controls:SettingsCard.ActionIcon>
+				<FontIcon Glyph="&#xE72C;" x:Name="ResetConfigIcon" />
+			</controls:SettingsCard.ActionIcon>
+		</controls:SettingsCard>
+
+		<controls:SettingsCard
+            x:Name="VersionCard"
+            x:Uid="/Settings/VersionCard">
+			<TextBlock x:Name="VersionText" />
+		</controls:SettingsCard>
     </StackPanel>
 </Page>

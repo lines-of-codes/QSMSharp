@@ -7,6 +7,7 @@
     xmlns:local="using:QSM.Windows.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:CommunityToolkit.WinUI"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -22,18 +23,25 @@
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
                 </DataTemplate>
-            </local:MenuItemTemplateSelector.ItemTemplate >
+            </local:MenuItemTemplateSelector.ItemTemplate>
+			<local:MenuItemTemplateSelector.NavItemTemplate>
+				<DataTemplate x:DataType="local:NavItem">
+					<NavigationViewItem Content="{x:Bind Text, Mode=OneTime}" Icon="{x:Bind Icon, Mode=OneTime}" />
+				</DataTemplate>
+            </local:MenuItemTemplateSelector.NavItemTemplate>
         </local:MenuItemTemplateSelector>
     </Page.Resources>
 
     <NavigationView x:Name="serverListView"
             MenuItemTemplateSelector="{StaticResource selector}"
             MenuItemsSource="{x:Bind ServerList, Mode=OneWay}"
-            FooterMenuItemsSource="{x:Bind FooterItems, Mode=OneWay}"
             SelectionChanged="serverListView_SelectionChanged"
             IsBackEnabled="False"
             IsBackButtonVisible="Collapsed"
             PaneTitle="QSM">
         <Frame Margin="0,0" x:Name="contentFrame" />
+		<NavigationView.FooterMenuItems>
+			<local:NavItem x:Name="CreateNewServer" x:Uid="/CreateServer/NavItem" Icon="{ui:FontIcon Glyph=&#xE710;}" />
+		</NavigationView.FooterMenuItems>
     </NavigationView>
 </Page>

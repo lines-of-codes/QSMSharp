@@ -11,6 +11,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -234,5 +235,10 @@ public sealed partial class ModSearchPage : Page
 
 		var selectedVersion = (ModPluginDownloadInfo)e.AddedItems.First();
 		SelectButton.IsChecked = SelectedMods.Contains(selectedVersion);
+	}
+
+	private void ModDescription_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
+	{
+		Process.Start("explorer", e.Link);
 	}
 }

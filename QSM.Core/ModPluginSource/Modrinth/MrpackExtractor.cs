@@ -67,6 +67,11 @@ public class MrpackExtractor
 
 		foreach (MrpackFile fileInfo in index.Files)
 		{
+			if (fileInfo.Env["server"] == "unsupported")
+			{
+				continue;
+			}
+
 			string fullPath = Path.GetFullPath(fileInfo.Path, dest);
 
 			// Check if the full path escapes out of the Minecraft server instance directory

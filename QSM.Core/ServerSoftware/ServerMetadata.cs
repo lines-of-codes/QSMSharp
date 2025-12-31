@@ -10,7 +10,8 @@ public class ServerMetadata
 	public static readonly ServerSoftwares[] SupportMods =
 	[
 		ServerSoftwares.Fabric,
-		ServerSoftwares.NeoForge
+		ServerSoftwares.NeoForge,
+		ServerSoftwares.Forge
 	];
 
 	public static readonly ServerSoftwares[] SupportPlugins =

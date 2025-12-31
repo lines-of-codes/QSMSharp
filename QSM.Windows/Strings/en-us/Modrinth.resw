@@ -117,49 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Title.Text" xml:space="preserve">
-    <value>สร้างเซิร์ฟเวอร์ใหม่</value>
+  <data name="CategoriesTitle.Text" xml:space="preserve">
+    <value>Categories</value>
   </data>
-  <data name="NavItem.Text" xml:space="preserve">
-    <value>สร้างเซิร์ฟเวอร์ใหม่</value>
+  <data name="ConfirmButton.Content" xml:space="preserve">
+    <value>Confirm</value>
   </data>
-  <data name="RequiredNameInfoBar.Title" xml:space="preserve">
-    <value>จำเป็นต้องมีชื่อ</value>
+  <data name="ModLoaderTitle.Text" xml:space="preserve">
+    <value>Mod loader</value>
   </data>
-  <data name="RequiredNameInfoBar.Message" xml:space="preserve">
-    <value>โปรดตั้งชื่อให้แก่เซิร์ฟเวอร์ของคุณ</value>
-  </data>
-  <data name="ServerNameInput.Header" xml:space="preserve">
-    <value>ชื่อเซิร์ฟเวอร์:</value>
-  </data>
-  <data name="ServerNameInput.PlaceholderText" xml:space="preserve">
-    <value>ชื่อเซิร์ฟเวอร์</value>
-  </data>
-  <data name="ServerFolderPathInput.Header" xml:space="preserve">
-    <value>โฟลเดอร์เซิร์ฟเวอร์:</value>
-  </data>
-  <data name="ServerFolderPathInput.PlaceholderText" xml:space="preserve">
-    <value>พาธของโฟลเดอร์เซิร์ฟเวอร์...</value>
-  </data>
-  <data name="ServerFolderBrowseBtn.Content" xml:space="preserve">
-    <value>เรียกดู...</value>
-  </data>
-  <data name="ServerSoftwareComboBox.Header" xml:space="preserve">
-    <value>ซอฟท์แวร์เซิร์ฟเวอร์:</value>
-  </data>
-  <data name="MinecraftVersionListHeader.Text" xml:space="preserve">
-    <value>เวอร์ชั่น Minecraft/ซอฟท์แวร์</value>
-  </data>
-  <data name="ServerBuildListHeader.Text" xml:space="preserve">
-    <value>บิลด์ที่มี</value>
-  </data>
-  <data name="CreateServerBtn.Content" xml:space="preserve">
-    <value>สร้างเซิร์ฟเวอร์</value>
-  </data>
-  <data name="CreateTab.Content" xml:space="preserve">
-    <value>สร้าง</value>
-  </data>
-  <data name="ManualImportTab.Content" xml:space="preserve">
-    <value>นำเข้า</value>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>Search</value>
   </data>
 </root>

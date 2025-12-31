@@ -37,8 +37,8 @@
 
             <AutoSuggestBox 
                 x:Name="ModSearchBox"
+                x:Uid="/Modrinth/SearchBox"
                 HorizontalAlignment="Stretch"
-                PlaceholderText="Search"
                 QueryIcon="Find"
                 QuerySubmitted="ModSearchBox_QuerySubmitted"
                 Grid.Column="1" />
@@ -112,7 +112,8 @@
                         HorizontalAlignment="Left"
                         x:Name="ModDescription" 
                         TextWrapping="WrapWholeWords"
-                        Background="Transparent" />
+                        Background="Transparent"
+                        LinkClicked="ModDescription_LinkClicked" />
                 </ScrollView>
 
                 <StackPanel Spacing="8" Grid.Row="4">

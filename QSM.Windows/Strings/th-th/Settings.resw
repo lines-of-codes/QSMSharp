@@ -117,49 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="OpenJavaWindowCard.Header" xml:space="preserve">
+    <value>จัดการการติดตั้ง Java</value>
+  </data>
+  <data name="OpenJavaWindowCard.Description" xml:space="preserve">
+    <value>ติดตั้ง/นำเข้าการติดตั้ง Java</value>
+  </data>
+  <data name="ResetConfigCard.Header" xml:space="preserve">
+    <value>รีเซ็ทไฟล์การตั้งค่า</value>
+  </data>
+  <data name="ResetConfigCard.Description" xml:space="preserve">
+    <value>ลบไฟล์การตั้งค่าแล้วสร้างมันขึ้นมาใหม่ คุณสามารถใช้ตัวเลือกนี้ได้เมื่อไม่สามารถตั้งค่าสิ่งต่าง ๆ ได้หลังจากการอัพเดทโปรแกรม</value>
+  </data>
+  <data name="VersionCard.Header" xml:space="preserve">
+    <value>เวอร์ชัน</value>
+  </data>
+  <data name="MonospaceFontCard.Header" xml:space="preserve">
+    <value>ฟอนต์ Monospace</value>
+  </data>
   <data name="Title.Text" xml:space="preserve">
-    <value>สร้างเซิร์ฟเวอร์ใหม่</value>
-  </data>
-  <data name="NavItem.Text" xml:space="preserve">
-    <value>สร้างเซิร์ฟเวอร์ใหม่</value>
-  </data>
-  <data name="RequiredNameInfoBar.Title" xml:space="preserve">
-    <value>จำเป็นต้องมีชื่อ</value>
-  </data>
-  <data name="RequiredNameInfoBar.Message" xml:space="preserve">
-    <value>โปรดตั้งชื่อให้แก่เซิร์ฟเวอร์ของคุณ</value>
-  </data>
-  <data name="ServerNameInput.Header" xml:space="preserve">
-    <value>ชื่อเซิร์ฟเวอร์:</value>
-  </data>
-  <data name="ServerNameInput.PlaceholderText" xml:space="preserve">
-    <value>ชื่อเซิร์ฟเวอร์</value>
-  </data>
-  <data name="ServerFolderPathInput.Header" xml:space="preserve">
-    <value>โฟลเดอร์เซิร์ฟเวอร์:</value>
-  </data>
-  <data name="ServerFolderPathInput.PlaceholderText" xml:space="preserve">
-    <value>พาธของโฟลเดอร์เซิร์ฟเวอร์...</value>
-  </data>
-  <data name="ServerFolderBrowseBtn.Content" xml:space="preserve">
-    <value>เรียกดู...</value>
-  </data>
-  <data name="ServerSoftwareComboBox.Header" xml:space="preserve">
-    <value>ซอฟท์แวร์เซิร์ฟเวอร์:</value>
-  </data>
-  <data name="MinecraftVersionListHeader.Text" xml:space="preserve">
-    <value>เวอร์ชั่น Minecraft/ซอฟท์แวร์</value>
-  </data>
-  <data name="ServerBuildListHeader.Text" xml:space="preserve">
-    <value>บิลด์ที่มี</value>
-  </data>
-  <data name="CreateServerBtn.Content" xml:space="preserve">
-    <value>สร้างเซิร์ฟเวอร์</value>
-  </data>
-  <data name="CreateTab.Content" xml:space="preserve">
-    <value>สร้าง</value>
-  </data>
-  <data name="ManualImportTab.Content" xml:space="preserve">
-    <value>นำเข้า</value>
+    <value>การตั้งค่า</value>
   </data>
 </root>

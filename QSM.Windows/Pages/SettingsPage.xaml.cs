@@ -6,6 +6,7 @@ using Serilog;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -23,10 +24,11 @@ public sealed partial class SettingsPage : Page
 	public SettingsPage()
 	{
 		this.InitializeComponent();
+		VersionText.Text = Assembly.GetEntryAssembly().GetName().Version.ToString();
 		MonospaceFontSelector.Text = ApplicationData.Configuration.MonospaceFont;
 	}
 
-	private void OpenJavaWindowButton_Click(object sender, RoutedEventArgs e)
+	private void OpenJavaWindowCard_Click(object sender, RoutedEventArgs e)
 	{
 		JavaWindow = new Window
 		{
@@ -67,11 +69,12 @@ public sealed partial class SettingsPage : Page
 		ApplicationData.SaveConfiguration();
 	}
 
-	private void ResetConfigButton_Click(object sender, RoutedEventArgs e)
+	private void ResetConfigCard_Click(object sender, RoutedEventArgs e)
 	{
 		Log.Information("Resetting configuration file...");
 		File.Delete(ApplicationData.ConfigFile);
 		ApplicationData.SaveConfiguration();
+		ResetConfigIcon.Glyph = "\uE8FB";
 		Log.Information("Configuration resetting finished.");
 	}
 }
