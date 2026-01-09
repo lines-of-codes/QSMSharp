@@ -7,15 +7,10 @@ namespace QSM.Core.ServerSoftware;
 
 public partial class ForgeFetcher : InfoFetcher
 {
-	private readonly HttpClient httpClient;
-	private readonly Regex majorMinorVersionMatch = MajorMinorVersionMatch();
+	private readonly HttpClient _httpClient = new();
+	private readonly Regex _majorMinorVersionMatch = MajorMinorVersionMatch();
 
-	private string[] availableVersionsCache = [];
-
-	public ForgeFetcher()
-	{
-		httpClient = new HttpClient();
-	}
+	private string[] _availableVersionsCache = [];
 
 	public override string FirstRunArgs => "--installServer";
 
@@ -27,16 +22,16 @@ public partial class ForgeFetcher : InfoFetcher
 		}
 
 		ForgeVersions? response =
-			await httpClient.GetFromJsonAsync<ForgeVersions>(
+			await _httpClient.GetFromJsonAsync<ForgeVersions>(
 				"https://maven.minecraftforge.net/api/maven/versions/releases/net/minecraftforge/forge");
 
-		availableVersionsCache = response!.Versions!;
+		_availableVersionsCache = response!.Versions!;
 
 		List<string> supportedVersions = [];
 
-		foreach (string version in availableVersionsCache)
+		foreach (string version in _availableVersionsCache)
 		{
-			string minecraftVersion = majorMinorVersionMatch.Match(version).Value;
+			string minecraftVersion = _majorMinorVersionMatch.Match(version).Value;
 			minecraftVersion = minecraftVersion.Substring(0, minecraftVersion.Length - 1);
 
 			if (!supportedVersions.Contains(minecraftVersion))
@@ -44,7 +39,7 @@ public partial class ForgeFetcher : InfoFetcher
 				supportedVersions.Add(minecraftVersion);
 			}
 		}
-
+		
 		minecraftVersionsCache = supportedVersions.ToArray();
 		Array.Reverse(minecraftVersionsCache);
 
@@ -61,7 +56,7 @@ public partial class ForgeFetcher : InfoFetcher
 		string prefix = minecraftVersion + "-";
 		List<string> versions = [];
 
-		foreach (string version in availableVersionsCache)
+		foreach (string version in _availableVersionsCache)
 		{
 			if (version.StartsWith(prefix))
 			{
@@ -122,5 +117,5 @@ public partial class ForgeFetcher : InfoFetcher
 		await process.WaitForExitAsync();
 	}
 
-	internal record class ForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
+	internal record ForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
 }
