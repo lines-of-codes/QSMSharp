@@ -2,12 +2,17 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core.ServerSettings
+@using QSM.Web.Components.Shared
 @using QSM.Web.Data
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
 <PageTitle>Interactions - @_server.Name Settings</PageTitle>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
 
 <h3>Player Interactions</h3>
 
@@ -17,7 +22,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating mb-2">
-                <InputNumber @bind-Value="Input.SpawnProtection" id="Input.SpawnProtection" class="form-control"
+                <InputNumber @bind-Value="Input!.SpawnProtection" id="Input.SpawnProtection" class="form-control"
                              aria-required="true" placeholder="" min="0" />
                 <label for="Input.SpawnProtection" class="form-label">Spawn Protection</label>
                 <ValidationMessage For="() => Input.SpawnProtection" class="text-danger"/>
@@ -46,13 +51,15 @@
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm] private InteractionSettings Input { get; set; } = new();
+    [SupplyParameterFromForm] private InteractionSettings? Input { get; set; }
     
     private ServerInstance _server = new();
     private ServerProperties _properties = null!;
-    
+    private Toast _savedToast = null!;
+
     protected override void OnInitialized()
     {
+        Input ??= new InteractionSettings();
         using var ctx = DbFactory.CreateDbContext();
         var server = ctx.Servers.Find(Id);
 
@@ -68,10 +75,11 @@
         Input.Load(_properties);
     }
 
-    private void SaveChanges()
+    private async Task SaveChanges()
     {
-        Input.Apply(_properties);
+        Input!.Apply(_properties);
         _properties.Save();
+        await _savedToast.Show();
     }
 
     class InteractionSettings : PropertyModificationModel

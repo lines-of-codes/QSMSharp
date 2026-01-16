@@ -1,0 +1,275 @@
+@using System.Security.Cryptography
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core
+@using QSM.Core.ModPluginSource
+@using QSM.Core.ModPluginSource.Modrinth
+@using QSM.Core.ServerSettings
+@using QSM.Core.ServerSoftware
+@using QSM.Core.Utilities
+@using QSM.Web.Data
+@using QSM.Web.Utilities
+@using Serilog
+
+@inherits ComponentBase
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject ApplicationConfig AppConfig
+@inject NavigationManager NavMan
+@inject IJSRuntime Js
+
+<NavigationLock OnBeforeInternalNavigation="InternalLocationChange" ConfirmExternalNavigation="true" />
+<p id="actionDescription">@_currentAction</p>
+    
+@if (_showIndeterminate)
+{
+    <progress aria-labelledby="actionDescription"></progress>
+}
+else
+{
+    @for (byte i = 0; i < _downloadProgress.Count; i++)
+    {
+        var progress = _downloadProgress[i];
+        <label for=@($"download{i}") class="d-block">@progress.Name</label>
+        <progress id=@($"download{i}") value="@progress.Percentage" max="100">@progress.Percentage%</progress>
+    }
+}
+
+@code {
+    private static SemaphoreSlim _downloadSemaphore = null!;
+
+    [Parameter] public ModPluginDownloadInfo? SelectedVersion { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? ServerPath { get; set; }
+
+    bool _finishedDownloading;
+    string _currentAction = string.Empty;
+    readonly List<DownloadProgress> _downloadProgress = [];
+    /// <summary>
+    /// Whether to show an indeterminate progress bar instead
+    /// </summary>
+    bool _showIndeterminate;
+
+    protected override void OnInitialized()
+    {
+        _downloadProgress.Clear();
+        _downloadSemaphore = new SemaphoreSlim(AppConfig.ConcurrentDownloads, AppConfig.ConcurrentDownloads);
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return StartDownload();
+    }
+
+    class DownloadProgress(string name, double? percentage)
+    {
+        public string Name = name;
+        public double? Percentage = percentage;
+    }
+    
+    private async Task InternalLocationChange(LocationChangingContext ctx)
+    {
+        if (_finishedDownloading) return;
+        
+        var confirm = await Js.InvokeAsync<bool>("window.confirm", "The installation isn't complete. Are you sure you want to leave this page?");
+
+        if (!confirm) ctx.PreventNavigation();
+    }
+
+    private ValueTask Alert(string message) => Js.InvokeVoidAsync("window.alert", message);
+    
+    private async Task<bool> DownloadFileAsync(int index, string url, string dest)
+    {
+        using var client = HttpClientFactory.CreateClient(ApplicationConfig.HttpDownloadClient);
+
+        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+        if (!response.IsSuccessStatusCode) return false;
+
+        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        await using var fileStream = File.Create(dest);
+
+        var buffer = new byte[8192];
+        long totalBytesRead = 0;
+        int bytesRead;
+
+        if (totalBytes == -1)
+        {
+            _downloadProgress[index].Percentage = null;
+        }
+
+        while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+        {
+            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+            totalBytesRead += bytesRead;
+
+            if (totalBytes == -1) continue;
+            
+            _downloadProgress[index].Percentage = (double)totalBytesRead / totalBytes * 100;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        return true;
+    }
+    
+    private async Task DownloadFileAsync(int index, string[] urls, string dest)
+    {
+        foreach (var url in urls)
+        {
+            if (await DownloadFileAsync(index, url, dest))
+            {
+                break;
+            }
+        }
+    }
+
+    public async Task StartDownload()
+    {
+        if (SelectedVersion == null)
+        {
+            await Alert("Unexpected Error: Selected modpack version is null.");
+            return;
+        }
+
+        if (Name == null || ServerPath == null)
+        {
+            await Alert("Unexpected Error: Name or server path is null.");
+            return;
+        }
+
+        if (!SelectedVersion.FileName.EndsWith(".mrpack"))
+        {
+            await Alert("Error: The modpack file does not have the expected \".mrpack\" file extension.");
+            return;
+        }
+
+        _currentAction = "Downloading the \".mrpack\" file...";
+
+        _downloadProgress.Add(new DownloadProgress(SelectedVersion.FileName, 0));
+
+        var packPath = Path.Join(ApplicationConfig.DownloadsFolder, StringUtility.SanitizeFileName(SelectedVersion.FileName));
+
+        if (SelectedVersion.DownloadUri == null)
+        {
+            await Alert("Unexpected Error: Download URL is null.");
+            return;
+        }
+        
+        // ModrinthProvider always return SHA512 hashes
+        using var sha512 = SHA512.Create();
+
+        if (!File.Exists(packPath) || sha512.GetFileHashAsString(packPath) != SelectedVersion.Hash)
+        {
+            await DownloadFileAsync(0, SelectedVersion.DownloadUri, packPath);
+        }
+        
+        _downloadProgress.Clear();
+        
+        _currentAction = "Verifying downloaded file...";
+        StateHasChanged();
+        
+        string fileHash = sha512.GetFileHashAsString(packPath);
+
+        if (SelectedVersion.Hash != fileHash)
+        {
+            await Alert("Error: Modpack file integrity check failed. File is likely corrupted, Installation aborted.");
+            Log.Error("Integrity check failed, File \"{PackPath}\" does not match provided hash.", packPath);
+            Log.Verbose("Remote hash: {}", SelectedVersion.Hash);
+            Log.Verbose("File hash: {}", fileHash);
+        }
+
+        _currentAction = "Extracting modpack file...";
+        _showIndeterminate = true;
+        StateHasChanged();
+        var tempDir = FileSystemUtility.GetTemporaryDirectory();
+
+        var extractResult = await MrpackExtractor.ExtractAsync(packPath, tempDir);
+
+        Directory.CreateDirectory(ServerPath);
+
+        _currentAction = "Copying overrides...";
+        StateHasChanged();
+        var copyOperation = MrpackExtractor.CopyOverrides(extractResult.ExtractLocation, ServerPath);
+
+        foreach (var op in copyOperation)
+        {
+            _currentAction = op.Operation;
+        }
+
+        _currentAction = "Downloading server software...";
+        _showIndeterminate = false;
+
+        InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch
+        {
+            ServerSoftwares.Fabric => new FabricFetcher(),
+            ServerSoftwares.NeoForge => new NeoForgeFetcher(),
+            ServerSoftwares.Forge => new ForgeFetcher(),
+            _ => throw new InvalidOperationException("Unsupported server software")
+        };
+        string url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);
+
+        _downloadProgress.Add(new DownloadProgress("server.jar", 0));
+        StateHasChanged();
+        
+        await DownloadFileAsync(0, url, Path.Join(ServerPath, "server.jar"));
+
+        var downloadList = MrpackExtractor.GetModList(extractResult.Index, ServerPath);
+        
+        _downloadProgress.Clear();
+
+        for (var i = 0; i < AppConfig.ConcurrentDownloads; i++)
+        {
+            _downloadProgress.Add(new DownloadProgress("", 0));
+        }
+
+        var tasks = new Task[downloadList.Count];
+        for (var i = 0; i < tasks.Length; i++)
+        {
+            var progressIndex = i % AppConfig.ConcurrentDownloads;
+            tasks[i] = Task.Run(async () =>
+            {
+                await _downloadSemaphore.WaitAsync();
+                FileDownloadRequest item;
+
+                lock (downloadList)
+                {
+                    item = downloadList.Dequeue();
+                }
+
+                _downloadProgress[progressIndex].Name = Path.GetFileName(item.Destination);
+                await DownloadFileAsync(progressIndex, item.DownloadLocations, item.Destination);
+                _downloadSemaphore.Release();
+            });
+        }
+
+        await Task.WhenAll(tasks);
+        
+        Directory.Delete(tempDir, true);
+
+        _downloadProgress.Clear();
+        _currentAction = "Registering server...";
+        StateHasChanged();
+        
+        await using (var ctx = await DbFactory.CreateDbContextAsync())
+        {
+            ServerInstance server = new()
+            {
+                MinecraftVersion = extractResult.Index.MinecraftVersion,
+                Name = Name,
+                ServerPath = ServerPath,
+                ServerVersion = extractResult.Index.MinecraftSoftwareVersion,
+                Software = extractResult.Index.MinecraftServerSoftware,
+                Running = false
+            };
+            ctx.Servers.Add(server);
+            await ctx.SaveChangesAsync();
+
+            await new ServerSettings().SaveJsonAsync(server.ConfigPath);
+        }
+
+        _finishedDownloading = true;
+        NavMan.NavigateTo("/");
+    }
+}

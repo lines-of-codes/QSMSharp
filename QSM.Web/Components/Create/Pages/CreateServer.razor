@@ -1,0 +1,92 @@
+@page "/Create/Regular"
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSoftware
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime Js
+
+<PageTitle>Create Server - QSM Web Console</PageTitle>
+
+<h1>Create Server</h1>
+
+<EditForm Model="Model" FormName="NewServer" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    @if (_errorMessage != string.Empty)
+    {
+        <div class="alert alert-danger" role="alert">
+            @_errorMessage
+        </div>
+    }
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Model!.Name" @oninput="NameInputChanged" id="Model.Name" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Model.Name" class="form-label">Name</label>
+                <ValidationMessage For="() => Model.Name" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-2">
+                <InputText @bind-Value="Model.Path" @oninput="PathInputChanged" id="Model.Path" class="form-control"
+                           aria-required="true" placeholder=""/>
+                <label for="Model.Path" class="form-label">Path</label>
+                <ValidationMessage For="() => Model.Path" class="text-danger"/>
+                <p class="text-secondary">Server will be created at @_targetFolderPreview</p>
+            </div>
+            <div class="mb-2">
+                <label for="Model.Software">Software</label>
+                <InputSelect class="form-select" id="Model.Software" name="Model.Software" @bind-Value="Model.Software"
+                             @oninput="SoftwareSelectionChanged">
+                    @foreach (var software in Enum.GetValues(typeof(ServerSoftwares)))
+                    {
+                        <option value="@software">@software</option>
+                    }
+                </InputSelect>
+            </div>
+            @if (Model.Software == ServerSoftwares.Custom)
+            {
+                <div class="mb-3">
+                    <label for="ServerFile">Server File (.jar)</label>
+                    <InputFile class="form-control" id="ServerFile" accept=".jar"></InputFile>
+                </div>
+            }
+            else
+            {
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="Model.MinecraftVersion">Minecraft/Software Version</label>
+                        <InputSelect class="form-select" id="Model.MinecraftVersion" name="Model.MinecraftVersion"
+                                     @bind-Value="Model.MinecraftVersion" @oninput="MinecraftVersionChanged">
+                            @foreach (var version in _minecraftVersions)
+                            {
+                                <option>@version</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col">
+                        <label for="Model.ServerBuild">Available Builds</label>
+                        <InputSelect class="form-select" id="Model.ServerBuild" name="Model.MinecraftVersion"
+                                     @bind-Value="Model.ServerBuild">
+                            @foreach (var build in _availableBuilds)
+                            {
+                                <option>@build</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            }
+            <div class="mb-2 d-flex align-items-center gap-2">
+                <button type="submit" class="btn btn-primary" disabled="@_isProcessing">Create</button>
+
+                @if (_isProcessing)
+                {
+                    <NavigationLock ConfirmExternalNavigation="true" OnBeforeInternalNavigation="OnBeforeLeave" />
+                    <div class="spinner-border d-inline-block" role="status"></div>
+                    <span>@_processingMessage</span>
+                }
+            </div>
+        </div>
+    </div>
+</EditForm>

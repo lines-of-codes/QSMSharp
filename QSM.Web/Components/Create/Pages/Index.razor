@@ -1,0 +1,11 @@
+@page "/Create"
+
+@inject NavigationManager NavMan
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavMan.NavigateTo("Create/Regular");
+    }
+
+}

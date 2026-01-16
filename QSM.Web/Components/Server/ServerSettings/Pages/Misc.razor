@@ -1,12 +1,17 @@
 @page "/Server/{Id:int:min(0)}/Settings/Misc"
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core.ServerSettings
+@using QSM.Web.Components.Shared
 @using QSM.Web.Data
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
 <PageTitle>Miscellaneous - @_server.Name Settings</PageTitle>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
 
 <h3>Miscellaneous</h3>
 
@@ -16,7 +21,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating mb-2">
-                <InputText @bind-Value="Input.MOTD" id="Input.MOTD" class="form-control"
+                <InputText @bind-Value="Input!.MOTD" id="Input.MOTD" class="form-control"
                            aria-required="true" placeholder=""/>
                 <label for="Input.MOTD" class="form-label">MOTD</label>
                 <ValidationMessage For="() => Input.MOTD" class="text-danger"/>
@@ -63,13 +68,15 @@
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm] private MiscOptions Input { get; set; } = new();
+    [SupplyParameterFromForm] private MiscOptions? Input { get; set; }
     
     private ServerInstance _server = new();
     private ServerProperties _properties = null!;
-    
+    private Toast _savedToast = null!;
+
     protected override void OnInitialized()
     {
+        Input ??= new MiscOptions();
         using var ctx = DbFactory.CreateDbContext();
         var server = ctx.Servers.Find(Id);
 
@@ -85,10 +92,11 @@
         Input.Load(_properties);
     }
 
-    private void SaveChanges()
+    private async Task SaveChanges()
     {
-        Input.Apply(_properties);
+        Input!.Apply(_properties);
         _properties.Save();
+        await _savedToast.Show();
     }
 
     class MiscOptions : PropertyModificationModel

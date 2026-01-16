@@ -1,13 +1,17 @@
 @page "/Server/{Id:int:min(0)}/Settings/Java"
-@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core.ServerSettings
+@using QSM.Web.Components.Shared
 @using QSM.Web.Data
 
 @inject ApplicationConfig AppConfig
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 
 <PageTitle>Java - @(_server?.Name ?? string.Empty) Settings</PageTitle>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
 
 <h3>Java</h3>
 
@@ -18,7 +22,7 @@
         <div class="col-md-6">
             <div class="mb-2">
                 <label for="Input.JavaHome" class="form-label">Java Install</label>
-                <InputSelect class="form-select" id="Input.JavaHome" @bind-Value="Input.JavaHome">
+                <InputSelect class="form-select" id="Input.JavaHome" @bind-Value="Input!.JavaHome">
                     @foreach (var install in AppConfig.JavaInstalls)
                     {
                         <option>@install</option>
@@ -76,12 +80,18 @@
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm] private JavaSettings Input { get; set; } = new();
+    [SupplyParameterFromForm] private JavaSettings? Input { get; set; }
 
     string CurrentArgPreset { get; set; } = "None";
     
     ServerInstance? _server;
     ServerSettings? _settings;
+    private Toast _savedToast = null!;
+
+    protected override void OnInitialized()
+    {
+        Input ??= new JavaSettings();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,16 +122,17 @@
             _settings = new ServerSettings();
         }
 
-        _settings.Java = Input;
+        _settings.Java = Input!;
         
         await _settings.SaveJsonAsync(_server.ConfigPath);
+        await _savedToast.Show();
     }
 
     private void PresetSelected(string value)
     {
         if (JvmArgPresets.TryGetValue(value, out var args))
         {
-            Input.JvmArgs = args;
+            Input!.JvmArgs = args;
         }
 
         CurrentArgPreset = value;

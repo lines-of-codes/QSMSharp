@@ -1,7 +1,6 @@
 @page "/Server/{Id:int:min(0)}/Mods"
 @using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
-@rendermode InteractiveServer
 
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
@@ -51,6 +50,8 @@
         }
 
         _server = server;
+
+        if (!Directory.Exists(_server.ModFolder)) return;
 
         var files = Directory.EnumerateFiles(_server.ModFolder).ToArray();
 

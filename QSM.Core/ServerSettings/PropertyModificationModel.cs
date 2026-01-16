@@ -21,7 +21,7 @@ public abstract class PropertyModificationModel
 
 	public void Load(ServerProperties props)
 	{
-		foreach (var pair in _properties)
+		foreach (KeyValuePair<string, PropertyInfo> pair in _properties)
 		{
 			if (!props.Properties.TryGetValue(pair.Key, out string? value))
 				continue;
@@ -32,12 +32,19 @@ public abstract class PropertyModificationModel
 	
 	public void Apply(ServerProperties props)
 	{
-		foreach (var pair in _properties)
+		foreach (KeyValuePair<string, PropertyInfo> pair in _properties)
 		{
-			var obj = pair.Value.GetValue(this);
+			object? obj = pair.Value.GetValue(this);
 			if (obj == null) continue;
 
-			props.Properties[pair.Key] = obj.ToString() ?? string.Empty;
+			string value = obj.ToString() ?? string.Empty;
+			
+			if (obj is bool)
+			{
+				value = value.ToLowerInvariant();
+			}
+
+			props.Properties[pair.Key] = value;
 		}
 	}
 }

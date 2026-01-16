@@ -1,0 +1,38 @@
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class=@(_show ? "toast show" : "toast") role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">@Title</strong>
+            <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+        </div>
+        <div class="toast-body">
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool AutoHide { get; set; } = true;
+
+    bool _show;
+
+    private void Close()
+    {
+        _show = false;
+    }
+
+    public async Task Show()
+    {
+        _show = true;
+        StateHasChanged();
+        
+        if (AutoHide)
+        {
+            await Task.Delay(3000);
+            _show = false;
+            StateHasChanged();
+        }
+    }
+
+}

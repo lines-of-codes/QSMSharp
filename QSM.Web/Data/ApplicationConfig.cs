@@ -5,8 +5,13 @@ namespace QSM.Web.Data;
 
 public class ApplicationConfig
 {
+	public const string HttpDownloadClient = "HttpDownload";
+	
+	public static string DownloadsFolder => Path.Join(GetDefaultAppDataFolder(), "downloads");
+	
 	public List<string> JavaInstalls { get; set; } = [];
 	public string? DefaultJavaInstall { get; set; }
+	public int ConcurrentDownloads { get; set; } = 5;
 	
 	public static string GetDefaultAppDataFolder()
 	{
@@ -39,5 +44,12 @@ public class ApplicationConfig
 
 		using var stream = File.OpenWrite(path);
 		JsonSerializer.Serialize(stream, this, typeof(ApplicationConfig), ApplicationConfigContext.Default);
+	}
+
+	public static void EnsureFolderExists()
+	{
+		string appFolder = GetDefaultAppDataFolder();
+
+		Directory.CreateDirectory(Path.Join(appFolder, "downloads"));
 	}
 }

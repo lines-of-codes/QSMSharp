@@ -1,5 +1,4 @@
 @page "/Server/{Id:int:min(0)}/Console"
-@rendermode InteractiveServer
 
 @using QSM.Web.Data
 @implements IDisposable
@@ -12,7 +11,7 @@
 
 <h1>Console</h1>
 
-<div class="overflow-scroll" id="outputList">
+<div class="overflow-auto" id="outputList">
     <pre>
     @foreach (var entry in _outputList)
     {
@@ -22,7 +21,7 @@
 </div>
 
 <EditForm Model="Input" class="mt-2" OnSubmit="CommandSubmitted">
-    <InputText class="form-control" @bind-Value="Input.Command" autocomplete="off" />
+    <InputText class="form-control" @bind-Value="Input!.Command" autocomplete="off" />
 </EditForm>
 
 <style>
@@ -34,7 +33,7 @@
 
 @code {
     [Parameter] public int Id { get; set; }
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
     private List<ProcessManager.OutputCache> _outputList = [];
     private Timer? _updateTimer;
     private bool _outputListModified;
@@ -43,6 +42,8 @@
 
     protected override void OnInitialized()
     {
+        Input ??= new InputModel();
+        
         var outputListExist = ProcessManager.ServerOutput.TryGetValue(Id, out var outputList);
 
         if (!outputListExist) return;
@@ -122,7 +123,7 @@
     {
         if (ProcessManager.Processes[Id].HasExited) return;
         
-        ProcessManager.Processes[Id].StandardInput.WriteLine(Input.Command);
+        ProcessManager.Processes[Id].StandardInput.WriteLine(Input!.Command);
 
         Input.Command = "";
     }

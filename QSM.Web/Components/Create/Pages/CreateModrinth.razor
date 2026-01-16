@@ -1,0 +1,231 @@
+@page "/Create/Modrinth"
+@using System.ComponentModel.DataAnnotations
+@using Ganss.Xss
+@using Markdig
+@using QSM.Core.ModPluginSource
+@using QSM.Web.Data
+@using QSM.Web.Utilities
+
+@inject ModrinthProvider Modrinth
+@inject MarkdownPipeline MarkPipe
+
+<PageTitle>Import Modrinth Modpack - QSM Web Console</PageTitle>
+
+@if (_askMoreInfo)
+{
+    <EditForm Model="CreationDataForm" OnValidSubmit="CreateDataSubmit" class="col-md-6">
+        <div class="form-floating mb-2">
+            <InputText @bind-Value="CreationDataForm!.Name" @oninput="NameInputChanged" id="Model.Name" class="form-control"
+                       aria-required="true" placeholder=""/>
+            <label for="Model.Name" class="form-label">Name</label>
+            <ValidationMessage For="() => CreationDataForm.Name" class="text-danger"/>
+        </div>
+        <div class="form-floating mb-2">
+            <InputText @bind-Value="CreationDataForm.Path" @oninput="PathInputChanged" id="Model.Path" class="form-control"
+                       aria-required="true" placeholder=""/>
+            <label for="Model.Path" class="form-label">Path</label>
+            <ValidationMessage For="() => CreationDataForm.Path" class="text-danger"/>
+            <p class="text-secondary">Server will be created at @_targetFolderPreview</p>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </EditForm>
+}
+else if (_downloading)
+{
+    <ModrinthDownload SelectedVersion="_selectedVersion" @ref="_modrinthDownload" Name="@CreationDataForm?.Name" ServerPath="@_targetFolderPreview" />
+}
+else
+{
+    <EditForm Model="SearchForm" class="my-2" OnSubmit="SearchSubmit">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search..." @bind="SearchForm!.Query" />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </EditForm>
+
+    <div class="row" style="max-height: 65vh;">
+        <div class="col">
+            @if (_modList.Length == 0)
+            {
+                <div class="border text-center py-4">
+                    No mods found.
+                </div>
+            }
+            else
+            {
+                <ul class="overflow-y-auto list-group" style="max-height: 75vh;">
+                    @for (ushort i = 0; i < _modList.Length; i++)
+                    {
+                        var mod = _modList[i];
+                        
+                        var i1 = i;
+                        <li class="@($"list-group-item list-group-item-action{(_selectedMod?.Slug == mod.Slug ? " active" : string.Empty)}")" @onclick="() => ModpackSelected(i1)">
+                            <div class="fw-bold">@mod.Name</div>
+                            <div class="overflow-hidden" style="-webkit-line-clamp: 2; line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical;">@mod.Description</div>
+                        </li>
+                    }
+                </ul>
+                
+            }
+        </div>
+        <div class="col-8">
+            <div class="overflow-auto" id="modDetails" style="max-width: 60vw; max-height: 67.5vh;">
+                @if (_loadingContent)
+                {
+                    <p class="text-secondary">Loading...</p>
+                }
+                else if (_selectedMod != null)
+                {
+                    <div class="d-flex gap-3 align-items-center mb-2">
+                        <img src="@_selectedMod.IconUrl" alt="@_selectedMod.Name's Icon" height="64" />
+                        <div>
+                            <h2 class="m-0">@_selectedMod.Name</h2>
+                            <p class="m-0">
+                                <strong>Downloads: </strong> @_selectedMod.DownloadCount.ToString("N0")<br/>
+                                <strong>License: </strong>
+                                <a href="@_selectedMod.LicenseUrl" target="_blank" rel="noreferrer">
+                                    @_selectedMod.License
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        @_selectedModDescription
+                    </div>
+                }
+                else
+                {
+                    <p class="text-secondary">No mod selected.</p>
+                }
+            </div>
+            @if (_selectedMod != null && !_loadingContent)
+            {
+                <EditForm Model="SelectModpackForm" OnValidSubmit="ModpackSubmit" class="mt-2">
+                    <div class="input-group">
+                        <InputSelect @bind-Value="SelectModpackForm!.Version" class="form-select">
+                            @if (_downloadInfos == null || _downloadInfos.Length == 0)
+                            {
+                                <option disabled>No versions available.</option>
+                            }
+                            else
+                            {
+                                @foreach (var version in _downloadInfos)
+                                {
+                                    <option value="@version.VersionId">@version.DisplayName</option>
+                                }
+                            }
+                        </InputSelect>
+                        <button type="submit" class="btn btn-primary">Confirm</button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromForm] SearchFormModel? SearchForm { get; set; }
+    [SupplyParameterFromForm] SelectModpackModel? SelectModpackForm { get; set; }
+    [SupplyParameterFromForm] CreationDataModel? CreationDataForm { get; set; }
+
+    readonly HtmlSanitizer _sanitizer = new();
+    ModPluginInfo[] _modList = [];
+    ModPluginInfo? _selectedMod;
+    ModPluginDownloadInfo[]? _downloadInfos;
+    ModPluginDownloadInfo? _selectedVersion;
+    ModrinthDownload _modrinthDownload = null!;
+    MarkupString _selectedModDescription;
+    string _targetFolderPreview = string.Empty;
+    bool _firstDownloadRender = true;
+    bool _loadingContent;
+    bool _askMoreInfo;
+    bool _downloading;
+    
+    class SearchFormModel
+    {
+        public string Query { get; set; } = string.Empty;
+    }
+
+    class SelectModpackModel
+    {
+        [Required] public string Version { get; set; } = string.Empty;
+    }
+
+    public class CreationDataModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Path { get; set; } = string.Empty;
+    }
+
+    protected override void OnInitialized()
+    {
+        SearchForm ??= new SearchFormModel();
+        SelectModpackForm ??= new SelectModpackModel();
+        CreationDataForm ??= new CreationDataModel();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _modList = await Modrinth.SearchAsync(projectType: ModrinthProvider.ProjectType.Modpack);
+    }
+
+    private async Task SearchSubmit()
+    {
+        _modList = await Modrinth.SearchAsync(SearchForm?.Query ?? string.Empty, ModrinthProvider.ProjectType.Modpack);
+    }
+
+    private async Task ModpackSelected(ushort index)
+    {
+        _loadingContent = true;
+        _selectedMod = await Modrinth.GetDetailedInfoAsync(_modList[index]);
+        _selectedModDescription = (MarkupString)_sanitizer.Sanitize(Markdown.ToHtml(_selectedMod.LongDescription, MarkPipe));
+        _loadingContent = false;
+        _downloadInfos = await Modrinth.GetVersionsAsync(_selectedMod.Slug);
+        SelectModpackForm?.Version = _downloadInfos[0].VersionId;
+    }
+
+    private void ModpackSubmit()
+    {
+        _askMoreInfo = true;
+        _selectedVersion = _downloadInfos?.FirstOrDefault(info => info.VersionId == SelectModpackForm?.Version);
+        CreationDataForm!.Name = _selectedMod?.Name ?? string.Empty;
+        CreationDataForm.Path = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "servers");
+        SetTargetFolderPreview(CreationDataForm.Path, CreationDataForm.Name);
+    }
+    
+    private void SetTargetFolderPreview(string path, string folderName)
+    {
+        _targetFolderPreview = Path.Join(path, StringUtility.SanitizeFileName(folderName));
+    }
+
+    private void NameInputChanged(ChangeEventArgs args)
+    {
+        string? newName = (string?)args.Value;
+
+        if (newName == null)
+        {
+            return;
+        }
+
+        SetTargetFolderPreview(CreationDataForm!.Path, newName);
+    }
+
+    private void PathInputChanged(ChangeEventArgs args)
+    {
+        string? newPath = (string?)args.Value;
+
+        if (newPath == null)
+        {
+            return;
+        }
+
+        SetTargetFolderPreview(newPath, CreationDataForm!.Name);
+    }
+
+    private void CreateDataSubmit()
+    {
+        _askMoreInfo = false;
+        _downloading = true;
+    }
+
+}

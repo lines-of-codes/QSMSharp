@@ -1,12 +1,13 @@
+using Markdig;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using QSM.Core.ModPluginSource;
-using QSM.Core.ServerSettings;
 using QSM.Web.Components;
 using QSM.Web.Components.Account;
 using QSM.Web.Data;
+using Serilog;
 using System.Reflection;
 
 namespace QSM.Web;
@@ -17,7 +18,22 @@ internal class Program
 
 	public static async Task Main(string[] args)
 	{
+		ApplicationConfig.EnsureFolderExists();
+
+		Log.Logger = new LoggerConfiguration()
+			.WriteTo.Console()
+			.CreateBootstrapLogger();
+		
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+		builder.Services.AddSerilog((services, lc) => lc
+			.ReadFrom.Configuration(builder.Configuration)
+			.ReadFrom.Services(services)
+			.Enrich.FromLogContext()
+			.WriteTo.Console()
+			.WriteTo.File(
+				Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "logs", "log.log"), 
+				rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true));
 
 		// Add services to the container.
 		builder.Services.AddRazorComponents()
@@ -40,7 +56,7 @@ internal class Program
 		builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 		{
 			options.UseSqlite(connectionString);
-			options.ConfigureWarnings((config) => config.Log(RelationalEventId.PendingModelChangesWarning));
+			options.ConfigureWarnings(config => config.Log(RelationalEventId.PendingModelChangesWarning));
 		});
 		builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -62,6 +78,21 @@ internal class Program
 		builder.Services.AddHttpClient(PaperMCHangarProvider.HttpClientName, client =>
 		{
 			client.BaseAddress = new Uri(PaperMCHangarProvider.BaseAddress);
+		});
+
+		builder.Services.AddHttpClient(ApplicationConfig.HttpDownloadClient, client =>
+		{
+			client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
+				$"lines-of-codes/QSMSharp/{Assembly.GetEntryAssembly()!.GetName().Version}-Web (linesofcodes@dailitation.xyz)");
+		});
+
+		builder.Services.AddScoped<MarkdownPipeline>(services =>
+		{
+			MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
+				.UseAdvancedExtensions()
+				.Build();
+
+			return pipeline;
 		});
 
 		builder.Services.AddTransient<ModrinthProvider>();
@@ -91,8 +122,7 @@ internal class Program
 		}
 
 		App.UseHttpsRedirection();
-
-
+		
 		App.UseAntiforgery();
 
 		App.MapStaticAssets();

@@ -2,12 +2,17 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core.ServerSettings
+@using QSM.Web.Components.Shared
 @using QSM.Web.Data
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
 <PageTitle>Network - @_server.Name Settings</PageTitle>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
 
 <h3>Network Settings</h3>
 
@@ -17,7 +22,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating mb-2">
-                <InputText @bind-Value="Input.ServerIp" id="Input.ServerIp" class="form-control"
+                <InputText @bind-Value="Input!.ServerIp" id="Input.ServerIp" class="form-control"
                            aria-required="true" placeholder=""/>
                 <label for="Input.ServerIp" class="form-label">Server IP</label>
                 <ValidationMessage For="() => Input.ServerIp" class="text-danger"/>
@@ -62,13 +67,15 @@
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm] private NetworkSettings Input { get; set; } = new();
+    [SupplyParameterFromForm] private NetworkSettings? Input { get; set; }
     
     private ServerInstance _server = new();
     private ServerProperties _properties = null!;
-    
+    private Toast _savedToast = null!;
+
     protected override void OnInitialized()
     {
+        Input ??= new NetworkSettings();
         using var ctx = DbFactory.CreateDbContext();
         var server = ctx.Servers.Find(Id);
 
@@ -110,10 +117,11 @@
         public bool UseNativeTransport { get; set; } = true;
     }
 
-    private void SaveChanges()
+    private async Task SaveChanges()
     {
-        Input.Apply(_properties);
+        Input!.Apply(_properties);
         _properties.Save();
+        await _savedToast.Show();
     }
 
 }

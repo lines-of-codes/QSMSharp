@@ -1,12 +1,17 @@
 @page "/Server/{Id:int:min(0)}/Settings/Security"
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core.ServerSettings
+@using QSM.Web.Components.Shared
 @using QSM.Web.Data
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
 <PageTitle>Security - @_server.Name Settings</PageTitle>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
 
 <h3>Server Security</h3>
 
@@ -16,7 +21,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-check mb-2">
-                <InputCheckbox @bind-Value="Input.OnlineMode" id="Input.OnlineMode" class="form-check-input" aria-required="true"/>
+                <InputCheckbox @bind-Value="Input!.OnlineMode" id="Input.OnlineMode" class="form-check-input" aria-required="true"/>
                 <label for="Input.OnlineMode" class="form-check-label">Online Mode</label>
             </div>
             <div class="form-check mb-2">
@@ -37,13 +42,15 @@
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm] private SecurityOptions Input { get; set; } = new();
+    [SupplyParameterFromForm] private SecurityOptions? Input { get; set; }
     
     private ServerInstance _server = new();
     private ServerProperties _properties = null!;
+    private Toast _savedToast = null!;
     
     protected override void OnInitialized()
     {
+        Input ??= new SecurityOptions();
         using var ctx = DbFactory.CreateDbContext();
         var server = ctx.Servers.Find(Id);
 
@@ -59,10 +66,11 @@
         Input.Load(_properties);
     }
 
-    private void SaveChanges()
+    private async Task SaveChanges()
     {
-        Input.Apply(_properties);
+        Input!.Apply(_properties);
         _properties.Save();
+        await _savedToast.Show();
     }
 
     class SecurityOptions : PropertyModificationModel

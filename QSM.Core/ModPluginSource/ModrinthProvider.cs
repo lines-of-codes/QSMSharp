@@ -7,7 +7,7 @@ using HashAlgorithm = QSM.Core.Utilities.HashAlgorithm;
 
 namespace QSM.Core.ModPluginSource;
 
-public class ModrinthProvider : ModPluginProvider
+public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginProvider
 {
 	public enum ProjectType
 	{
@@ -18,27 +18,20 @@ public class ModrinthProvider : ModPluginProvider
 
 	public const string HttpClientName = "ModrinthApi";
 	public const string BaseAddress = "https://api.modrinth.com/v2/";
-	private static readonly string[] ignoredDependencyType = ["embedded", "incompatible"];
-
-	private readonly IHttpClientFactory _httpClientFactory;
-
-	public ModrinthProvider(IHttpClientFactory httpClientFactory)
-	{
-		_httpClientFactory = httpClientFactory;
-	}
+	private static readonly string[] s_ignoredDependencyType = ["embedded", "incompatible"];
 
 	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
 	{
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 
-		string queryString = $"project/{slug}/version";
+		string queryString = $"project/{slug}/version?include_changelog=false";
 
 		if (ServerMetadata != null)
 		{
-			queryString += "?loaders=";
-			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.Software.ToString().ToLowerInvariant()}\"]");
+			queryString += "&loaders=";
+			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata.Software.ToString().ToLowerInvariant()}\"]");
 			queryString += "&game_versions=";
-			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata?.MinecraftVersion}\"]");
+			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata.MinecraftVersion}\"]");
 		}
 
 		VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
@@ -62,6 +55,7 @@ public class ModrinthProvider : ModPluginProvider
 
 			versions.Add(new ModPluginDownloadInfo
 			{
+				VersionId = info.id ?? string.Empty,
 				DisplayName = $"{info.name} ({info.version_type})",
 				FileName = primaryFile.filename!,
 				Dependencies = dependencies.ToArray(),
@@ -75,6 +69,38 @@ public class ModrinthProvider : ModPluginProvider
 		return versions.ToArray();
 	}
 
+	public async Task<ModPluginDownloadInfo> GetVersionAsync(string id)
+	{
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
+		VersionInfo version = await client.GetFromJsonAsync<VersionInfo>("version/" + id)
+		                       ?? throw new NetworkResourceUnavailableException();
+		
+		IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = version.dependencies!.Select(dependency =>
+			new ModPluginDownloadInfo.Dependency
+			{
+				Slug = dependency.version_id ?? string.Empty,
+				Name = dependency.file_name ?? string.Empty,
+				DownloadUri = null,
+				ExternalPageUrl = dependency.dependency_type,
+				Required = dependency.dependency_type == "required"
+			});
+
+		
+		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0]);
+
+		return new ModPluginDownloadInfo
+		{
+			VersionId = version.id ?? string.Empty,
+			DisplayName = $"{version.name} ({version.version_type})",
+			FileName = primaryFile.filename!,
+			Dependencies = dependencies.ToArray(),
+			DownloadUri = primaryFile.url,
+			ExternalPageUrl = null,
+			Hash = primaryFile.hashes!.sha512,
+			HashAlgorithm = HashAlgorithm.SHA512
+		};
+	}
+	
 	public override Task<ModPluginInfo[]> SearchAsync(string query = "")
 	{
 		return SearchAsync(query);
@@ -146,7 +172,7 @@ public class ModrinthProvider : ModPluginProvider
 			queryString += WebUtility.UrlEncode(query);
 		}
 
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
 		                         ?? throw new NetworkResourceUnavailableException();
 
@@ -180,9 +206,9 @@ public class ModrinthProvider : ModPluginProvider
 			{
 				Uri? downloadUri = null;
 
-				if (!ignoredDependencyType.Contains(dependency.ExternalPageUrl))
+				if (!s_ignoredDependencyType.Contains(dependency.ExternalPageUrl))
 				{
-					using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+					using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 					VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
 					                       ?? throw new NetworkResourceUnavailableException();
 
@@ -206,7 +232,7 @@ public class ModrinthProvider : ModPluginProvider
 
 	public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
 	{
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		DetailedProjectResult? project =
 			await client.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
 
@@ -220,6 +246,7 @@ public class ModrinthProvider : ModPluginProvider
 		return modPlugin;
 	}
 
+	// TODO: Finish this thing
 	public override Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
 	{
 		List<string> hashes = [];
@@ -244,10 +271,11 @@ public class ModrinthProvider : ModPluginProvider
 
 	public async Task<Category[]> ListCategories()
 	{
-		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		return (await client.GetFromJsonAsync<Category[]>("tag/category"))!;
 	}
 
+	// ReSharper disable InconsistentNaming
 	internal record VersionDependency(
 		string? version_id = null,
 		string? project_id = null,
@@ -267,6 +295,7 @@ public class ModrinthProvider : ModPluginProvider
 		string? file_type = null);
 
 	internal record VersionInfo(
+		string? id = null,
 		string? name = null,
 		string? version_number = null,
 		string? changelog = null,
@@ -344,4 +373,5 @@ public class ModrinthProvider : ModPluginProvider
 		public int? Offset = offset;
 		public int? TotalHits = total_hits;
 	}
+	// ReSharper restore InconsistentNaming
 }

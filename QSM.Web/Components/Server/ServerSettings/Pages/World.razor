@@ -2,12 +2,17 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core.ServerSettings
+@using QSM.Web.Components.Shared
 @using QSM.Web.Data
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager Navigation
 
 <PageTitle>World Generation - @_server.Name Settings</PageTitle>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
 
 <h3>World Generation</h3>
 
@@ -17,7 +22,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating mb-2">
-                <InputText @bind-Value="Input.LevelName" id="Input.LevelName" class="form-control"
+                <InputText @bind-Value="Input!.LevelName" id="Input.LevelName" class="form-control"
                            aria-required="true" placeholder=""/>
                 <label for="Input.LevelName" class="form-label">Level Name</label>
                 <ValidationMessage For="() => Input.LevelName" class="text-danger"/>
@@ -60,14 +65,15 @@
     [Parameter]
     public int Id { get; set; }
 
-    [SupplyParameterFromForm]
-    private WorldSettings Input { get; set; } = new();
+    [SupplyParameterFromForm] private WorldSettings? Input { get; set; }
 
     private ServerInstance _server = new();
     private ServerProperties _properties = null!;
+    private Toast _savedToast = null!;
 
     protected override void OnInitialized()
     {
+        Input ??= new WorldSettings();
         using var ctx = DbFactory.CreateDbContext();
         var server = ctx.Servers.Find(Id);
 
@@ -105,10 +111,11 @@
         public bool GenerateStructures { get; set; } = true;
     }
 
-    private void SaveChanges()
+    private async Task SaveChanges()
     {
-        Input.Apply(_properties);
+        Input!.Apply(_properties);
         _properties.Save();
+        await _savedToast.Show();
     }
 
 }

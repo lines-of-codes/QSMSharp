@@ -3,10 +3,6 @@ html, body {
     letter-spacing: -0.02em;
 }
 
-a, .btn-link {
-    color: #006bb7;
-}
-
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
@@ -167,4 +163,8 @@ main .top-row a:first-child {
     position: absolute;
     right: 0.75rem;
     top: 0.5rem;
+}
+
+#modDetails img {
+    max-width: 100%;
 }

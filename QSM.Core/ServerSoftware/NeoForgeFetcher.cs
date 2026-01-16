@@ -7,15 +7,10 @@ namespace QSM.Core.ServerSoftware;
 
 public partial class NeoForgeFetcher : InfoFetcher
 {
-	private readonly HttpClient httpClient;
-	private readonly Regex majorMinorVersionMatch = MajorMinorVersionMatch();
+	private readonly HttpClient _httpClient = new();
+	private readonly Regex _majorMinorVersionMatch = MajorMinorVersionMatch();
 
-	private string[] availableVersionsCache = [];
-
-	public NeoForgeFetcher()
-	{
-		httpClient = new HttpClient();
-	}
+	private string[] _availableVersionsCache = [];
 
 	public override string FirstRunArgs => "--install-server";
 
@@ -27,16 +22,16 @@ public partial class NeoForgeFetcher : InfoFetcher
 		}
 
 		NeoForgeVersions? response =
-			await httpClient.GetFromJsonAsync<NeoForgeVersions>(
+			await _httpClient.GetFromJsonAsync<NeoForgeVersions>(
 				"https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge");
 
-		availableVersionsCache = response!.Versions!;
+		_availableVersionsCache = response!.Versions!;
 
 		List<string> supportedVersions = [];
 
-		foreach (string version in availableVersionsCache)
+		foreach (string version in _availableVersionsCache)
 		{
-			string matched = majorMinorVersionMatch.Match(version).Value;
+			string matched = _majorMinorVersionMatch.Match(version).Value;
 			string minecraftVersion = $"1.{matched}";
 
 			if (!supportedVersions.Contains(minecraftVersion))
@@ -61,7 +56,7 @@ public partial class NeoForgeFetcher : InfoFetcher
 		string majorMinorVersion = minecraftVersion.Substring(2) + ".";
 		List<string> versions = [];
 
-		foreach (string version in availableVersionsCache)
+		foreach (string version in _availableVersionsCache)
 		{
 			if (version.StartsWith(majorMinorVersion))
 			{
@@ -122,5 +117,5 @@ public partial class NeoForgeFetcher : InfoFetcher
 		await process.WaitForExitAsync();
 	}
 
-	internal record class NeoForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
+	internal record NeoForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);
 }

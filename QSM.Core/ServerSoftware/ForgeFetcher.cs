@@ -32,7 +32,7 @@ public partial class ForgeFetcher : InfoFetcher
 		foreach (string version in _availableVersionsCache)
 		{
 			string minecraftVersion = _majorMinorVersionMatch.Match(version).Value;
-			minecraftVersion = minecraftVersion.Substring(0, minecraftVersion.Length - 1);
+			minecraftVersion = minecraftVersion[..^1];
 
 			if (!supportedVersions.Contains(minecraftVersion))
 			{

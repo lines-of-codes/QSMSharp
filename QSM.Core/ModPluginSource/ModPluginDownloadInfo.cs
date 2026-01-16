@@ -5,6 +5,7 @@ namespace QSM.Core.ModPluginSource;
 public class ModPluginDownloadInfo
 {
 	public Dependency[] Dependencies = [];
+	public string VersionId = string.Empty;
 	public string DisplayName = string.Empty;
 
 	/// <summary>
