@@ -17,14 +17,13 @@ Even if QSM eases the process of self-hosting a Minecraft
 server, it is still recommended that you understand some basics
 of hosting a game server.
 
-The Minecraft Wiki states the following ([source](https://minecraft.wiki/w/Tutorials/Setting_up_a_server#Warning)):
+The Minecraft Wiki states the following ([source](https://minecraft.wiki/w/Tutorial:Setting_up_a_Java_Edition_server?oldid=3347971#User_knowledge)):
 
-> In order to run your server and stay out of trouble, we highly suggest that you should at least know about the following:
+> In order to run your server correctly, we highly suggest that you should at least know about the following:
+> - Technical game knowledge, such as commands, chunk, etc.
 > - Using the command-line and editing configuration files
-> - Networking in general (IP, DHCP, ports, etc.)
-> - Your system configuration
-> - Your network configuration
-> - Your router configuration (if you want other people to connect over the Internet)
+> - Networking in general (IP, ports, etc.)
+> - System configuration
 
 To start using QSM, Please pick between the QSM Windows version and the QSM Web 
 version. QSM Web can run on Windows too, but QSM Windows will be more 
@@ -46,7 +45,7 @@ beginner-friendly to set up, as it is just like any other Windows program.
 </CardGrid>
 
 <Aside>
-    QSM is an in-development software. Breaking changes and unstability *may* occur.
+    QSM is an in-development software. Breaking changes and unstability *may* occur. Please backup your data regularly.
 </Aside>
 
 ## License
@@ -66,14 +65,13 @@ following (according to NuGet packages referenced):
 - System.Net.Http: [MIT License](https://licenses.nuget.org/MIT)
 - System.Text.RegularExpressions: [MIT License](https://licenses.nuget.org/MIT)
 
-The QSM Core is licensed under the same GNU GPL v3,
-And its dependencies has the following licenses:
+The QSM Core dependencies has the following licenses:
 
+- cuid.net: [MIT License](https://licenses.nuget.org/MIT)
+- Microsoft.Extensions.Http: [MIT License](https://licenses.nuget.org/MIT)
 - PasteMystNet: [MIT License](https://github.com/dentolos19/PasteMystNet/blob/main/LICENSE)
-- System.Text.Json: [MIT License](https://licenses.nuget.org/MIT)
-- System.IO.Pipelines: [MIT License](https://licenses.nuget.org/MIT)
-- ZstdSharp.Port: [MIT License](https://github.com/oleg-st/ZstdSharp/blob/master/LICENSE)
-- SharpCompress: [MIT License](https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt)
 - Serilog: [Apache License 2.0](https://github.com/serilog/serilog/blob/dev/LICENSE)
+- SharpCompress: [MIT License](https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt)
+- ZstdSharp.Port: [MIT License](https://github.com/oleg-st/ZstdSharp/blob/master/LICENSE)
 
 These lists only include direct/top-level dependencies.

@@ -3,7 +3,7 @@ title: Choosing a server software
 description: How to choose a software for your Minecraft server.
 ---
 
-There are two types of server softwares in QSM. **Proxies**
+There are two types of server software in QSM. **Proxies**
 and **Game servers**.
 
 ## Game servers
@@ -12,9 +12,9 @@ game world, manage player data, etc.
 
 Game servers can support datapacks, mods, and/or plugins.
 
-**Mods** are _usually_ modifications that modify the core game
+**Mods** (Which comes from "Modifying") are _usually_ modifications that modify the core game
 and require both the client and the server to have the mods
-installed. But some mods are an exception to this, as some mods
+installed. But some mods does not follow this condition, as some mods
 are client-side/server-side only. Some examples include:
 
 - [The Create Mod](https://modrinth.com/mod/create) - Adding new blocks and mechanics, Requires that both the client and the server have this mod installed.
@@ -24,10 +24,10 @@ are client-side/server-side only. Some examples include:
 **Plugins** can basically be called server-side only mods,
 They can modify the core game, but not to an extent that
 "mods" can do. They usually add commands and utilities to
-the game, but not add new blocks. But servers with plugins
-do not require that the client install anything, So it is
-easy for the user to just launch up their vanilla client
-and join.
+the game, but not add new blocks or drastically modify the 
+game's mechanics. But servers with plugins do not require 
+that the client install anything, So it is easy for the 
+user to just launch up their vanilla client and join.
 
 ### Paper
 [Paper](https://papermc.io/software/paper) is a popular
@@ -43,7 +43,7 @@ You can read Paper's documentation [here](https://docs.papermc.io/paper)
 [Purpur](https://purpurmc.org/) is a fork of Paper, Meaning
 that Purpur is based on Paper. Purpur is a drop-in replacement
 for Paper servers that's designed for configurability, and new
-fun and exciting gameplay features.
+fun and exciting gameplay features. (That's what they said)
 
 You can read Purpur's documentation [here](https://purpurmc.org/docs/purpur/)
 
@@ -52,9 +52,8 @@ You can read Purpur's documentation [here](https://purpurmc.org/docs/purpur/)
 simply mean the official Minecraft server software.
 
 You can read a Minecraft wiki page covering about setting
-up a Minecraft server [here](https://minecraft.wiki/w/Tutorials/Setting_up_a_server).
-But it is unlikely that you'll have to read that if you're
-going to use QSM.
+up a Minecraft server [here](https://minecraft.wiki/w/Tutorial:Setting_up_a_Java_Edition_server).
+But not all of the instructions within that page will apply to QSM.
 
 ### Fabric
 [Fabric](https://fabricmc.net/) is a Minecraft mod loader
@@ -65,6 +64,10 @@ the latest available installer version.
 
 You can read Fabric's documentation [here](https://docs.fabricmc.net/)
 
+### Forge
+
+Forge is a widely-used modding API. You can read Forge's documentation [here](https://docs.minecraftforge.net/en/1.21.x/)
+
 ### NeoForge
 [NeoForge](https://neoforged.net/) is a free, open-source,
 community-oriented modding API.
@@ -73,7 +76,7 @@ You can read NeoForge's documentation about how to create a mod
 [here](https://docs.neoforged.net/docs/gettingstarted/)
 
 ## Proxies
-**Proxies** are softwares that reroute the Minecraft game to a
+**Proxies** are software that reroute the Minecraft game to a
 different server. These are for server setups with multiple
 sub-servers.
 

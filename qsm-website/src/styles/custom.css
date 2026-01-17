@@ -1,0 +1,4 @@
+/* Increase theme select width to better accommodate menu contents. */
+starlight-theme-select select {
+    --sl-select-width: 6rem;
+}
