@@ -38,8 +38,15 @@ public static class Program
 			client.BaseAddress = new System.Uri(PaperMCHangarProvider.BaseAddress);
 		});
 
+		builder.Services.AddHttpClient(CurseForgeProvider.HttpClientName, client =>
+		{
+			client.BaseAddress = new System.Uri(CurseForgeProvider.BaseAddress);
+			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
+		});
+
 		builder.Services.AddTransient<ModrinthProvider>();
 		builder.Services.AddTransient<PaperMCHangarProvider>();
+		builder.Services.AddTransient<CurseForgeProvider>();
 
 		((IHostApplicationBuilder)builder).Properties.Add(
 			key: HostingExtensions.HostingContextKey,

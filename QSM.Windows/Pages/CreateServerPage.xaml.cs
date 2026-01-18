@@ -49,15 +49,15 @@ public sealed partial class CreateServerPage : Page
 			InfoFetcher = new NeoForgeFetcher()
 		},
 		new() {
+			Name = "Forge",
+			Icon = "/Assets/ServerSoftware/forge.png",
+			InfoFetcher = new ForgeFetcher()
+		},
+		new() {
 			Name = "Velocity",
 			Icon = "/Assets/ServerSoftware/velocity-blue.svg",
 			InfoFetcher = new PaperMCFetcher("velocity")
 		},
-		new() {
-			Name = "Forge",
-			Icon = "/Assets/ServerSoftware/forge.png",
-			InfoFetcher = new ForgeFetcher()
-		}
 	];
 
 	static Dictionary<string, ServerSoftwares> s_softwareDisplayNameToEnumMapping = new()
@@ -67,8 +67,8 @@ public sealed partial class CreateServerPage : Page
 		{ "Vanilla", ServerSoftwares.Vanilla },
 		{ "Fabric", ServerSoftwares.Fabric },
 		{ "NeoForge", ServerSoftwares.NeoForge },
-		{ "Velocity", ServerSoftwares.Velocity },
 		{ "Forge", ServerSoftwares.Forge },
+		{ "Velocity", ServerSoftwares.Velocity },
 	};
 
 	ExtendedObservableCollection<string> MinecraftVersions { get; set; } = [];

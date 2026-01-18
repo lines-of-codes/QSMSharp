@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using QSM.Core.ModPluginSource.Modrinth;
 using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
+using QSM.Core.Utilities;
 using QSM.Windows.Utilities;
 using Serilog;
 using System;
