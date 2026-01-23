@@ -27,7 +27,7 @@ In the solution, There are three projects including:
 - QSM.Web: Cross-platform web version of the management software
 - QSM.Windows: Original Windows-only version, More complete.
 
-## API Keys
+## Forks
 
 Similarly to Prism Launcher's policy, You are free to fork, redistribute, and 
 provide custom builds as long as you follow the terms of the license (GNU GPLv3) 

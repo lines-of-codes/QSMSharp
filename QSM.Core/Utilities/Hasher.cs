@@ -9,8 +9,9 @@ public class Hasher
 		return algorithm switch
 		{
 			HashAlgorithm.None => string.Empty,
-			HashAlgorithm.SHA256 => SHA256.Create().GetFileHashAsString(path),
-			HashAlgorithm.SHA512 => SHA512.Create().GetFileHashAsString(path),
+			HashAlgorithm.Sha1 => SHA1.Create().GetFileHashAsString(path),
+			HashAlgorithm.Sha256 => SHA256.Create().GetFileHashAsString(path),
+			HashAlgorithm.Sha512 => SHA512.Create().GetFileHashAsString(path),
 			_ => throw new InvalidOperationException("Unsupported hash algorithm used in parameter.")
 		};
 	}

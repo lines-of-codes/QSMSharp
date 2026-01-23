@@ -1,4 +1,5 @@
 ﻿using QSM.Core.ModPluginSource.Modrinth;
+using QSM.Core.ServerSoftware;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -20,18 +21,18 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 	public const string BaseAddress = "https://api.modrinth.com/v2/";
 	private static readonly string[] s_ignoredDependencyType = ["embedded", "incompatible"];
 
-	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
+	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug, ServerMetadata? serverMetadata = null)
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 
 		string queryString = $"project/{slug}/version?include_changelog=false";
 
-		if (ServerMetadata != null)
+		if (serverMetadata != null)
 		{
 			queryString += "&loaders=";
-			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata.Software.ToString().ToLowerInvariant()}\"]");
+			queryString += WebUtility.UrlEncode($"[\"{serverMetadata.Software.ToString().ToLowerInvariant()}\"]");
 			queryString += "&game_versions=";
-			queryString += WebUtility.UrlEncode($"[\"{ServerMetadata.MinecraftVersion}\"]");
+			queryString += WebUtility.UrlEncode($"[\"{serverMetadata.MinecraftVersion}\"]");
 		}
 
 		VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
@@ -62,7 +63,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				DownloadUri = primaryFile.url,
 				ExternalPageUrl = null,
 				Hash = primaryFile.hashes!.sha512,
-				HashAlgorithm = HashAlgorithm.SHA512
+				HashAlgorithm = HashAlgorithm.Sha512
 			});
 		}
 
@@ -84,7 +85,6 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				ExternalPageUrl = dependency.dependency_type,
 				Required = dependency.dependency_type == "required"
 			});
-
 		
 		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0]);
 
@@ -97,29 +97,29 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 			DownloadUri = primaryFile.url,
 			ExternalPageUrl = null,
 			Hash = primaryFile.hashes!.sha512,
-			HashAlgorithm = HashAlgorithm.SHA512
+			HashAlgorithm = HashAlgorithm.Sha512
 		};
 	}
 	
-	public override Task<ModPluginInfo[]> SearchAsync(string query = "")
+	public override Task<ModPluginInfo[]> SearchAsync(string query = "", ServerMetadata? serverMetadata = null)
 	{
-		return SearchAsync(query);
+		return SearchAsync(serverMetadata, query);
 	}
 
-	public async Task<ModPluginInfo[]> SearchAsync(string query = "", ProjectType projectType = ProjectType.Mod,
-		IEnumerable<string>? categories = null)
+	public async Task<ModPluginInfo[]> SearchAsync(ServerMetadata? serverMetadata = null, string query = "", 
+		ProjectType projectType = ProjectType.Mod, IEnumerable<string>? categories = null)
 	{
 		string queryString = "search";
 
 		List<List<string>> facets = [];
 
 		List<string> projectTypes = [];
-		if (ServerMetadata?.IsModSupported ?? projectType == ProjectType.Mod)
+		if (serverMetadata?.IsModSupported ?? projectType == ProjectType.Mod)
 		{
 			projectTypes.Add("project_type:mod");
 		}
 
-		if (ServerMetadata?.IsPluginSupported ?? projectType == ProjectType.Plugin)
+		if (serverMetadata?.IsPluginSupported ?? projectType == ProjectType.Plugin)
 		{
 			projectTypes.Add("project_type:plugin");
 		}
@@ -131,18 +131,16 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 
 		facets.Add(projectTypes);
 
-		if (ServerMetadata != null)
+
+		if (serverMetadata != null)
 		{
-			facets.Add([$"versions:{ServerMetadata.MinecraftVersion}"]);
-			facets.Add([$"categories:{ServerMetadata.Software.ToString().ToLowerInvariant()}"]);
+			facets.Add([$"versions:{serverMetadata.MinecraftVersion}"]);
+			facets.Add([$"categories:{serverMetadata.Software.ToString().ToLowerInvariant()}"]);
 		}
 
 		categories ??= [];
 
-		foreach (string category in categories)
-		{
-			facets.Add([$"categories:{category}"]);
-		}
+		facets.AddRange(categories.Select(category => (List<string>)[$"categories:{category}"]));
 
 		facets.Add(["server_side!=unsupported"]);
 
@@ -176,27 +174,19 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
 		                         ?? throw new NetworkResourceUnavailableException();
 
-		List<ModPluginInfo> modPlugins = [];
-
-		foreach (ProjectResult project in response.Hits!)
+		return response.Hits!.Select(project => new ModPluginInfo
 		{
-			modPlugins.Add(new ModPluginInfo
-			{
-				IconUrl = project.icon_url,
-				License = project.license!,
-				Name = project.title!,
-				Owner = project.author!,
-				Slug = project.slug!,
-				DownloadCount = (uint)project.downloads!,
-				LicenseUrl =
-					project.license!.StartsWith("LicenseRef")
-						? string.Empty
-						: $"https://spdx.org/licenses/{project.license}",
-				Description = project.description!
-			});
-		}
-
-		return modPlugins.ToArray();
+			IconUrl = project.icon_url,
+			License = project.license,
+			Name = project.title!,
+			Owner = project.author,
+			Slug = project.slug!,
+			DownloadCount = (uint)project.downloads,
+			LicenseUrl = project.license.StartsWith("LicenseRef")
+				? string.Empty
+				: $"https://spdx.org/licenses/{project.license}",
+			Description = project.description!
+		}).ToArray();
 	}
 
 	public override async Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
@@ -276,6 +266,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 	}
 
 	// ReSharper disable InconsistentNaming
+	// ReSharper disable ClassNeverInstantiated.Global
 	internal record VersionDependency(
 		string? version_id = null,
 		string? project_id = null,
@@ -305,24 +296,24 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		VersionFile[]? files = null);
 
 	internal record ProjectResult(
+		string project_id,
+		string project_type,
+		int downloads,
+		string author,
+		int follows,
+		DateTime date_created,
+		DateTime date_modified,
+		string license,
 		string? slug = null,
 		string? title = null,
 		string? description = null,
 		string[]? categories = null,
 		string? client_side = null,
 		string? server_side = null,
-		string? project_type = null,
-		int? downloads = null,
 		string? icon_url = null,
-		string? project_id = null,
-		string? author = null,
 		string[]? display_categories = null,
 		string[]? versions = null,
-		int? follows = null,
-		DateTime? date_created = null,
-		DateTime? date_modified = null,
 		string? latest_version = null,
-		string? license = null,
 		string[]? gallery = null,
 		string? featured_gallery = null);
 
@@ -373,5 +364,6 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		public int? Offset = offset;
 		public int? TotalHits = total_hits;
 	}
+	// ReSharper restore ClassNeverInstantiated.Global
 	// ReSharper restore InconsistentNaming
 }

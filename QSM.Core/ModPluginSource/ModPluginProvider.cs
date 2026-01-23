@@ -6,9 +6,7 @@ namespace QSM.Core.ModPluginSource;
 // False positive
 public abstract class ModPluginProvider
 {
-	protected static ServerMetadata? ServerMetadata => ServerMetadata.Selected;
-
-	public abstract Task<ModPluginInfo[]> SearchAsync(string query = "");
+	public abstract Task<ModPluginInfo[]> SearchAsync(string query = "", ServerMetadata? serverMetadata = null);
 
 	public abstract Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin);
 
@@ -16,8 +14,9 @@ public abstract class ModPluginProvider
 	///     Get available versions for
 	/// </summary>
 	/// <param name="slug">The project's slug</param>
+	/// <param name="serverMetadata"></param>
 	/// <returns>Returns a dictionary in a Version:DownloadUrl format</returns>
-	public abstract Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug);
+	public abstract Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug, ServerMetadata? serverMetadata = null);
 
 	public abstract Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod);
 

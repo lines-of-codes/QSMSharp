@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using QSM.Core.ServerSoftware;
+using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -23,9 +24,9 @@ public class PaperMCHangarProvider : ModPluginProvider
 		_httpClientFactory = httpClientFactory;
 	}
 
-	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug)
+	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug, ServerMetadata? serverMetadata = null)
 	{
-		if (ServerMetadata is null)
+		if (serverMetadata is null)
 		{
 			return [];
 		}
@@ -33,14 +34,14 @@ public class PaperMCHangarProvider : ModPluginProvider
 		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
 
 		VersionRequest response = await client.GetFromJsonAsync<VersionRequest>(
-			                          $"projects/{slug}/versions?platform={ServerMetadata.Software}&platformVersion={ServerMetadata.MinecraftVersion}")
+			                          $"projects/{slug}/versions?platform={serverMetadata.Software}&platformVersion={serverMetadata.MinecraftVersion}")
 		                          ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginDownloadInfo> versions = [];
 
 		foreach (ProjectVersionEntry version in response.Result!)
 		{
-			string platform = ServerMetadata.Software.ToString().ToUpperInvariant();
+			string platform = serverMetadata.Software.ToString().ToUpperInvariant();
 			HangarDownloadEntry downloadEntry = version.Downloads![platform];
 			_ = version.PluginDependencies!.TryGetValue(platform, out Dependency[]? dependencies);
 
@@ -69,20 +70,20 @@ public class PaperMCHangarProvider : ModPluginProvider
 				ExternalPageUrl = downloadEntry.ExternalUrl,
 				Dependencies = genericInfo.ToArray(),
 				Hash = downloadEntry.FileInfo.Sha256Hash,
-				HashAlgorithm = HashAlgorithm.SHA256
+				HashAlgorithm = HashAlgorithm.Sha256
 			});
 		}
 
 		return [.. versions];
 	}
 
-	public override async Task<ModPluginInfo[]> SearchAsync(string query = "")
+	public override async Task<ModPluginInfo[]> SearchAsync(string query = "", ServerMetadata? serverMetadata = null)
 	{
 		string route = "projects";
 
-		if (ServerMetadata is not null)
+		if (serverMetadata is not null)
 		{
-			route += $"?platform={ServerMetadata.Software}&version={ServerMetadata.MinecraftVersion}";
+			route += $"?platform={serverMetadata.Software}&version={serverMetadata.MinecraftVersion}";
 		}
 
 		if (!string.IsNullOrWhiteSpace(query))
@@ -125,7 +126,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 
 				if (dependency.ExternalPageUrl == null)
 				{
-					downloadUri = new Uri((await GetVersionsAsync(dependency.Name!)).First().DownloadUri!);
+					downloadUri = new Uri((await GetVersionsAsync(dependency.Name, null)).First().DownloadUri!);
 				}
 
 				return new ModPluginDownloadInfo.Dependency

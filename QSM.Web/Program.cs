@@ -86,6 +86,12 @@ internal class Program
 				$"lines-of-codes/QSMSharp/{Assembly.GetEntryAssembly()!.GetName().Version}-Web (linesofcodes@dailitation.xyz)");
 		});
 
+		builder.Services.AddHttpClient(CurseForgeProvider.HttpClientName, client =>
+		{
+			client.BaseAddress = new Uri(CurseForgeProvider.BaseAddress);
+			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
+		});
+
 		builder.Services.AddScoped<MarkdownPipeline>(services =>
 		{
 			MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
@@ -97,6 +103,7 @@ internal class Program
 
 		builder.Services.AddTransient<ModrinthProvider>();
 		builder.Services.AddTransient<PaperMCHangarProvider>();
+		builder.Services.AddTransient<CurseForgeProvider>();
 
 		builder.Services.AddSingleton(ApplicationConfig.LoadConfig() ?? new ApplicationConfig());
 		builder.Services.AddSingleton<ProcessManager>();

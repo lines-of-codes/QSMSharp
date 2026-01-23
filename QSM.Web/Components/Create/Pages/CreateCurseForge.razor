@@ -1,4 +1,4 @@
-@page "/Create/Modrinth"
+@page "/Create/CurseForge"
 @using System.ComponentModel.DataAnnotations
 @using Ganss.Xss
 @using Markdig
@@ -6,10 +6,10 @@
 @using QSM.Web.Data
 @using QSM.Web.Utilities
 
-@inject ModrinthProvider Modrinth
+@inject CurseForgeProvider Curse
 @inject MarkdownPipeline MarkPipe
 
-<PageTitle>Import Modrinth Modpack - QSM Web Console</PageTitle>
+<PageTitle>Import CurseForge Modpack - QSM Web Console</PageTitle>
 
 @if (_askMoreInfo)
 {
@@ -32,7 +32,7 @@
 }
 else if (_downloading)
 {
-    <ModrinthDownload SelectedVersion="_selectedVersion" Name="@CreationDataForm?.Name" ServerPath="@_targetFolderPreview" />
+    <CurseDownload SelectedVersion="_selectedVersion" Name="@CreationDataForm?.Name" ServerPath="@_targetFolderPreview" />
 }
 else
 {
@@ -82,11 +82,7 @@ else
                             <h2 class="m-0">@_selectedMod.Name</h2>
                             <p class="m-0">
                                 <strong>Downloads: </strong> @_selectedMod.DownloadCount.ToString("N0")<br/>
-                                <strong>Creator(s): </strong> @_selectedMod.Owner<br/>
-                                <strong>License: </strong>
-                                <a href="@_selectedMod.LicenseUrl" target="_blank" rel="noreferrer">
-                                    @_selectedMod.License
-                                </a>
+                                <strong>Author: </strong> @_selectedMod.Owner
                             </p>
                         </div>
                     </div>
@@ -136,10 +132,10 @@ else
     ModPluginDownloadInfo? _selectedVersion;
     MarkupString _selectedModDescription;
     string _targetFolderPreview = string.Empty;
-    bool _firstDownloadRender = true;
     bool _loadingContent;
     bool _askMoreInfo;
     bool _downloading;
+    uint _modpackClass;
     
     class SearchFormModel
     {
@@ -166,21 +162,22 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _modList = await Modrinth.SearchAsync(projectType: ModrinthProvider.ProjectType.Modpack);
+        _modpackClass = (await Curse.ListCategories()).First(c => c.Name == "Modpacks").Id;
+        _modList = await Curse.SearchAsync(classId: _modpackClass);
     }
 
     private async Task SearchSubmit()
     {
-        _modList = await Modrinth.SearchAsync(null, SearchForm?.Query ?? string.Empty, ModrinthProvider.ProjectType.Modpack);
+        _modList = await Curse.SearchAsync(SearchForm?.Query ?? string.Empty, _modpackClass);
     }
 
     private async Task ModpackSelected(ushort index)
     {
         _loadingContent = true;
-        _selectedMod = await Modrinth.GetDetailedInfoAsync(_modList[index]);
+        _selectedMod = await Curse.GetDetailedInfoAsync(_modList[index]);
         _selectedModDescription = (MarkupString)_sanitizer.Sanitize(Markdown.ToHtml(_selectedMod.LongDescription, MarkPipe));
         _loadingContent = false;
-        _downloadInfos = await Modrinth.GetVersionsAsync(_selectedMod.Slug);
+        _downloadInfos = await Curse.GetVersionsAsync(((uint)_selectedMod.Id!).ToString());
         SelectModpackForm?.Version = _downloadInfos[0].VersionId;
     }
 

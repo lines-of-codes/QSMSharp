@@ -9,7 +9,7 @@ public class ModPluginDownloadInfo
 	public string DisplayName = string.Empty;
 
 	/// <summary>
-	///     A boolean specifying whether or not this mod should be downloaded
+	///     A boolean specifying whether this mod should be downloaded
 	/// </summary>
 	public bool Download = true;
 

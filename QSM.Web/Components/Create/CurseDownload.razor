@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using QSM.Core
 @using QSM.Core.ModPluginSource
-@using QSM.Core.ModPluginSource.Modrinth
+@using QSM.Core.ModPluginSource.CurseForge
 @using QSM.Core.ServerSettings
 @using QSM.Core.ServerSoftware
 @using QSM.Core.Utilities
@@ -14,6 +14,7 @@
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject IHttpClientFactory HttpClientFactory
+@inject CurseForgeProvider Curse
 @inject ApplicationConfig AppConfig
 @inject NavigationManager NavMan
 @inject IJSRuntime Js
@@ -82,45 +83,36 @@ else
     {
         using var client = HttpClientFactory.CreateClient(ApplicationConfig.HttpDownloadClient);
 
-        try
+        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+        if (!response.IsSuccessStatusCode) return false;
+
+        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        await using var fileStream = File.Create(dest);
+
+        var buffer = new byte[8192];
+        long totalBytesRead = 0;
+        int bytesRead;
+
+        if (totalBytes == -1)
         {
-            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-
-            if (!response.IsSuccessStatusCode) return false;
-
-            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
-            await using var fileStream = File.Create(dest);
-
-            var buffer = new byte[8192];
-            long totalBytesRead = 0;
-            int bytesRead;
-
-            if (totalBytes == -1)
-            {
-                _downloadProgress[index].Percentage = null;
-            }
-
-            while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
-            {
-                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
-                totalBytesRead += bytesRead;
-
-                if (totalBytes == -1) continue;
-
-                _downloadProgress[index].Percentage = (double)totalBytesRead / totalBytes * 100;
-                await InvokeAsync(StateHasChanged);
-            }
-
-            return true;
+            _downloadProgress[index].Percentage = null;
         }
-        catch (HttpRequestException ex)
+
+        while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
         {
-            Log.Warning("{}", ex.Message);
-            await Task.Delay(1000);
-            return await DownloadFileAsync(index, url, dest);
+            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+            totalBytesRead += bytesRead;
+
+            if (totalBytes == -1) continue;
+            
+            _downloadProgress[index].Percentage = (double)totalBytesRead / totalBytes * 100;
+            await InvokeAsync(StateHasChanged);
         }
+
+        return true;
     }
     
     private async Task DownloadFileAsync(int index, string[] urls, string dest)
@@ -148,13 +140,13 @@ else
             return;
         }
 
-        if (!SelectedVersion.FileName.EndsWith(".mrpack"))
+        if (!SelectedVersion.FileName.EndsWith(".zip"))
         {
-            await Alert("Error: The modpack file does not have the expected \".mrpack\" file extension.");
+            await Alert("Error: The modpack file does not have the expected \".zip\" file extension.");
             return;
         }
 
-        _currentAction = "Downloading the \".mrpack\" file...";
+        _currentAction = "Downloading the \".zip\" file...";
 
         _downloadProgress.Add(new DownloadProgress(SelectedVersion.FileName, 0));
 
@@ -166,10 +158,10 @@ else
             return;
         }
         
-        // ModrinthProvider always return SHA512 hashes
-        using var sha512 = SHA512.Create();
+        // CurseForgeProvider always return SHA1 hashes
+        using var sha1 = SHA1.Create();
 
-        if (!File.Exists(packPath) || sha512.GetFileHashAsString(packPath) != SelectedVersion.Hash)
+        if (!File.Exists(packPath) || sha1.GetFileHashAsString(packPath) != SelectedVersion.Hash)
         {
             await DownloadFileAsync(0, SelectedVersion.DownloadUri, packPath);
         }
@@ -179,7 +171,7 @@ else
         _currentAction = "Verifying downloaded file...";
         StateHasChanged();
         
-        string fileHash = sha512.GetFileHashAsString(packPath);
+        var fileHash = sha1.GetFileHashAsString(packPath);
 
         if (SelectedVersion.Hash != fileHash)
         {
@@ -194,37 +186,35 @@ else
         StateHasChanged();
         var tempDir = FileSystemUtility.GetTemporaryDirectory();
 
-        var extractResult = await MrpackExtractor.ExtractAsync(packPath, tempDir);
+        var extractor = new CursePackExtractor();
+        var manifest = await extractor.ExtractAsync(packPath, tempDir);
 
         Directory.CreateDirectory(ServerPath);
 
         _currentAction = "Copying overrides...";
         StateHasChanged();
-        var copyOperation = MrpackExtractor.CopyOverrides(extractResult.ExtractLocation, ServerPath);
-
-        foreach (var op in copyOperation)
-        {
-            _currentAction = op.Operation;
-        }
+        extractor.CopyOverrides(ServerPath);
 
         _currentAction = "Downloading server software...";
         _showIndeterminate = false;
 
-        InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch
+        InfoFetcher api = manifest.Minecraft.PrimaryLoader.Software switch
         {
             ServerSoftwares.Fabric => new FabricFetcher(),
             ServerSoftwares.NeoForge => new NeoForgeFetcher(),
             ServerSoftwares.Forge => new ForgeFetcher(),
             _ => throw new InvalidOperationException("Unsupported server software")
         };
-        string url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);
+        var url = await api.GetDownloadUrlAsync(manifest.Minecraft.Version, manifest.Minecraft.PrimaryLoader.Version);
 
         _downloadProgress.Add(new DownloadProgress("server.jar", 0));
         StateHasChanged();
         
         await DownloadFileAsync(0, url, Path.Join(ServerPath, "server.jar"));
 
-        var downloadList = MrpackExtractor.GetModList(extractResult.Index, ServerPath);
+        _currentAction = "Downloading mods...";
+        StateHasChanged();
+        var downloadList = await Curse.GetDownloadQueueFromManifest(manifest, ServerPath);
         
         _downloadProgress.Clear();
 
@@ -265,11 +255,11 @@ else
         {
             ServerInstance server = new()
             {
-                MinecraftVersion = extractResult.Index.MinecraftVersion,
+                MinecraftVersion = manifest.Minecraft.Version,
                 Name = Name,
                 ServerPath = ServerPath,
-                ServerVersion = extractResult.Index.MinecraftSoftwareVersion,
-                Software = extractResult.Index.MinecraftServerSoftware,
+                ServerVersion = manifest.Minecraft.PrimaryLoader.Version,
+                Software = manifest.Minecraft.PrimaryLoader.Software,
                 Running = false
             };
             ctx.Servers.Add(server);

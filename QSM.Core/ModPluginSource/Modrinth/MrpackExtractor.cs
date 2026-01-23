@@ -6,7 +6,7 @@ using HashAlgorithm = QSM.Core.Utilities.HashAlgorithm;
 
 namespace QSM.Core.ModPluginSource.Modrinth;
 
-public class MrpackExtractor
+public static class MrpackExtractor
 {
 	public static async IAsyncEnumerable<MrpackOperation> Install(string file, string temp, string dest)
 	{
@@ -39,7 +39,7 @@ public class MrpackExtractor
 
 		Directory.CreateDirectory(dest);
 
-		await Task.Run(() => ZipFile.ExtractToDirectory(file, dest));
+		await ZipFile.ExtractToDirectoryAsync(file, dest);
 
 		string indexFile = Path.Combine(dest, "modrinth.index.json");
 
@@ -49,8 +49,9 @@ public class MrpackExtractor
 			throw new MrpackException("The .mrpack does not contain the modrinth.index.json file.");
 		}
 
+		await using FileStream indexStream = File.OpenRead(indexFile);
 		MrpackModrinthIndex? index =
-			JsonSerializer.Deserialize(File.ReadAllText(indexFile), MrpackContext.Default.MrpackModrinthIndex);
+			await JsonSerializer.DeserializeAsync(indexStream, MrpackContext.Default.MrpackModrinthIndex);
 
 		if (index is null)
 		{
@@ -86,7 +87,7 @@ public class MrpackExtractor
 			{
 				Destination = fullPath,
 				DownloadLocations = fileInfo.Downloads.ToArray(),
-				HashAlgorithm = HashAlgorithm.SHA512,
+				HashAlgorithm = HashAlgorithm.Sha512,
 				Hash = fileInfo.Hashes["sha512"]
 			});
 		}
