@@ -58,6 +58,7 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		{
 			StringBuilder name = new(file.DisplayName);
 
+			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
 			switch (file.ReleaseType)
 			{
 				case FileReleaseType.Alpha:
@@ -65,9 +66,6 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 					break;
 				case FileReleaseType.Beta:
 					name.Append(" (beta)");
-					break;
-				case FileReleaseType.Release:
-				default:
 					break;
 			}
 			

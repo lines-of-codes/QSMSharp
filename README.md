@@ -45,4 +45,3 @@ throw an exception due to being unauthorized.
 
 The project is licensed under the GNU GPLv3.
 
-The Starlight UI translations for the Thai language (`qsm-website/src/content/i18n/th.json`) is MIT licensed as it is the same file I added into the Starlight PR to officially add the translations into the framework.
