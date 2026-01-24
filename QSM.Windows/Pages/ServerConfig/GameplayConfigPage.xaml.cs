@@ -1,10 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ServerSettings;
-using QSM.Windows.Utilities;
 using System;
-using System.IO;
-using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -41,7 +38,7 @@ public sealed partial class GameplayConfigPage : Page
 		public bool AllowNether { get; set; } = true;
 	}
 
-	private Gameplay _settingsData = new();
+	private readonly Gameplay _settingsData = new();
 	private ServerProperties _serverProps;
 
 	public GameplayConfigPage()

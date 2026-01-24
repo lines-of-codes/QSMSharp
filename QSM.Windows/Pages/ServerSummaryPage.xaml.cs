@@ -90,12 +90,15 @@ public sealed partial class ServerSummaryPage : Page
 
 		if (settings.FirstRun)
 		{
-			if (_metadata.Software == ServerSoftwares.NeoForge) {
+			if (_metadata.Software == ServerSoftwares.NeoForge)
+			{
 				await new NeoForgeFetcher().InitializeOnFirstRun(
 					_metadata,
 					settings,
 					(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
-			} else if (_metadata.Software == ServerSoftwares.Forge) {
+			}
+			else if (_metadata.Software == ServerSoftwares.Forge)
+			{
 				await new ForgeFetcher().InitializeOnFirstRun(
 					_metadata,
 					settings,

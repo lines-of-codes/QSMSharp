@@ -27,7 +27,7 @@
 						</Grid.ColumnDefinitions>
 
 						<TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
-						<HyperlinkButton x:Uid="/Common/Download" NavigateUri="{x:Bind Url, Mode=OneWay}" Grid.Column="1" />
+						<HyperlinkButton x:Uid="/Common/Download" NavigateUri="{x:Bind Url, Mode=OneTime}" Grid.Column="1" />
 					</Grid>
 				</DataTemplate>
 			</ListView.ItemTemplate>

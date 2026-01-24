@@ -157,7 +157,7 @@ public sealed partial class CurseForgeImportPage : Page
 		{
 			var extraDownloads = new CurseExtraDownloads(downloadList.Skipped, Path.Join(serverDir, "mods"));
 			var missingDialog = extraDownloads.CreateDialog(this);
-		
+
 			await missingDialog.ShowAsync();
 		}
 

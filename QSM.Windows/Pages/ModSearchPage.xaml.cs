@@ -145,7 +145,7 @@ public sealed partial class ModSearchPage : Page
 			SelectButton.IsEnabled = true;
 			ConfirmButton.IsEnabled = true;
 		}
-		catch(HttpRequestException reqEx)
+		catch (HttpRequestException reqEx)
 		{
 			SelectButton.IsEnabled = false;
 			Log.Error("[GetVersionsAsync] {}", reqEx.Message);

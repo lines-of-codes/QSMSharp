@@ -1,8 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using Org.BouncyCastle.Asn1.Cms;
 using QSM.Core.ServerSettings;
-using QSM.Core.ServerSoftware;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -48,7 +46,7 @@ public sealed partial class ServerPerformanceConfigPage : Page
 		_serverProps = new ServerProperties(_metadata.ServerPropertiesFile);
 		_serverProps.Load();
 		_settings.Load(_serverProps);
-		
+
 		base.OnNavigatedTo(e);
 	}
 

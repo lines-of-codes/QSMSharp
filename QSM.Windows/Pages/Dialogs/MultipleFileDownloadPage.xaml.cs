@@ -79,7 +79,6 @@ public sealed partial class MultipleFileDownloadPage : Page
 		while (downloads.Count != 0)
 		{
 			var download = downloads.Dequeue();
-			var count = downloads.Count;
 
 			tasks.Add(Task.Run(async () =>
 			{

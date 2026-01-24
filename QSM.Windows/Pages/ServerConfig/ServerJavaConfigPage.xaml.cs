@@ -61,10 +61,9 @@ public sealed partial class ServerJavaConfigPage : Page
 		_metadataIndex = (int)e.Parameter;
 		_serverGuid = ApplicationData.Configuration.Servers[_metadataIndex].Guid;
 
-		if (ServerSettings.Java.JavaHome != string.Empty && JavaCheck.CheckJavaInstallation(ServerSettings.Java.JavaHome, out var javaInstall))
-			JavaLabel.Text = $"{javaInstall.Vendor} {javaInstall.Version}";
-		else
-			JavaLabel.Text = "None selected.";
+		JavaLabel.Text = ServerSettings.Java.JavaHome != string.Empty && JavaCheck.CheckJavaInstallation(ServerSettings.Java.JavaHome, out var javaInstall)
+			? $"{javaInstall.Vendor} {javaInstall.Version}"
+			: "None selected.";
 
 		JvmArgsInput.Text = ServerSettings.Java.JvmArgs;
 

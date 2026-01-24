@@ -401,3 +401,6 @@ FodyWeavers.xsd
 
 /QSM.Web/Data/app.db
 /QSM.Web/status/*
+
+# Inno Setup Output
+/QSM.Windows/Output/*.exe

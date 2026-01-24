@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Navigation;
 using Serilog;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
