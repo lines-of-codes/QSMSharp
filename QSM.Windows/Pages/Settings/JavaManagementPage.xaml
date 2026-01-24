@@ -17,20 +17,16 @@
         IsBackEnabled="False"
         IsBackButtonVisible="Collapsed">
         <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="ManageTab">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xEA37;" />
-                </NavigationViewItem.Icon>
-                
-                Manage
-            </NavigationViewItem>
-            <NavigationViewItem x:Name="DownloadTab">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE896;" />
-                </NavigationViewItem.Icon>
-                
-                Download
-            </NavigationViewItem>
+            <NavigationViewItem x:Name="ManageTab" x:Uid="/JavaManager/ManageTab">
+				<NavigationViewItem.Icon>
+					<FontIcon Glyph="&#xEA37;" />
+				</NavigationViewItem.Icon>
+			</NavigationViewItem>
+            <NavigationViewItem x:Name="DownloadTab" x:Uid="/Common/Download">
+				<NavigationViewItem.Icon>
+					<FontIcon Glyph="&#xE896;" />
+				</NavigationViewItem.Icon>
+			</NavigationViewItem>
         </NavigationView.MenuItems>
 
         <Frame x:Name="ContentFrame" />

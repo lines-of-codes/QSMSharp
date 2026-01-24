@@ -29,6 +29,9 @@ public sealed partial class NewServerPage : Page
 			case "ModrinthTab":
 				page = typeof(ModrinthImportPage);
 				break;
+			case "CurseForgeTab":
+				page = typeof(CurseForgeImportPage);
+				break;
 			case "ManualImportTab":
 				page = typeof(ImportLocalPage);
 				break;

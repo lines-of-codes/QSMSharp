@@ -16,6 +16,6 @@ public sealed partial class ModDownloadsConfirmPage : Page
 	public ModDownloadsConfirmPage(ModPluginDownloadInfo[] downloadList)
 	{
 		DownloadList = downloadList;
-		this.InitializeComponent();
+		InitializeComponent();
 	}
 }

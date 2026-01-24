@@ -26,7 +26,7 @@
         <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
         <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
         <WindowsPackageType>None</WindowsPackageType>
-        <Version>1.1.2</Version>
+        <Version>1.2.0</Version>
     </PropertyGroup>
     <ItemGroup>
         <None Remove="ChatAndCommandsConfigPage.xaml" />
@@ -37,6 +37,7 @@
         <None Remove="MultipleFileDownloadDialogContent.xaml" />
         <None Remove="NetworkConfigPage.xaml" />
         <None Remove="Pages\Dialogs\BackupCreationPage.xaml" />
+        <None Remove="Pages\Dialogs\CurseExtraDownloads.xaml" />
         <None Remove="Pages\Dialogs\FileDeletionConfirmationPage.xaml" />
         <None Remove="Pages\Dialogs\InfoDialog.xaml" />
         <None Remove="Pages\Dialogs\JavaPickerPage.xaml" />
@@ -157,6 +158,9 @@
         </Page>
         <Page Update="Pages\Dialogs\InfoDialog.xaml">
             <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Pages\Dialogs\CurseExtraDownloads.xaml">
+          <Generator>MSBuild:Compile</Generator>
         </Page>
         <None Update="Utilities\JavaCheck.jar">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

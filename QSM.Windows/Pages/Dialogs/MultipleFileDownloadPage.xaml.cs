@@ -76,7 +76,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 			Files.Add(new FileDownloadEntry());
 		}
 
-		while (downloads.Any())
+		while (downloads.Count != 0)
 		{
 			var download = downloads.Dequeue();
 			var count = downloads.Count;
@@ -84,14 +84,15 @@ public sealed partial class MultipleFileDownloadPage : Page
 			tasks.Add(Task.Run(async () =>
 			{
 				await semaphore.WaitAsync();
+				byte index;
+
+				lock (_indexQueue)
+				{
+					index = _indexQueue.Dequeue();
+				}
+
 				try
 				{
-					byte index;
-					lock (_indexQueue)
-					{
-						index = _indexQueue.Dequeue();
-					}
-
 					foreach (var uri in download.DownloadLocations)
 					{
 						var downloadResult = await DownloadFileAsync(uri, download.Destination, index);
@@ -116,7 +117,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 				{
 					lock (_indexQueue)
 					{
-						_indexQueue.Enqueue((byte)(count % 5));
+						_indexQueue.Enqueue(index);
 					}
 					semaphore.Release();
 				}

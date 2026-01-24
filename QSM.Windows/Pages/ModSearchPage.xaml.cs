@@ -16,9 +16,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace QSM.Windows;
 
 /// <summary>
@@ -60,6 +57,13 @@ public sealed partial class ModSearchPage : Page
 			Icon = "/Assets/ModPluginProvider/modrinth-logo.svg",
 			ProviderName = "Modrinth",
 			Provider = Program.Hoster.Services.GetService<ModrinthProvider>()
+		});
+
+		Providers.Add(new()
+		{
+			Icon = "/Assets/ModPluginProvider/curseforge-orange-logo.svg",
+			ProviderName = "CurseForge",
+			Provider = Program.Hoster.Services.GetService<CurseForgeProvider>()
 		});
 
 		ProviderSelector.SelectedIndex = 0;
@@ -124,20 +128,28 @@ public sealed partial class ModSearchPage : Page
 
 		VersionSelector.IsEnabled = true;
 
-		ModPluginDownloadInfo[] versions = await CurrentProvider.Provider.GetVersionsAsync(mod.Slug);
+		try
+		{
+			ModPluginDownloadInfo[] versions = await CurrentProvider.Provider.GetVersionsAsync(CurrentProvider.ProviderName == "CurseForge" ? mod.Id.ToString() : mod.Slug, ServerMetadata.Selected);
 
-		AvailableVersions.Clear();
-		AvailableVersions.AddRange(versions);
-		VersionSelector.SelectedIndex = 0;
+			AvailableVersions.Clear();
+			AvailableVersions.AddRange(versions);
+			VersionSelector.SelectedIndex = 0;
 
-		if (versions.Length == 0)
+			if (versions.Length == 0)
+			{
+				SelectButton.IsEnabled = false;
+				return;
+			}
+
+			SelectButton.IsEnabled = true;
+			ConfirmButton.IsEnabled = true;
+		}
+		catch(HttpRequestException reqEx)
 		{
 			SelectButton.IsEnabled = false;
-			return;
+			Log.Error("[GetVersionsAsync] {}", reqEx.Message);
 		}
-
-		SelectButton.IsEnabled = true;
-		ConfirmButton.IsEnabled = true;
 	}
 
 	private async void ModSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

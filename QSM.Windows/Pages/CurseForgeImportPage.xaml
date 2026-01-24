@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.Pages.CurseForgeImportPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:modplugin="using:QSM.Core.ModPluginSource"
+    xmlns:curseforge="using:QSM.Core.ModPluginSource.CurseForge"
+    mc:Ignorable="d">
+
+    <Grid Margin="30,20" RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Image Source="/Assets/ModPluginProvider/curseforge-orange-logo.svg" />
+
+            <AutoSuggestBox 
+                x:Name="ModpackSearchBox"
+                x:Uid="/Modrinth/SearchBox"
+                HorizontalAlignment="Stretch"
+                QueryIcon="Find"
+                QuerySubmitted="ModpackSearchBox_QuerySubmitted"
+                Grid.Column="1" />
+            
+            <ToggleButton 
+                x:Name="FilterButton"
+                Grid.Column="2" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch"
+                Checked="FilterButton_Checked"
+                Unchecked="FilterButton_Unchecked">
+                <FontIcon Glyph="&#xE71C;" FontSize="14" />
+            </ToggleButton>
+        </Grid>
+
+        <SplitView x:Name="FilterPane" 
+                   Grid.Row="1"
+                   DisplayMode="Inline">
+            <SplitView.Pane>
+                <ScrollView>
+                    <StackPanel Margin="30,20">
+                        <TextBlock x:Uid="/Modrinth/CategoriesTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <ListView 
+                            x:Name="FilterCategorySelector"
+                            SelectionMode="Multiple" 
+                            ItemsSource="{x:Bind _categories}"
+                            SelectionChanged="FilterCategorySelector_SelectionChanged">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="curseforge:CurseCategory">
+                                    <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Uid="/Modrinth/ModLoaderTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <ListView x:Name="ModLoaderSelector"
+                                  SelectionMode="Multiple"
+                                  SelectionChanged="ModLoaderSelector_SelectionChanged">
+							<x:String>Forge</x:String>
+                            <x:String>NeoForge</x:String>
+                            <x:String>Fabric</x:String>
+                        </ListView>
+                    </StackPanel>
+                </ScrollView>
+            </SplitView.Pane>
+            <SplitView
+                DisplayMode="Inline"
+                IsPaneOpen="True">
+                <SplitView.Pane>
+                    <ListView 
+                        ItemsSource="{x:Bind _searchResults, Mode=OneWay}"
+                        SelectionChanged="ModList_SelectionChanged"
+                        x:Name="ModList">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="modplugin:ModPluginInfo">
+                                <Grid Padding="0,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Image
+                                        Source="{x:Bind IconUrl}"
+                                        Grid.RowSpan="2"
+                                        Margin="6"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Width="32" />
+
+                                    <TextBlock
+                                        Text="{x:Bind Name}"
+                                        x:Phase="1"
+                                        Grid.Column="1"
+                                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                                    <TextBlock
+                                        Text="{x:Bind Description}"
+                                        x:Phase="2"
+                                        Grid.Row="1"
+                                        Grid.Column="1" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </SplitView.Pane>
+
+                <Grid Margin="15,5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <ImageIcon x:Name="ModIcon" Width="32" />
+                        <StackPanel Margin="8,0">
+                            <TextBlock x:Name="ModName" Style="{StaticResource TitleTextBlockStyle}" />
+                            <TextBlock x:Name="OwnerLabel" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock x:Name="ModLicense" Grid.Row="1" />
+                    <TextBlock x:Name="ModDownloadCount" Grid.Row="2" />
+                    <ScrollView Grid.Row="3">
+                        <toolkit:MarkdownTextBlock 
+                            HorizontalAlignment="Left"
+                            x:Name="ModDescription" 
+                            TextWrapping="WrapWholeWords"
+                            Background="Transparent" />
+                    </ScrollView>
+
+                    <StackPanel Spacing="8" Grid.Row="4">
+                        <ComboBox 
+                            x:Name="VersionSelector"
+                            ItemsSource="{x:Bind _availableVersions, Mode=OneWay}"
+                            IsEnabled="False">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="modplugin:ModPluginDownloadInfo">
+                                    <TextBlock Text="{x:Bind DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button 
+                            x:Name="ConfirmButton"
+                            x:Uid="/Modrinth/ConfirmButton"
+                            Click="ConfirmButton_Click"
+                            Style="{StaticResource AccentButtonStyle}" 
+                            IsEnabled="False" />
+                    </StackPanel>
+                </Grid>
+            </SplitView>
+        </SplitView>
+    </Grid>
+</Page>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="QSM.Windows.Pages.Dialogs.CurseExtraDownloads"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QSM.Windows.Pages.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:curse="using:QSM.Core.ModPluginSource.CurseForge"
+    mc:Ignorable="d">
+
+	<Grid RowSpacing="8">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<TextBlock x:Name="MissingModsReason" x:Uid="/CurseForge/MissingModsReason" TextWrapping="Wrap" />
+		<ListView ItemsSource="{x:Bind FileList, Mode=OneTime}" Grid.Row="1">
+			<ListView.ItemTemplate>
+				<DataTemplate x:DataType="curse:CurseMissingMod">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+						<HyperlinkButton x:Uid="/Common/Download" NavigateUri="{x:Bind Url, Mode=OneWay}" Grid.Column="1" />
+					</Grid>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+		<Button 
+			x:Name="OpenModsFolderBtn" 
+			x:Uid="/CurseForge/OpenModsFolderBtn" 
+			Click="OpenModsFolderBtn_Click" Grid.Row="2" />
+	</Grid>
+</Page>

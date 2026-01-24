@@ -23,6 +23,12 @@
                 </NavigationViewItem.Icon>
                 Modrinth
             </NavigationViewItem>
+			<NavigationViewItem x:Name="CurseForgeTab">
+				<NavigationViewItem.Icon>
+					<ImageIcon Source="/Assets/ModPluginProvider/curseforge-orange-logo.svg"/>
+				</NavigationViewItem.Icon>
+                CurseForge
+            </NavigationViewItem>
             <NavigationViewItem x:Name="ManualImportTab" x:Uid="/CreateServer/ManualImportTab">
 				<NavigationViewItem.Icon>
 					<FontIcon Glyph="&#xE8B5;" />

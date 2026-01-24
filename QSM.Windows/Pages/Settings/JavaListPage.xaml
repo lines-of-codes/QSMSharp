@@ -11,15 +11,19 @@
 
     <StackPanel>
         <CommandBar DefaultLabelPosition="Right">
-            <AppBarButton Icon="Add" Label="Import">
+            <AppBarButton Icon="Add" x:Uid="/Common/ImportLabel">
                 <AppBarButton.Flyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem Text="Zip Archive" x:Name="PickJavaZip" Click="PickJavaZip_Click" />
-                        <MenuFlyoutItem Text="Folder" x:Name="PickJavaFolder" Click="PickJavaFolder_Click" />
+                        <MenuFlyoutItem x:Uid="/JavaManager/PickJavaZip" x:Name="PickJavaZip" Click="PickJavaZip_Click" />
+                        <MenuFlyoutItem x:Uid="/JavaManager/PickJavaFolder" x:Name="PickJavaFolder" Click="PickJavaFolder_Click" />
                     </MenuFlyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
-            <AppBarButton Icon="Delete" Label="Remove" x:Name="DeleteJavaButton" Click="DeleteJavaButton_Click" />
+            <AppBarButton 
+                Icon="Delete" 
+                x:Uid="/JavaManager/DeleteJavaButton" 
+                x:Name="DeleteJavaButton" 
+                Click="DeleteJavaButton_Click" />
         </CommandBar>
         <ListView ItemsSource="{x:Bind JavaInstallations, Mode=OneWay}" x:Name="JavaInstallationList">
             <ListView.Header>
@@ -31,12 +35,12 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="Version" />
+                           x:Uid="/JavaManager/VersionColHead" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="Vendor"
+                           x:Uid="/JavaManager/VendorColHead"
                            Grid.Column="1" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="Path"
+                           x:Uid="/JavaManager/PathColHead"
                            Grid.Column="2" />
                 </Grid>
             </ListView.Header>
