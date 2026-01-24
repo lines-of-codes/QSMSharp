@@ -15,7 +15,7 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	public const string CurseKey = "$2a$10$kz4OPSZlWNbJLaJImOgTIOwfx3bnMshplbA1F5L2WiMuL5oq63o.q";
 
 	private const ushort MinecraftId = 432;
-	public async Task<Category[]> ListCategories()
+	public async Task<CurseCategory[]> ListCategories()
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		return (await client.GetFromJsonAsync<GetCategoriesResponse>($"categories?gameId={MinecraftId}"))!.Data;
@@ -58,17 +58,14 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		{
 			StringBuilder name = new(file.DisplayName);
 
-			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-			switch (file.ReleaseType)
+			if (file.ReleaseType == FileReleaseType.Alpha)
 			{
-				case FileReleaseType.Alpha:
-					name.Append(" (alpha)");
-					break;
-				case FileReleaseType.Beta:
-					name.Append(" (beta)");
-					break;
+				name.Append(" (alpha)");
+			} else if (file.ReleaseType == FileReleaseType.Beta)
+			{
+				name.Append(" (beta)");
 			}
-			
+
 			file.GameVersions.Sort();
 
 			name.Append(" (");
@@ -112,7 +109,8 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		return SearchAsync(query);
 	}
 
-	public async Task<ModPluginInfo[]> SearchAsync(string searchFilter = "", uint? classId = null, IEnumerable<uint>? categories = null, IEnumerable<ModLoaderType>? modLoaderTypes = null)
+	// Class ID 6 is "mc-mods" Category
+	public async Task<ModPluginInfo[]> SearchAsync(string searchFilter = "", uint? classId = 6, IEnumerable<uint>? categories = null, IEnumerable<ModLoaderType>? modLoaderTypes = null)
 	{
 		StringBuilder pathString = new($"mods/search?gameId={MinecraftId}&sortOrder=1");
 
@@ -169,32 +167,59 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 
 		return modPlugins.ToArray();
 	}
+
+	private async Task<Mod[]> GetMods(IEnumerable<uint> modIds)
+	{
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
+		HttpResponseMessage message = await client.PostAsJsonAsync("mods", new GetModsByIdsListRequestBody([.. modIds]));
+
+		return (await message.Content.ReadFromJsonAsync<GetModsResponse>() 
+			?? throw new NetworkResourceUnavailableException()).Data;
+	}
 	
-	public async Task<Queue<FileDownloadRequest>> GetDownloadQueueFromManifest(CursePackManifest manifest, string dest)
+	public async Task<(Queue<FileDownloadRequest> Queue, CurseMissingMod[] Skipped)> GetDownloadQueueFromManifest(CursePackManifest manifest, string dest)
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 
 		HttpResponseMessage message = await client.PostAsJsonAsync(
 			"mods/files", 
 			new GetModFilesRequestBody(
-				manifest.Files.Select(f => f.FileId).ToList()));
+				[.. manifest.Files.Select(f => f.FileId)]));
 		message.EnsureSuccessStatusCode();
 		
 		File[] response = (await message.Content.ReadFromJsonAsync<GetFilesResponse>())?.Data ?? throw new NetworkResourceUnavailableException();
 		string modsFolder = Path.Join(dest, "mods");
 
+		var rawSkipped = response.Where(f => f.DownloadUrl == null).ToArray();
+		CurseMissingMod[] skipped = new CurseMissingMod[rawSkipped.Length];
+
+		if (rawSkipped.Length > 0)
+		{
+			var skippedMods = await GetMods(rawSkipped.Select(f => f.ModId));
+
+
+			for (ushort i = 0; i < rawSkipped.Length; i++)
+			{
+				skipped[i] = new CurseMissingMod(skippedMods[i].Slug, $"{skippedMods[i].Name} - {rawSkipped[i].DisplayName}", rawSkipped[i].Id);
+			}
+		}
+
 		Directory.CreateDirectory(modsFolder);
 		
-		return new Queue<FileDownloadRequest>(response.Select(file => new FileDownloadRequest()
+		return (new Queue<FileDownloadRequest>(response.Where(f => f.DownloadUrl != null).Select(file => new FileDownloadRequest()
 		{
 			Destination = Path.Join(modsFolder, file.FileName),
-			DownloadLocations = [file.DownloadUrl],
+			DownloadLocations = [file.DownloadUrl!],
 			Hash = file.Hashes.First(h => h.Algo == CfHashAlgorithm.Sha1).Value,
 			HashAlgorithm = HashAlgorithm.Sha1
-		}));
+		})), skipped);
 	}
 
+	private record GetModsByIdsListRequestBody(uint[] modIds, bool? filterPcOnly = null);
+
 	private record GetModFilesRequestBody([UsedImplicitly] List<uint> fileIds);
+
+	private record GetModsResponse(Mod[] Data);
 
 	public enum ModLoaderType
 	{
@@ -207,21 +232,8 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		NeoForge
 	}
 
-	public record Category(
-		uint Id,
-		uint GameId,
-		string Name,
-		string Slug,
-		string Url,
-		string IconUrl,
-		string DateModified,
-		bool? IsClass,
-		uint? ClassId,
-		uint? ParentCategoryId,
-		int? DisplayIndex);
-
 	private record GetCategoriesResponse(
-		Category[] Data);
+		CurseCategory[] Data);
 
 	private record Pagination(
 		uint Index,
@@ -255,30 +267,30 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		ModLinks Links,
 		string Summary,
 		ulong DownloadCount,
-		Category[] Categories,
+		CurseCategory[] Categories,
 		ModAuthor[] Authors,
 		ModAsset Logo,
 		bool? AllowModDistribution);
 
-	private enum CfHashAlgorithm
+	public enum CfHashAlgorithm
 	{
 		Sha1 = 1,
 		Md5
 	}
 
 	[UsedImplicitly]
-	private record FileHash(
+	public record FileHash(
 		string Value,
 		CfHashAlgorithm Algo);
 
-	private enum FileReleaseType
+	public enum FileReleaseType
 	{
 		Release = 1,
 		Beta,
 		Alpha
 	}
 
-	private enum FileRelationType
+	public enum FileRelationType
 	{
 		EmbeddedLibrary = 1,
 		OptionalDependency,
@@ -289,18 +301,19 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	}
 
 	[UsedImplicitly]
-	private record FileDependency(
+	public record FileDependency(
 		uint ModId,
 		FileRelationType RelationType);
 
 	[UsedImplicitly]
-	private record File(
+	public record File(
 		uint Id,
+		uint ModId,
 		string DisplayName,
 		string FileName,
 		FileReleaseType ReleaseType,
 		FileHash[] Hashes,
-		string DownloadUrl,
+		string? DownloadUrl,
 		string[] GameVersions,
 		FileDependency[] Dependencies);
 
