@@ -123,4 +123,7 @@
   <data name="ImportLabel.Label" xml:space="preserve">
     <value>นำเข้า</value>
   </data>
+  <data name="Okay" xml:space="preserve">
+    <value>ตกลง</value>
+  </data>
 </root>
