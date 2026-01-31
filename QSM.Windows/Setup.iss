@@ -2,8 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
+#include "CodeDependencies.iss"
+
 #define MyAppName "QSM.Windows"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.2.1"
 #define MyAppPublisher "Satakun Utama"
 #define MyAppURL "https://linesofcodes.dailitation.xyz/QSMSharp/"
 #define MyAppExeName "QSM.Windows.exe"
@@ -34,7 +36,7 @@ LicenseFile=C:\Users\Satakun Utama\Downloads\gpl-3.0.rtf
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename=QSMWindows-x64-1.2.0
+OutputBaseFilename=QSMWindows-x64-1.2.1
 SolidCompression=yes
 WizardStyle=modern dynamic
 
@@ -85,3 +87,9 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
+[Code]
+function InitializeSetup: Boolean;
+begin
+  Dependency_AddDotNet100Desktop;
+  Result := True;
+end;
