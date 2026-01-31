@@ -6,6 +6,7 @@ using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -70,11 +71,21 @@ public sealed partial class ServerSummaryPage : Page
 	// skipcq: CS-R1005
 	private async void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-		if (string.IsNullOrWhiteSpace(ApplicationData.ServerSettings[_metadata.Guid].Java.JavaHome))
+		var settings = ApplicationData.ServerSettings[_metadata.Guid];
+
+		if (string.IsNullOrWhiteSpace(settings.Java.JavaHome))
 		{
-			await InfoDialog.CreateDialog("Java Not Selected", "A Java installation hasn't been selected for this server instance. Please select one in the Configuration › Java menu.", this).ShowAsync();
-			Log.Error($"Java install not set for server instance. (Server \"{_metadata.Name}\")");
-			return;
+			var defaultJava = ApplicationData.Configuration.JavaInstallations.FirstOrDefault();
+
+			if (defaultJava == null)
+			{
+				await InfoDialog.CreateDialog("Java Not Selected", "No registered Java installation. Please add one in the Settings › Manage Java menu.", this).ShowAsync();
+				Log.Error($"No registed Java installation (Server \"{_metadata.Name}\")");
+				return;
+			}
+
+			settings.Java.JavaHome = defaultJava;
+			await settings.SaveJsonAsync(_metadata.QsmConfigFile);
 		}
 
 		StartButton.IsEnabled = false;
@@ -85,8 +96,6 @@ public sealed partial class ServerSummaryPage : Page
 		var dialog = loadingPage.CreateDialog(this, "Starting server...");
 
 		_ = dialog.ShowAsync();
-
-		var settings = ApplicationData.ServerSettings[_metadata.Guid];
 
 		if (settings.FirstRun)
 		{

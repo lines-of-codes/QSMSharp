@@ -115,6 +115,12 @@ public partial class ForgeFetcher : InfoFetcher
 		process.BeginErrorReadLine();
 
 		await process.WaitForExitAsync();
+
+		var newServerFile = Path.Join(metadata.ServerPath, $"minecraft_server.{metadata.MinecraftVersion}.jar");
+		if (File.Exists(newServerFile))
+		{
+			File.Move(newServerFile, serverJar);
+		}
 	}
 
 	internal record ForgeVersions(bool? IsSnapshot = null, string[]? Versions = null);

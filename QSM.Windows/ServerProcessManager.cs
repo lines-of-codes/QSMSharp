@@ -51,13 +51,14 @@ public class ServerProcessManager
 
 		ProcessOutputs[serverGuid] = [];
 
-		string args = $"{settings.Java.JvmArgs} -jar \"{Path.Combine(metadata.ServerPath, "server.jar")}\" {programArgs}";
+		var serverJar = Path.Join(metadata.ServerPath, "server.jar");
+		string args = $"{settings.Java.JvmArgs} -jar \"{serverJar}\" {programArgs}";
 
 		if (metadata.Software == ServerSoftwares.NeoForge)
 		{
 			args = $"{settings.Java.JvmArgs} @libraries/net/neoforged/neoforge/{metadata.ServerVersion}/win_args.txt {programArgs}";
 		}
-		else if (metadata.Software == ServerSoftwares.Forge)
+		else if (metadata.Software == ServerSoftwares.Forge && !File.Exists(serverJar))
 		{
 			args = $"{settings.Java.JvmArgs} @libraries/net/minecraftforge/forge/{metadata.MinecraftVersion}-{metadata.ServerVersion}/win_args.txt {programArgs}";
 		}
