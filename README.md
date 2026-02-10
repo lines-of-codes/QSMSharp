@@ -45,3 +45,5 @@ throw an exception due to being unauthorized.
 
 The project is licensed under the GNU GPLv3.
 
+QSM.Windows/CodeDependencies.iss is from [InnoDependencyInstaller](https://github.com/DomGries/InnoDependencyInstaller)
+and is licensed under CPOL 1.02.

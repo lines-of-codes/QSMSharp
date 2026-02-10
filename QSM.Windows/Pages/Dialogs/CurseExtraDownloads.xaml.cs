@@ -22,16 +22,14 @@ public sealed partial class CurseExtraDownloads : Page
 
 	public ContentDialog CreateDialog(Page page, string title = "Missing Mod(s)")
 	{
-		var loader = new ResourceLoader();
+		var loader = new ResourceLoader("QSM.Windows.pri", "Common");
 
 		ContentDialog dialog = new()
 		{
 			XamlRoot = page.XamlRoot,
 			Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
 			Title = title,
-			PrimaryButtonText = "Okay",
-			SecondaryButtonText = loader.GetString("/CurseForge/OpenModsFolderBtn/Content"),
-			IsSecondaryButtonEnabled = false,
+			PrimaryButtonText = loader.GetString("/Okay"),
 			DefaultButton = ContentDialogButton.Primary,
 			Content = this
 		};
