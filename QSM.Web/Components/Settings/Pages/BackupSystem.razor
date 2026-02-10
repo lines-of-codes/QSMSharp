@@ -7,7 +7,9 @@
 @using System.Runtime.InteropServices
 @using Microsoft.AspNetCore.Authorization
 @using Octokit
+@using QSM.Core.Backups.QuickBackupSystem
 @using QSM.Web.Data
+@using Tomlyn
 @using ZstdSharp
 
 @attribute [Authorize(Roles = "Owner")]
@@ -29,7 +31,7 @@ else
     <div>QBS is not installed.</div>
 }
 
-<EditForm FormName="InstallForm" Model="InstallFormData" class="d-flex gap-2" OnSubmit="Install">
+<EditForm FormName="InstallForm" Model="InstallFormData" class="d-flex gap-2 mb-2" OnSubmit="Install">
     <select @bind="InstallFormData?.Version" class="form-select">
         @foreach (var rel in _availableVersions)
         {
@@ -39,15 +41,42 @@ else
     <button class="btn btn-primary" disabled="@_installing">Install</button>
 </EditForm>
 
+<EditForm FormName="ConfigForm" Model="ConfigFormData">
+    <div class="row">
+        <div class="mb-3 col-md-6">
+            <label for="archiveFormat">Archive Format</label>
+            <select @bind="ConfigFormData?.Archive" id="archiveFormat" class="form-select">
+                <option value="tar">Tar</option>
+                <option value="zip">Zip</option>
+            </select>
+        </div>
+        <div class="mb-3 col-md-6">
+            <label for="archiveDirectory">Archive Directory</label>
+            <InputText type="text" id="archiveDirectory" class="form-control" @bind-Value="ConfigFormData!.ArchiveDir" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="mb-3 col-md-6">
+            <label for="compression">Compression</label>
+            <select id="compression">
+                <option value="gzip">Gzip</option>
+                <option value="deflate">Deflate</option>
+            </select>
+        </div>
+    </div>
+</EditForm>
+
 @if (_installing)
 {
-    <p class="mt-2">Installing QBSGo, Please do not leave this page until the process is finished.</p>
+    <p class="mt-2">Installing qbsgo, Please do not leave this page until the process is finished.</p>
 }
 
 @code {
     [SupplyParameterFromForm] private InstallForm? InstallFormData { get; set; }
+    [SupplyParameterFromForm] private ConfigForm? ConfigFormData { get; set; }
 
     IReadOnlyList<Release> _availableVersions = [];
+    BackupConfig _backupConfig = new();
     string _installPath = string.Empty;
     string _installedVersion = string.Empty;
     bool _installed;
@@ -59,7 +88,8 @@ else
 
         InstallFormData ??= new InstallForm();
 
-        _installPath = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "qbs/qbsgo");
+        var appData = ApplicationConfig.GetDefaultAppDataFolder();
+        _installPath = Path.Join(appData, "qbs/qbsgo");
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -67,6 +97,28 @@ else
         }
 
         _installed = File.Exists(_installPath);
+
+        if (!_installed) return;
+        var configFile = Path.Join(appData, "qbs/qbsgo.toml");
+
+        if (!File.Exists(configFile))
+        {
+            ConfigFormData ??= new ConfigForm();
+            return;
+        }
+            
+        _backupConfig = Toml.ToModel<BackupConfig>(File.ReadAllText(configFile), configFile, new TomlModelOptions()
+        {
+            ConvertPropertyName = s => s[0].ToString().ToLowerInvariant() + s[1..]
+        });
+        ConfigFormData ??= new ConfigForm()
+        {
+            Archive = _backupConfig.Archive,
+            ArchiveDir = _backupConfig.ArchiveDir,
+            Compression = _backupConfig.Compression,
+            CompressionLevel = _backupConfig.CompressionLevel,
+            DeleteAfterUpload = _backupConfig.DeleteAfterUpload
+        };
     }
 
     protected override async Task OnInitializedAsync()
@@ -112,7 +164,7 @@ else
         };
 
         string os;
-        string archiveFormat = "tar.zst";
+        var archiveFormat = "tar.zst";
         if (OperatingSystem.IsWindows())
         {
             os = "windows";
@@ -169,6 +221,15 @@ else
     class InstallForm
     {
         [Required] public string? Version { get; set; }
+    }
+    
+    private class ConfigForm
+    {
+        [Required] public string Archive { get; set; } = "tar";
+        [Required] public string ArchiveDir { get; set; } = "/tmp/";
+        [Required] public string Compression { get; set; } = "gzip";
+        [Required] public int CompressionLevel { get; set; } = 9;
+        public bool DeleteAfterUpload { get; set; } = true;
     }
 
 }

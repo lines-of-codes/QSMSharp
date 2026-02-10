@@ -2,11 +2,11 @@
 
 public abstract class InfoFetcher
 {
-	protected Dictionary<string, string[]> buildInfoCache = [];
-	protected string[] minecraftVersionsCache = [];
+	protected readonly Dictionary<string, string[]> BuildInfoCache = [];
+	protected string[] MinecraftVersionsCache = [];
 
+	public virtual string HttpClientName => "InfoFetcher";
 	public virtual string FirstRunArgs => "";
-	public virtual string HttpClientName => "InfoFetcherApi";
 	public virtual string HttpBaseAddress => "";
 
 	public abstract Task<string[]> FetchAvailableMinecraftVersionsAsync();

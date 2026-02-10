@@ -16,9 +16,9 @@ public partial class ForgeFetcher : InfoFetcher
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
-		if (minecraftVersionsCache.Length != 0)
+		if (MinecraftVersionsCache.Length != 0)
 		{
-			return minecraftVersionsCache;
+			return MinecraftVersionsCache;
 		}
 
 		ForgeVersions? response =
@@ -40,15 +40,15 @@ public partial class ForgeFetcher : InfoFetcher
 			}
 		}
 		
-		minecraftVersionsCache = supportedVersions.ToArray();
-		Array.Reverse(minecraftVersionsCache);
+		MinecraftVersionsCache = supportedVersions.ToArray();
+		Array.Reverse(MinecraftVersionsCache);
 
-		return minecraftVersionsCache;
+		return MinecraftVersionsCache;
 	}
 
 	public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
-		if (buildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
+		if (BuildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
 		{
 			return Task.FromResult(buildInfo);
 		}
@@ -66,9 +66,9 @@ public partial class ForgeFetcher : InfoFetcher
 
 		versions.Reverse();
 
-		buildInfoCache[minecraftVersion] = versions.ToArray();
+		BuildInfoCache[minecraftVersion] = versions.ToArray();
 
-		return Task.FromResult(buildInfoCache[minecraftVersion]);
+		return Task.FromResult(BuildInfoCache[minecraftVersion]);
 	}
 
 	[GeneratedRegex("1\\..+-")]

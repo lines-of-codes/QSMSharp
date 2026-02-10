@@ -19,7 +19,7 @@ public class PaperMCFetcher : InfoFetcher
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
-		if (buildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
+		if (BuildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
 		{
 			return buildInfo;
 		}
@@ -34,16 +34,16 @@ public class PaperMCFetcher : InfoFetcher
 
 		string[] builds = Array.ConvertAll(response.Builds!, num => num.ToString());
 
-		buildInfoCache[minecraftVersion] = builds;
+		BuildInfoCache[minecraftVersion] = builds;
 
 		return builds;
 	}
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
-		if (minecraftVersionsCache.Length != 0)
+		if (MinecraftVersionsCache.Length != 0)
 		{
-			return minecraftVersionsCache;
+			return MinecraftVersionsCache;
 		}
 
 		ProjectInformation? response = await _httpClient.GetFromJsonAsync<ProjectInformation>(_prefixPath);
@@ -53,9 +53,9 @@ public class PaperMCFetcher : InfoFetcher
 
 		var versionList = response.Versions!.Select(pair => pair.Value).SelectMany(arr => arr);
 
-		minecraftVersionsCache = versionList.ToArray();
+		MinecraftVersionsCache = versionList.ToArray();
 
-		return minecraftVersionsCache;
+		return MinecraftVersionsCache;
 	}
 
 	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)

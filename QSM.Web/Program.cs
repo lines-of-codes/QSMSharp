@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using QSM.Core.ModPluginSource;
+using QSM.Core.ServerSoftware;
 using QSM.Web.Components;
 using QSM.Web.Components.Account;
 using QSM.Web.Data;
@@ -67,7 +68,6 @@ internal class Program
 			.AddDefaultTokenProviders();
 
 		// HTTP Clients
-
 		builder.Services.AddHttpClient(ModrinthProvider.HttpClientName, client =>
 		{
 			client.BaseAddress = new Uri(ModrinthProvider.BaseAddress);

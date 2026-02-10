@@ -22,7 +22,7 @@ public class ApplicationConfig
 			return "/usr/local/etc/qsm-web/";
 
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-			return "C:\\ProgramData\\QSMWeb\\";
+			return @"C:\ProgramData\QSMWeb\";
 		// TODO: Add default path for macOS
 
 		return string.Empty;

@@ -21,9 +21,9 @@ public class VanillaFetcher : InfoFetcher
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
-		if (minecraftVersionsCache.Length != 0)
+		if (MinecraftVersionsCache.Length != 0)
 		{
-			return minecraftVersionsCache;
+			return MinecraftVersionsCache;
 		}
 
 		PasteMystPaste? paste = await _pasteMystClient.GetPasteAsync("1m9xuwik");
@@ -46,9 +46,9 @@ public class VanillaFetcher : InfoFetcher
 			_downloadUrls[entry[0]] = entry[1];
 		}
 
-		minecraftVersionsCache = versions.ToArray();
+		MinecraftVersionsCache = versions.ToArray();
 
-		return minecraftVersionsCache;
+		return MinecraftVersionsCache;
 	}
 
 	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)

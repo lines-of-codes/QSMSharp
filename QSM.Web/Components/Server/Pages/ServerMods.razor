@@ -1,16 +1,53 @@
 @page "/Server/{Id:int:min(0)}/Mods"
 @using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
+@implements IAsyncDisposable
 
-@inject NavigationManager NavigationManager
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime Js
 @inject ILogger<ServerMods> Logger
 
 <PageTitle>Mods - QSM Web Console</PageTitle>
 
 <h1>Mods/Plugins</h1>
 
-<table class="table table-hover" id="serverList">
+<div class="d-flex justify-content-between">
+    <p class="text-secondary m-0">
+    @if (_selectionMode)
+    {
+        <span>Hold Ctrl to select multiple items, Shift to select in ranges between two items.</span>
+    }
+    </p>
+    <div>
+        <button class=@(_selectionMode ? "btn btn-danger" : "btn btn-primary") @onclick="SelectionModeToggle">
+            @(_selectionMode ? "Exit " : "")Selection Mode
+        </button>
+    </div>
+</div>
+
+@if (_selectionMode)
+{
+    <div class="sticky-top bg-dark-subtle p-2 mt-2 rounded-3 d-flex justify-content-between align-items-center" style="top: 64px;">
+        <div>
+            <button class="btn btn-outline-primary" @onclick="MassEnable">Enable</button>
+            <button class="btn btn-outline-secondary" @onclick="MassDisable">Disable</button>
+            <button class="btn btn-outline-danger" @onclick="MassDelete">Delete</button>
+        </div>
+        <div class="pe-2">
+            @if (_selectedMods.Count > 0)
+            {
+                <span>@_selectedMods.Count @(_selectedMods.Count == 1 ? "item" : "items") selected</span>
+            }
+            else
+            {
+                <span>No item selected.</span>
+            }
+        </div>
+    </div>
+}
+
+<table class=@(_selectionMode ? "table table-hover user-select-none" : "table table-hover") id="serverList">
     <thead>
     <tr>
         <th scope="col">Enabled</th>
@@ -20,8 +57,10 @@
     <tbody>
     @foreach (var mod in _files)
     {
-        <tr>
-            <td><input type="checkbox" checked="@(_modsEnabled[mod])" @onchange="evt => ToggleMod(evt, mod)" /></td>
+        if (!_modsEnabled.ContainsKey(mod)) continue;
+        
+        <tr class=@(_selectedMods.Contains(mod) ? "table-primary" : "") @onclick="() => SelectMod(mod)">
+            <td><input type="checkbox" disabled=@(_selectionMode) checked="@(_modsEnabled[mod])" @onchange="evt => ToggleMod(evt, mod)" /></td>
             <td>@(Path.GetFileName(mod))</td>
         </tr>
     }
@@ -36,6 +75,12 @@
     private ServerInstance _server = new();
     private string[] _files = [];
     private Dictionary<string, bool> _modsEnabled = [];
+    private HashSet<string> _selectedMods = [];
+    private DotNetObjectReference<ServerMods>? _objRef;
+    bool _ctrlKey;
+    bool _shiftKey;
+    string? _lastSelected;
+    private bool _selectionMode;
 
     protected override void OnInitialized()
     {
@@ -60,6 +105,22 @@
             .ToDictionary();
 
         _files = _modsEnabled.Keys.ToArray();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _objRef = DotNetObjectReference.Create(this);
+        await Js.InvokeVoidAsync("keyDownListener.initialize", _objRef);
+        await Js.InvokeVoidAsync("keyUpListener.initialize", _objRef);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Js.InvokeVoidAsync("keyDownListener.dispose");
+        await Js.InvokeVoidAsync("keyUpListener.dispose");
+        _objRef?.Dispose();
     }
 
     private string TrimPath(string path)
@@ -92,15 +153,146 @@
 
     private void ToggleMod(ChangeEventArgs evt, string mod)
     {
-        var newValue = (bool?)evt.Value;
+        var newValue = (bool?)evt.Value ?? false;
+
+        if (_selectionMode)
+        {
+            foreach (var item in _selectedMods)
+            {
+                Logger.LogInformation("{}", item);
+                ToggleMod(newValue, mod);
+            }
+            return;
+        }
+        
+        ToggleMod(newValue, mod);
+    }
+
+    private void ToggleMod(bool newValue, string mod)
+    {
         var index = Array.FindIndex(_files, path => path == mod);
         
-        if (newValue == false)
+        if (!newValue)
         {
             DisableMod(index);
             return;
         }
         EnableMod(index);
+    }
+
+    private void SelectMod(string mod)
+    {
+        if (!_selectionMode) return;
+        
+        if (_ctrlKey)
+        {
+            if (!_selectedMods.Add(mod))
+            {
+                _selectedMods.Remove(mod);
+            }
+
+            _lastSelected = mod;
+        } else if (_shiftKey)
+        {
+            if (_lastSelected == null)
+            {
+                _selectedMods.Clear();
+                _selectedMods.Add(mod);
+                _lastSelected = mod;
+                return;
+            }
+
+            var firstIndex = _files.IndexOf(_lastSelected);
+            var newIndex = _files.IndexOf(mod);
+
+            if (firstIndex == -1 || newIndex == -1) return;
+            
+            _selectedMods.Clear();
+            _selectedMods = new HashSet<string>(_files[Math.Min(firstIndex, newIndex)..Math.Max(firstIndex + 1, newIndex + 1)]);
+
+            _lastSelected = mod;
+        }
+        else
+        {
+            if (_selectedMods.Count == 1 && _selectedMods.Contains(mod))
+            {
+                _selectedMods.Clear();
+                _lastSelected = null;
+            }
+            else
+            {
+                _selectedMods.Clear();
+                _selectedMods.Add(mod);
+                _lastSelected = mod;
+            }
+        }
+    }
+
+    private void MassEnable()
+    {
+        foreach (var mod in _selectedMods.Where(m => !_modsEnabled[m]))
+        {
+            var index = _files.IndexOf(mod);
+            if (index == -1) continue;
+            
+            EnableMod(index);
+            _modsEnabled[mod] = true;
+        }
+    }
+    
+    private void MassDisable()
+    {
+        foreach (var mod in _selectedMods.Where(m => !m.EndsWith(DisabledSuffix)))
+        {
+            var index = _files.IndexOf(mod);
+            if (index == -1) continue;
+            
+            DisableMod(index);
+            _modsEnabled[mod] = false;
+        }
+    }
+
+    private void MassDelete()
+    {
+        foreach (var mod in _selectedMods)
+        {
+            var index = _files.IndexOf(mod);
+            if (index == -1) continue;
+            
+            File.Delete(mod);
+            _modsEnabled.Remove(mod);
+        }
+    }
+
+    [JSInvokable]
+    public void OnKeyDown(string key)
+    {
+        _ctrlKey = "Control" == key;
+        _shiftKey = "Shift" == key;
+    }
+    
+    [JSInvokable]
+    public void OnKeyUp(string key)
+    {
+        switch (key)
+        {
+            case "Control":
+                _ctrlKey = false;
+                break;
+            case "Shift":
+                _shiftKey = false;
+                break;
+        }
+    }
+
+    private void SelectionModeToggle()
+    {
+        if (_selectionMode)
+        {
+            _selectedMods.Clear();
+        }
+        
+        _selectionMode = !_selectionMode;
     }
 
 }
