@@ -1,7 +1,7 @@
 ﻿using SharpCompress.Archives;
 using SharpCompress.Archives.Tar;
 using SharpCompress.Common;
-using SharpCompress.Writers;
+using SharpCompress.Writers.Tar;
 using System.Formats.Tar;
 using System.IO.Pipelines;
 using ZstdSharp;
@@ -48,11 +48,11 @@ public static class TarArchiver
 
 	public static void SharpCompressTar(string folderPath, string dest, CompressionFormat format)
 	{
-		using TarArchive archive = TarArchive.Create();
+		using IWritableArchive<TarWriterOptions> archive = TarArchive.CreateArchive();
 		archive.AddAllFromDirectory(folderPath);
 		archive.SaveTo(
 			File.Create(dest),
-			new WriterOptions(format switch
+			new TarWriterOptions(format switch
 			{
 				CompressionFormat.Deflate => CompressionType.GZip,
 				CompressionFormat.BZip2 => CompressionType.BZip2,

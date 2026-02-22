@@ -1,7 +1,7 @@
 ﻿using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
-using SharpCompress.Writers;
+using SharpCompress.Writers.Zip;
 
 namespace QSM.Core.Backups;
 
@@ -18,9 +18,9 @@ public static class ZipArchiver
 
 	public static void CompressDirectory(string folderPath, string dest, CompressionFormat compressionFormat)
 	{
-		using ZipArchive archive = ZipArchive.Create();
+		using IWritableArchive<ZipWriterOptions> archive = ZipArchive.CreateArchive();
 		archive.AddAllFromDirectory(folderPath);
-		archive.SaveTo(dest, new WriterOptions(compressionFormat switch
+		archive.SaveTo(dest, new ZipWriterOptions(compressionFormat switch
 		{
 			CompressionFormat.None => CompressionType.None,
 			CompressionFormat.Deflate => CompressionType.Deflate,
