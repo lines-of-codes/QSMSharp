@@ -7,14 +7,11 @@ public class SimpleCache<T>(TimeSpan cacheTime)
 {
 	public T? Value
 	{
-		get
-		{
-			return DateTime.Now - _cachedAt >= cacheTime ? default : field;
-		}
+		get => DateTime.UtcNow - _cachedAt >= cacheTime ? default : field;
 		set
 		{
 			field = value;
-			_cachedAt = DateTime.Now;
+			_cachedAt = DateTime.UtcNow;
 		}
 	}
 

@@ -64,7 +64,9 @@ public class ProcessManager
 				_serverOutput[server.Id].Add(output);
 				OutputReceived?.Invoke(server.Id, output);
 			};
-			switch (server.Software)
+			// Intended to do nothing for software that requires nothing
+			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+			switch (server.Software) // skipcq: CS-W1009
 			{
 				case ServerSoftwares.NeoForge:
 					await new NeoForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
@@ -90,7 +92,9 @@ public class ProcessManager
 
 		string serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "server.jar")}\"";
 		
-		switch (server.Software)
+		// Intended to do nothing for software that requires nothing
+		// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+		switch (server.Software) // skipcq: CS-W1009
 		{
 			case ServerSoftwares.NeoForge:
 				{

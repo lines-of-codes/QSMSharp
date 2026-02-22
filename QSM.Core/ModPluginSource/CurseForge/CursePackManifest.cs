@@ -11,13 +11,13 @@ public class CursePackManifest
 	[JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
 	[JsonPropertyName("version")] public string Version { get; set; } = string.Empty;
 	[JsonPropertyName("author")] public string Author { get; set; } = string.Empty;
-	[JsonPropertyName("files")] public File[] Files { get; set; } = [];
+	[JsonPropertyName("files")] public List<File> Files { get; set; } = [];
 	[JsonPropertyName("overrides")] public string Overrides { get; set; } = "overrides";
 
 	public struct MinecraftInfo
 	{
 		[JsonPropertyName("version")] public string Version { get; set; }
-		[JsonPropertyName("modLoaders")] public ModLoader[] ModLoaders { get; set; }
+		[JsonPropertyName("modLoaders")] public List<ModLoader> ModLoaders { get; set; }
 
 		public ModLoader PrimaryLoader => ModLoaders.First(m => m.Primary);
 	}
