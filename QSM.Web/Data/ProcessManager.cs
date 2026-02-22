@@ -17,8 +17,8 @@ public class ProcessManager
 
 	public class OutputCache(OutputType type, string message)
 	{
-		public OutputType Type = type;
-		public string Message = message;
+		public readonly OutputType Type = type;
+		public readonly string Message = message;
 	}
 
 	private readonly Dictionary<int, Process> _processes = [];
@@ -37,7 +37,7 @@ public class ProcessManager
 	/// <exception cref="Exception">Failure to load the server's configuration</exception>
 	public async Task RunAsync(ServerInstance server)
 	{
-		if (Processes.TryGetValue(server.Id, out var process) && !process.HasExited)
+		if (Processes.TryGetValue(server.Id, out Process? process) && !process.HasExited)
 		{
 			await StopAsync(server.Id);
 		}
@@ -58,22 +58,23 @@ public class ProcessManager
 
 		if (settings.FirstRun)
 		{
-			if (server.Software == ServerSoftwares.NeoForge)
+			DataReceivedEventHandler onDataReceived = (_, e) =>
 			{
-				await new NeoForgeFetcher().InitializeOnFirstRun(server, settings, (_, e) =>
-				{
-					OutputCache output = new(OutputType.Normal, e.Data ?? string.Empty);
-					_serverOutput[server.Id].Add(output);
-					OutputReceived?.Invoke(server.Id, output);
-				});
-			} else if (server.Software == ServerSoftwares.Forge)
+				OutputCache output = new(OutputType.Normal, e.Data ?? string.Empty);
+				_serverOutput[server.Id].Add(output);
+				OutputReceived?.Invoke(server.Id, output);
+			};
+			switch (server.Software)
 			{
-				await new ForgeFetcher().InitializeOnFirstRun(server, settings, (_, e) =>
-				{
-					OutputCache output = new(OutputType.Normal, e.Data ?? string.Empty);
-					_serverOutput[server.Id].Add(output);
-					OutputReceived?.Invoke(server.Id, output);
-				});
+				case ServerSoftwares.NeoForge:
+					await new NeoForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
+					break;
+				case ServerSoftwares.Forge:
+					await new ForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
+					break;
+				case ServerSoftwares.Quilt:
+					await new QuiltFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
+					break;
 			}
 			settings.FirstRun = false;
 			await settings.SaveJsonAsync(server.ConfigPath);
@@ -87,19 +88,30 @@ public class ProcessManager
 		if (settings.Java.MaxMemoryPoolSize > 0)
 			args += $"-Xmx{settings.Java.MaxMemoryPoolSize}G ";
 
-		args +=
-			$"{settings.Java.JvmArgs} -jar \"{Path.Combine(server.ServerPath!, "server.jar")}\" {settings.Java.ProgramArgs}";
-
-		if (server.Software == ServerSoftwares.NeoForge)
+		string serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "server.jar")}\"";
+		
+		switch (server.Software)
 		{
-			string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
-			args =
-				$"{settings.Java.JvmArgs} @libraries/net/neoforged/neoforge/{server.ServerVersion}/{argsFile} {settings.Java.ProgramArgs}";
-		} else if (server.Software == ServerSoftwares.Forge)
-		{
-			string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
-			args = $"{settings.Java.JvmArgs} @libraries/net/minecraftforge/forge/{server.MinecraftVersion}-{server.ServerVersion}/{argsFile} {settings.Java.ProgramArgs}";
+			case ServerSoftwares.NeoForge:
+				{
+					string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
+					serverJar =
+						$"@libraries/net/neoforged/neoforge/{server.ServerVersion}/{argsFile}";
+					break;
+				}
+			case ServerSoftwares.Forge:
+				{
+					string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
+					serverJar = $"@libraries/net/minecraftforge/forge/{server.MinecraftVersion}-{server.ServerVersion}/{argsFile}";
+					break;
+				}
+			case ServerSoftwares.Quilt:
+				serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "quilt-server-launch.jar")}\"";
+				break;
 		}
+		
+		args +=
+			$"{settings.Java.JvmArgs} {serverJar} {settings.Java.ProgramArgs}";
 
 		var startInfo = new ProcessStartInfo
 		{

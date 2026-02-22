@@ -1,15 +1,20 @@
-using System.Runtime.Serialization;
+using Tomlyn;
 
 namespace QSM.Core.Backups.QuickBackupSystem;
 
 public class BackupConfig
 {
+	public static readonly TomlModelOptions TomlModelOptions = new()
+	{
+		ConvertPropertyName = s => s[0].ToString().ToLowerInvariant() + s[1..]
+	};
+	
 	public string Archive { get; set; } = "tar";
 	public string ArchiveDir { get; set; } = "/tmp/";
 	public string Compression { get; set; } = "gzip";
 	public int CompressionLevel { get; set; } = 9;
 	public bool DeleteAfterUpload { get; set; } = true;
-	public BackupList? BackupList { get; set; }
+	public BackupList BackupList { get; set; } = new();
 
 	public Dictionary<string, BackupRemote> Remotes { get; set; } = [];
 	

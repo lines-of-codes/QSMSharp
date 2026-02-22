@@ -135,8 +135,10 @@
 
         if (lastMessageExist)
         {
-            var lastMessage = messageList?.LastOrDefault((msg) => msg.Message != string.Empty)?.Message;
+            var lastMessage = messageList?.LastOrDefault(msg => msg.Message != string.Empty)?.Message;
             _lastOutput = lastMessage ?? string.Empty;
+            if (_lastOutput.Contains("You need to agree to the EULA in order to run the server. Go to eula.txt for more info."))
+                _eulaPrompt = true;
         } else if (server.Running)
         {
             _lastOutput = "...";

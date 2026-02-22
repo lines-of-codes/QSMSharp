@@ -14,17 +14,7 @@ namespace QSM.Web.Components.Create.Pages;
 [UsedImplicitly]
 public partial class CreateServer : ComponentBase
 {
-	private readonly Dictionary<ServerSoftwares, InfoFetcher> _infoFetchers = new()
-	{
-		{ ServerSoftwares.Paper, new PaperMCFetcher("paper") },
-		{ ServerSoftwares.Purpur, new PurpurFetcher() },
-		{ ServerSoftwares.Vanilla, new VanillaFetcher() },
-		{ ServerSoftwares.Fabric, new FabricFetcher() },
-		{ ServerSoftwares.NeoForge, new NeoForgeFetcher() },
-		{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") },
-		{ ServerSoftwares.Folia, new PaperMCFetcher("folia") },
-		{ ServerSoftwares.Forge, new ForgeFetcher() }
-	};
+	private Dictionary<ServerSoftwares, InfoFetcher> _infoFetchers = null!;
 
 	private bool _isProcessing;
 	private string _processingMessage = string.Empty;
@@ -38,6 +28,18 @@ public partial class CreateServer : ComponentBase
 
 	protected override void OnInitialized()
 	{
+		_infoFetchers = new Dictionary<ServerSoftwares, InfoFetcher>
+		{
+			{ ServerSoftwares.Paper, new PaperMCFetcher("paper") },
+			{ ServerSoftwares.Purpur, new PurpurFetcher() },
+			{ ServerSoftwares.Vanilla, new VanillaFetcher() },
+			{ ServerSoftwares.Fabric, new FabricFetcher(HttpClientFactory) },
+			{ ServerSoftwares.NeoForge, new NeoForgeFetcher() },
+			{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") },
+			{ ServerSoftwares.Folia, new PaperMCFetcher("folia") },
+			{ ServerSoftwares.Forge, new ForgeFetcher() },
+			{ ServerSoftwares.Quilt, new QuiltFetcher(HttpClientFactory) }
+		};
 		Model ??= new NewServerModel();
 		Model.Path = GetDefaultServerPath();
 		_targetFolderPreview = Model.Path;

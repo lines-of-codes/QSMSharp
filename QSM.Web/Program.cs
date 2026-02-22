@@ -91,6 +91,20 @@ internal class Program
 			client.BaseAddress = new Uri(CurseForgeProvider.BaseAddress);
 			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
 		});
+		
+		InfoFetcher[] fetchers =
+		[
+			new FabricFetcher(null!),
+			new QuiltFetcher(null!)
+		];
+
+		foreach (InfoFetcher fetcher in fetchers)
+		{
+			builder.Services.AddHttpClient(fetcher.HttpClientName, client =>
+			{
+				client.BaseAddress = new Uri(fetcher.HttpBaseAddress);
+			});
+		}
 
 		builder.Services.AddScoped<MarkdownPipeline>(services =>
 		{

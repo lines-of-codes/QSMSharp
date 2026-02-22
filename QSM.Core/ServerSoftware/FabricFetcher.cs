@@ -1,47 +1,39 @@
-﻿using System.Net.Http.Json;
+﻿using JetBrains.Annotations;
+using System.Net.Http.Json;
 
 namespace QSM.Core.ServerSoftware;
 
-public class FabricFetcher : InfoFetcher
+public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 {
-	private readonly HttpClient httpClient;
-
-	public FabricFetcher()
-	{
-		httpClient = new HttpClient { BaseAddress = new Uri("https://meta.fabricmc.net/") };
-	}
+	public override string HttpClientName => "FabricFetcher";
+	public override string HttpBaseAddress => "https://meta.fabricmc.net/";
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
-		if (buildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
+		if (BuildInfoCache.TryGetValue(minecraftVersion, out string[]? buildInfo))
 		{
 			return buildInfo;
 		}
 
+		using HttpClient client = factory.CreateClient(HttpClientName);
 		AvailableFabricVersion[]? response =
-			await httpClient.GetFromJsonAsync<AvailableFabricVersion[]>($"/v2/versions/loader/{minecraftVersion}");
+			await client.GetFromJsonAsync<AvailableFabricVersion[]>($"/v2/versions/loader/{minecraftVersion}");
 
-		List<string> loaders = [];
+		BuildInfoCache[minecraftVersion] = response!.Select(e => e.Loader!.Version!).ToArray();
 
-		foreach (AvailableFabricVersion entry in response!)
-		{
-			loaders.Add(entry!.Loader!.Version!);
-		}
-
-		buildInfoCache[minecraftVersion] = loaders.ToArray();
-
-		return buildInfoCache[minecraftVersion];
+		return BuildInfoCache[minecraftVersion];
 	}
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
-		if (minecraftVersionsCache.Length != 0)
+		if (MinecraftVersionsCache.Length != 0)
 		{
-			return minecraftVersionsCache;
+			return MinecraftVersionsCache;
 		}
 
+		using HttpClient client = factory.CreateClient(HttpClientName);
 		SupportedMinecraftVersion[]? response =
-			await httpClient.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game");
+			await client.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game");
 
 		if (response == null)
 		{
@@ -58,41 +50,40 @@ public class FabricFetcher : InfoFetcher
 			}
 		}
 
-		minecraftVersionsCache = versions.ToArray();
+		MinecraftVersionsCache = versions.ToArray();
 
-		return minecraftVersionsCache;
+		return MinecraftVersionsCache;
 	}
 
 	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		FabricInstaller[]? response = await httpClient.GetFromJsonAsync<FabricInstaller[]>("/v2/versions/installer");
+		using HttpClient client = factory.CreateClient(HttpClientName);
+		FabricInstaller[]? response = await client.GetFromJsonAsync<FabricInstaller[]>("/v2/versions/installer");
 
-		if (response == null)
-		{
-			throw new NetworkResourceUnavailableException();
-		}
-
-		return
-			$"https://meta.fabricmc.net/v2/versions/loader/{minecraftVersion}/{build}/{response[0].Version}/server/jar";
+		return response == null ? throw new NetworkResourceUnavailableException() : $"https://meta.fabricmc.net/v2/versions/loader/{minecraftVersion}/{build}/{response[0].Version}/server/jar";
 	}
 
-	internal record class FabricInstaller(
+	[UsedImplicitly]
+	private record FabricInstaller(
 		string? Url = null,
 		string? Maven = null,
 		string? Version = null,
 		bool? Stable = null);
 
-	internal record class FabricLoader(
+	[UsedImplicitly]
+	private record FabricLoader(
 		string? Separator = null,
 		int? Build = null,
 		string? Maven = null,
 		string? Version = null,
 		bool? Stable = null);
 
-	internal record class AvailableFabricVersion(
+	[UsedImplicitly]
+	private record AvailableFabricVersion(
 		FabricLoader? Loader = null);
 
-	internal record class SupportedMinecraftVersion(
+	[UsedImplicitly]
+	private record SupportedMinecraftVersion(
 		string? Version = null,
 		bool? Stable = null);
 }

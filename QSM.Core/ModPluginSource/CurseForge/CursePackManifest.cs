@@ -32,6 +32,7 @@ public class CursePackManifest
 			"fabric" => ServerSoftwares.Fabric,
 			"forge" => ServerSoftwares.Forge,
 			"neoforge" => ServerSoftwares.NeoForge,
+			"quilt" => ServerSoftwares.Quilt,
 			_ => throw new ArgumentOutOfRangeException()
 		};
 

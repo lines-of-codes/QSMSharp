@@ -32,6 +32,7 @@ public class MrpackModrinthIndex
 	{
 		"neoforge" => ServerSoftwares.NeoForge,
 		"fabric-loader" => ServerSoftwares.Fabric,
+		"quilt-loader" => ServerSoftwares.Quilt,
 		"forge" => ServerSoftwares.Forge,
 		_ => throw new InvalidOperationException()
 	};

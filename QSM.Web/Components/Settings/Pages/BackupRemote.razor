@@ -1,0 +1,81 @@
+@page "/Settings/BackupSystem/Remote/{Name}"
+
+@using QSM.Core.Backups.QuickBackupSystem
+@using QSM.Web.Data
+@using Tomlyn
+@using BackupRemoteData = QSM.Core.Backups.QuickBackupSystem.BackupRemote;
+
+@inject NavigationManager NavMan
+
+<PageTitle>Remote "@Name" - QSM Web Console</PageTitle>
+
+<a href="/Settings/BackupSystem" class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover transition-250">
+    <i class="bi bi-arrow-left"></i>
+    Back to "Backup System"
+</a>
+
+<h1>@Name</h1>
+
+<EditForm Model="Remote" OnValidSubmit="Save">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="type">Type</label>
+            <InputSelect @bind-Value="Remote!.Type" id="type" class="form-select">
+                <option value="nextcloud">Nextcloud</option>
+                <option value="copyparty">Copyparty</option>
+            </InputSelect>
+        </div>
+        <div class="col-md-6">
+            <label for="root">Root URL</label>
+            <InputText @bind-Value="Remote!.Root" id="root" class="form-control" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="user">Username</label>
+            <InputText @bind-Value="Remote!.User" id="user" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label for="destDir">Destination Directory</label>
+            <InputText @bind-Value="Remote!.DestDir" id="destDir" class="form-control" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="password">Password</label>
+            <InputText type="password" @bind-Value="Remote!.Password" id="password" class="form-control" />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [SupplyParameterFromForm] private BackupRemoteData? Remote { get; set; }
+
+    BackupConfig _config = null!;
+    string _configFile = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _configFile = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "qbs/qbsgo.toml");
+        _config = Toml.ToModel<BackupConfig>(File.ReadAllText(_configFile), _configFile, BackupConfig.TomlModelOptions);
+
+        if (_config.Remotes.TryGetValue(Name, out var remote))
+        {
+            Remote = remote;
+        }
+        
+        Remote ??= new BackupRemoteData();
+    }
+
+    private async Task Save()
+    {
+        if (Remote == null) return;
+        
+        _config.Remotes[Name] = Remote;
+        await File.WriteAllTextAsync(_configFile, Toml.FromModel(_config, BackupConfig.TomlModelOptions));
+        NavMan.NavigateTo("Settings/BackupSystem");
+    }
+
+}

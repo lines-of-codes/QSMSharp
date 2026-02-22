@@ -200,9 +200,10 @@ else
 
         InfoFetcher api = manifest.Minecraft.PrimaryLoader.Software switch
         {
-            ServerSoftwares.Fabric => new FabricFetcher(),
+            ServerSoftwares.Fabric => new FabricFetcher(HttpClientFactory),
             ServerSoftwares.NeoForge => new NeoForgeFetcher(),
             ServerSoftwares.Forge => new ForgeFetcher(),
+            ServerSoftwares.Quilt => new QuiltFetcher(HttpClientFactory),
             _ => throw new InvalidOperationException("Unsupported server software")
         };
         var url = await api.GetDownloadUrlAsync(manifest.Minecraft.Version, manifest.Minecraft.PrimaryLoader.Version);
@@ -223,7 +224,7 @@ else
             _downloadProgress.Add(new DownloadProgress("", 0));
         }
 
-        var tasks = new Task[downloadList.Count];
+        var tasks = new Task[downloadList.Queue.Count];
         for (var i = 0; i < tasks.Length; i++)
         {
             var progressIndex = i % AppConfig.ConcurrentDownloads;
@@ -232,9 +233,9 @@ else
                 await _downloadSemaphore.WaitAsync();
                 FileDownloadRequest item;
 
-                lock (downloadList)
+                lock (downloadList.Queue)
                 {
-                    item = downloadList.Dequeue();
+                    item = downloadList.Queue.Dequeue();
                 }
 
                 _downloadProgress[progressIndex].Name = Path.GetFileName(item.Destination);

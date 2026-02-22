@@ -121,6 +121,12 @@ else
             await Task.Delay(1000);
             return await DownloadFileAsync(index, url, dest);
         }
+        catch (IOException ex)
+        {
+            Log.Warning("{}", ex.Message);
+            await Task.Delay(1000);
+            return await DownloadFileAsync(index, url, dest);
+        }
     }
     
     private async Task DownloadFileAsync(int index, string[] urls, string dest)
@@ -212,9 +218,10 @@ else
 
         InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch
         {
-            ServerSoftwares.Fabric => new FabricFetcher(),
+            ServerSoftwares.Fabric => new FabricFetcher(HttpClientFactory),
             ServerSoftwares.NeoForge => new NeoForgeFetcher(),
             ServerSoftwares.Forge => new ForgeFetcher(),
+            ServerSoftwares.Quilt => new QuiltFetcher(HttpClientFactory),
             _ => throw new InvalidOperationException("Unsupported server software")
         };
         string url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);

@@ -55,7 +55,7 @@
 
 @code {
 
-    public List<ServerInstance> Servers { get; set; } = [];
+    private List<ServerInstance> Servers { get; set; } = [];
 
     protected override void OnInitialized()
     {
@@ -73,17 +73,16 @@
     ///     A greeting which can be good morning, afternoon, and
     ///     evening.
     /// </returns>
-    private string GetGreeting(string? name)
+    private static string GetGreeting(string? name)
     {
         var hours = DateTime.Now.Hour;
-        string greeting;
 
-        if (hours > 19)
-            greeting = "Good evening";
-        else if (hours >= 12)
-            greeting = "Good afternoon";
-        else
-            greeting = "Good morning";
+        var greeting = hours switch
+        {
+            > 19 => "Good evening",
+            >= 12 => "Good afternoon",
+            _ => "Good morning"
+        };
 
         if (name == null)
             return greeting + '.';

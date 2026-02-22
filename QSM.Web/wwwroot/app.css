@@ -168,3 +168,7 @@ main .top-row a:first-child {
 #modDetails img {
     max-width: 100%;
 }
+
+.transition-250 {
+    transition: 250ms;
+}

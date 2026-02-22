@@ -1,0 +1,96 @@
+@page "/Settings/BackupSystem/Target/{Id:int}"
+
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.Backups.QuickBackupSystem
+@using QSM.Web.Data
+@using Tomlyn
+
+@inject NavigationManager NavMan
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<PageTitle>Target "@_server?.Name" - QSM Web Console</PageTitle>
+
+<a href="/Settings/BackupSystem" class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover transition-250">
+    <i class="bi bi-arrow-left"></i>
+    Back to "Backup System"
+</a>
+
+<h1>@_server?.Name</h1>
+
+<EditForm Model="Target" OnValidSubmit="Save">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="interval" class="fw-bold">Interval</label>
+            <p>
+                Example values include "daily", "weekly", or "monthly".
+                See <a href="https://man.archlinux.org/man/systemd.time.7#CALENDAR_EVENTS" target="_blank">systemd.time(7)</a> for full details.
+            </p>
+            <InputText @bind-Value="Target!.Interval" id="interval" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label for="remote" class="fw-bold">Remote</label>
+            <InputSelect @bind-Value="Target!.Remote" id="remote" class="form-select">
+                @foreach (var remote in _config.Remotes)
+                {
+                    <option value="@remote.Key">@remote.Key</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <p>
+                <strong>Path</strong><br/>
+                @Target.Path
+            </p>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [SupplyParameterFromForm] private BackupTarget? Target { get; set; }
+
+    BackupConfig _config = null!;
+    ServerInstance? _server;
+    string _configFile = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _configFile = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "qbs/qbsgo.toml");
+        _config = Toml.ToModel<BackupConfig>(File.ReadAllText(_configFile), _configFile, BackupConfig.TomlModelOptions);
+
+        if (_config.Targets.TryGetValue(Id.ToString(), out var target))
+        {
+            Target = target;
+        }
+        
+        Target ??= new BackupTarget();
+        Target.Remote = _config.Remotes.Keys.FirstOrDefault() ?? string.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+        _server = await ctx.Servers.FindAsync(Id);
+
+        if (_server == null)
+        {
+            NavMan.NavigateTo("Settings/BackupSystem");
+            return;
+        }
+
+        Target!.Path = _server.ServerPath ?? string.Empty;
+    }
+
+    private async Task Save()
+    {
+        if (Target == null) return;
+        
+        _config.Targets[Id.ToString()] = Target;
+        await File.WriteAllTextAsync(_configFile, Toml.FromModel(_config, BackupConfig.TomlModelOptions));
+        NavMan.NavigateTo("Settings/BackupSystem?InstallService=true");
+    }
+
+}

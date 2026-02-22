@@ -1,0 +1,462 @@
+@page "/Settings/BackupSystem"
+
+@using System.Diagnostics
+@using System.Formats.Tar
+@using System.IO.Compression
+@using System.Runtime.InteropServices
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Octokit
+@using QSM.Core.Backups.QuickBackupSystem
+@using QSM.Web.Components.Shared
+@using QSM.Web.Data
+@using Tomlyn
+@using ZstdSharp
+
+@attribute [Authorize(Roles = "Owner")]
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<PageTitle>Backup System - QSM Web Console</PageTitle>
+
+<h2>Backup System</h2>
+
+<p>
+    The Quick Backup System (QBS) program is used as the main backup system for QSM.
+</p>
+
+@if (_installed)
+{
+    <div>QBS @_installedVersion is installed!</div>
+    <button @onclick="Reinstall" class="btn btn-primary my-3">Reinstall/Change Version</button>
+}
+else
+{
+    <div>QBS is not installed.</div>
+}
+
+@if (!_installed || _reinstall)
+{
+    <EditForm FormName="InstallForm" Model="InstallFormData" class="d-flex gap-2 mb-2" OnSubmit="Install">
+        <InputSelect @bind-Value="InstallFormData" class="form-select">
+            @foreach (var rel in _availableVersions)
+            {
+                <option value="@rel.TagName">@rel.TagName</option>
+            }
+        </InputSelect>
+        <button class="btn btn-primary" disabled="@_installing">Install</button>
+    </EditForm>
+}
+
+@if (_installed)
+{
+    <h3>Settings</h3>
+    
+    <EditForm FormName="ConfigForm" Model="ConfigFormData" OnValidSubmit="SaveSettings">
+        <div class="row">
+            <div class="mb-2 col-md-6">
+                <label for="archiveFormat">Archive Format</label>
+                <InputSelect @bind-Value="ConfigFormData!.Archive" id="archiveFormat" class="form-select">
+                    <option value="tar">Tar</option>
+                    <option value="zip">Zip</option>
+                </InputSelect>
+            </div>
+            <div class="mb-2 col-md-6">
+                <label for="archiveDirectory">Archive Directory</label>
+                <InputText id="archiveDirectory" class="form-control" @bind-Value="ConfigFormData!.ArchiveDir" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="mb-2 col-md-6">
+                <label for="compression">Compression</label>
+                <InputSelect id="compression" class="form-select" @bind-Value="ConfigFormData.Compression">
+                    <option value="none">None</option>
+                    @switch (ConfigFormData.Archive)
+                    {
+                        case "tar":
+                            <option value="gzip">Gzip</option>
+                            <option value="zstd">Zstandard</option>
+                            break;
+                        case "zip":
+                            <option value="deflate">Deflate</option>
+                            break;
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-2 col-md-6">
+                <label for="compressionLevel">Compression Level</label>
+                <InputNumber id="compressionLevel" class="form-control" 
+                       @bind-Value="ConfigFormData.CompressionLevel" 
+                       disabled="@(ConfigFormData.Compression != "gzip")" 
+                       min="1" max="9" />
+            </div>
+        </div>
+        <div class="form-check mb-3">
+            <InputCheckbox class="form-check-input" id="deleteAfterUpload" @bind-Value="ConfigFormData.DeleteAfterUpload" />
+            <label class="form-check-label" for="deleteAfterUpload">Delete After Upload</label>
+        </div>
+        
+        <h4>Backup List</h4>
+        <div class="form-check mb-2">
+            <InputCheckbox class="form-check-input" id="cleanEntries" @bind-Value="ConfigFormData.BackupList.CleanEntries" />
+            <label for="cleanEntries" class="form-check-label">Clean Entries</label>
+        </div>
+        <div class="mb-3 col-md-6">
+            <label for="olderThan">Older Than</label>
+            <InputText class="form-control" id="olderThan" disabled="@(!ConfigFormData.BackupList.CleanEntries)" @bind-Value="ConfigFormData.BackupList.OlderThan" />
+        </div>
+        
+        <div class="row">
+            <h4 class="col-md-6">Remotes</h4>
+            <div class="col-md-6 d-flex gap-2">
+                <InputText @bind-Value="NewRemoteName" class="form-control" placeholder="New Remote Name" />
+                <a href="/Settings/BackupSystem/Remote/@NewRemoteName" aria-disabled="@(string.IsNullOrWhiteSpace(NewRemoteName))" class="btn btn-primary">Create</a>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>URL</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var remote in ConfigFormData.Remotes)
+            {
+                <tr>
+                    <td>@remote.Key</td>
+                    <td>@remote.Value.Root</td>
+                    <td class="d-flex gap-2">
+                        <a class="btn text-primary-emphasis" href="/Settings/BackupSystem/Remote/@remote.Key">
+                            <i class="bi bi-pencil-square" role="img" aria-label="Edit"></i>
+                        </a>
+                        <button type="button" class="btn text-danger" @onclick="() => ConfigFormData.Remotes.Remove(remote.Key)"><i class="bi bi-trash" role="img" aria-label="Delete"></i></button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        
+        <div class="row">
+            <h4 class="col-md-6">Targets</h4>
+            <div class="col-md-6 d-flex gap-2">
+                <InputSelect @bind-Value="NewTargetId" class="form-select">
+                    @foreach (var server in _servers)
+                    {
+                        <option value="@server.Id">@server.Name</option>
+                    }
+                </InputSelect>
+                <a class="btn btn-primary" 
+                   href="/Settings/BackupSystem/Target/@NewTargetId" 
+                   aria-disabled="@(string.IsNullOrWhiteSpace(NewRemoteName))">Add</a>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Remote</th>
+                <th>Interval</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var remote in ConfigFormData.Targets)
+            {
+                var serverName = TryGetServerName(remote.Key);
+                <tr>
+                    <td>@remote.Key</td>
+                    <td>@(serverName ?? "N/A")</td>
+                    <td>@remote.Value.Remote</td>
+                    <td>@remote.Value.Interval</td>
+                    <td class="d-flex gap-2">
+                        @if (serverName != null)
+                        {
+                            <a class="btn text-primary-emphasis" href="/Settings/BackupSystem/Target/@remote.Key">
+                                <i class="bi bi-pencil-square" role="img" aria-label="Edit"></i>
+                            </a>
+                        }
+                        <button type="button" class="btn text-danger"
+                                @onclick="() => RemoveTarget(remote.Key)">
+                            <i class="bi bi-trash" role="img" aria-label="Delete"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        
+        <button type="submit" class="btn btn-primary mb-3" disabled="@_saving">
+            Save Changes
+        </button>
+    </EditForm>
+}
+
+<pre>
+    @_commandLog
+</pre>
+
+<Toast @ref="_savedToast" Title="Saved">
+    Changes saved!
+</Toast>
+
+@if (_installing)
+{
+    <p class="mt-2">Installing qbsgo, Please do not leave this page until the process is finished.</p>
+    <NavigationLock />
+}
+
+@code {
+    [SupplyParameterFromQuery] public bool InstallService { get; set; }
+    
+    [SupplyParameterFromForm(FormName = "InstallForm")] private string? InstallFormData { get; set; }
+    [SupplyParameterFromForm(FormName = "ConfigForm")] private BackupConfig? ConfigFormData { get; set; }
+    
+    private string NewRemoteName { get; set; } = string.Empty;
+    private int NewTargetId { get; set; }
+    
+    IReadOnlyList<Release> _availableVersions = [];
+    Dictionary<int, ServerInstance> _serverMap = [];
+    List<ServerInstance> _servers = [];
+    BackupSystem? _backupSystem;
+    string _installPath = string.Empty;
+    string _installedVersion = string.Empty;
+    string _configFile = string.Empty;
+    string _commandLog = string.Empty;
+    bool _installed;
+    bool _installing;
+    bool _reinstall;
+    bool _saving;
+    Toast _savedToast = null!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        InstallFormData ??= string.Empty;
+
+        var appData = ApplicationConfig.GetDefaultAppDataFolder();
+        _installPath = Path.Join(appData, "qbs/qbsgo");
+        _backupSystem = new BackupSystem(_installPath);
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _installPath += ".exe";
+        }
+
+        _installed = File.Exists(_installPath);
+
+        if (!_installed) return;
+        _configFile = Path.Join(appData, "qbs/qbsgo.toml");
+
+        if (!File.Exists(_configFile))
+        {
+            ConfigFormData ??= new BackupConfig();
+            return;
+        }
+            
+        ConfigFormData = Toml.ToModel<BackupConfig>(File.ReadAllText(_configFile), _configFile, BackupConfig.TomlModelOptions);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!_installed)
+        {
+            await GetAvailableVersionsAsync();
+            return;
+        }
+
+        await CheckVersion();
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+        _servers = await ctx.Servers.ToListAsync();
+        _serverMap = _servers.ToDictionary(s => s.Id);
+        NewTargetId = _servers.FirstOrDefault()?.Id ?? 0;
+    }
+
+    private async Task GetAvailableVersionsAsync()
+    {
+        var client = new GitHubClient(new ProductHeaderValue("QSMSharp"));
+        var releases = await client.Repository.Release.GetAll("lines-of-codes", "qbsgo");
+        _availableVersions = releases;
+    }
+
+    async Task CheckVersion()
+    {
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = _installPath,
+            Arguments = "-version",
+            RedirectStandardError = true,
+        };
+        var process = Process.Start(startInfo)!;
+        await process.WaitForExitAsync();
+        var output = await process.StandardError.ReadToEndAsync();
+
+        output = output.Split(" ")[3];
+
+        _installedVersion = output;
+    }
+
+    async Task Install()
+    {
+        _installing = true;
+        
+        var release = _availableVersions.FirstOrDefault(r => r.TagName == InstallFormData, _availableVersions[0]);
+        
+        var arch = RuntimeInformation.OSArchitecture switch
+        {
+            Architecture.Arm => "arm",
+            Architecture.Arm64 => "arm64",
+            Architecture.X64 => "amd64",
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+        string os;
+        var archiveFormat = "tar.zst";
+        if (OperatingSystem.IsWindows())
+        {
+            os = "windows";
+            archiveFormat = "zip";
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            os = "linux";
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            os = "darwin";
+        }
+        else
+        {
+            throw new InvalidOperationException("Unsupported Operating System");
+        }
+        
+        var assetName = $"qbsgo_{release.TagName[1..]}_{os}_{arch}.{archiveFormat}";
+        
+        var asset = release.Assets.First(r => r.Name == assetName);
+        var directory = Path.GetDirectoryName(_installPath)!;
+        
+        Directory.CreateDirectory(directory);
+        
+        using (HttpClient client = new())
+        {
+            await using var stream = await client.GetStreamAsync(asset.BrowserDownloadUrl);
+        
+            if (os == "windows")
+            {
+                await ZipFile.ExtractToDirectoryAsync(stream, directory, true);
+            }
+            else
+            {
+                await using var compStream = new DecompressionStream(stream);
+                await TarFile.ExtractToDirectoryAsync(compStream, directory, true);
+            }
+        }
+        
+        var extractedDir = Path.Join(directory, $"qbsgo_{os}_{arch}");
+        foreach (var file in Directory.EnumerateFiles(extractedDir))
+        {
+            File.Copy(file, Path.Join(directory, Path.GetFileName(file)));
+        }
+        
+        Directory.Delete(extractedDir, true);
+        
+        var appData = ApplicationConfig.GetDefaultAppDataFolder();
+        _configFile = Path.Join(appData, "qbs/qbsgo.toml");
+        
+        if (!_installed && File.Exists(_configFile))
+        {
+            ConfigFormData = Toml.ToModel<BackupConfig>(await File.ReadAllTextAsync(_configFile), _configFile, BackupConfig.TomlModelOptions);
+            ConfigFormData?.Remotes.Clear();
+            ConfigFormData?.Targets.Clear();
+            await File.WriteAllTextAsync(_configFile, Toml.FromModel(ConfigFormData!, BackupConfig.TomlModelOptions));
+
+            if (os != "windows")
+            {
+                File.SetUnixFileMode(_configFile, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
+        }
+        
+        _installing = false;
+        _installed = true;
+        await CheckVersion();
+    }
+
+    private async Task SaveSettings()
+    {
+        _saving = true;
+        await File.WriteAllTextAsync(_configFile, Toml.FromModel(ConfigFormData!, BackupConfig.TomlModelOptions));
+
+        if (InstallService)
+        {
+            await CheckInstallService();
+        }
+        
+        await _savedToast.Show();
+        _saving = false;
+    }
+
+    private async Task CheckInstallService()
+    {
+        _commandLog += "Checking if installing service files are applicable...\n";
+        if (!OperatingSystem.IsLinux())
+        {
+            _commandLog += "Not applicable: Operating system is not Linux.\n";
+            return;
+        }
+
+        if (!await BackupSystem.CheckSystemdAsync())
+        {
+            _commandLog += "Not applicable: system is not using systemd (systemctl is not available)\n";
+            return;
+        }
+
+        _commandLog += "Installing service files...\n";
+        var proc = _backupSystem?.InstallService(["all"]);
+        if (proc == null)
+            return;
+
+        proc.OutputDataReceived += SystemDataReceived;
+        proc.ErrorDataReceived += SystemDataReceived;
+        proc.Exited += BackupSystemExit;
+        proc.Start();
+    }
+
+    private void BackupSystemExit(object? sender, EventArgs e)
+    {
+        _commandLog += "Installation finished.";
+    }
+
+    private void SystemDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (e.Data == null) return;
+
+        _commandLog += e.Data;
+        StateHasChanged();
+    }
+
+    private async Task Reinstall()
+    {
+        _reinstall = true;
+        await GetAvailableVersionsAsync();
+    }
+
+    private string? TryGetServerName(string rawId)
+    {
+        if (int.TryParse(rawId, out var id) && _serverMap.TryGetValue(id, out var instance))
+        {
+            return instance.Name;
+        }
+
+        return null;
+    }
+
+    private void RemoveTarget(string key)
+    {
+        ConfigFormData?.Targets.Remove(key);
+        InstallService = true;
+    }
+
+}
