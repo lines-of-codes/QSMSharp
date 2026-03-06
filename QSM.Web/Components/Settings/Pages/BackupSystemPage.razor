@@ -257,7 +257,7 @@ else
             return;
         }
             
-        ConfigFormData = Toml.ToModel<BackupConfig>(File.ReadAllText(_configFile), _configFile, BackupConfig.TomlModelOptions);
+        ConfigFormData = TomlSerializer.Deserialize(File.ReadAllText(_configFile), BackupConfigContext.Default.BackupConfig);
     }
 
     protected override async Task OnInitializedAsync()
@@ -368,10 +368,10 @@ else
         
         if (!_installed && File.Exists(_configFile))
         {
-            ConfigFormData = Toml.ToModel<BackupConfig>(await File.ReadAllTextAsync(_configFile), _configFile, BackupConfig.TomlModelOptions);
+            ConfigFormData = TomlSerializer.Deserialize(await File.ReadAllTextAsync(_configFile), BackupConfigContext.Default.BackupConfig);
             ConfigFormData?.Remotes.Clear();
             ConfigFormData?.Targets.Clear();
-            await File.WriteAllTextAsync(_configFile, Toml.FromModel(ConfigFormData!, BackupConfig.TomlModelOptions));
+            await File.WriteAllTextAsync(_configFile, TomlSerializer.Serialize(ConfigFormData!, BackupConfigContext.Default.BackupConfig));
 
             if (os != "windows")
             {
@@ -387,7 +387,7 @@ else
     private async Task SaveSettings()
     {
         _saving = true;
-        await File.WriteAllTextAsync(_configFile, Toml.FromModel(ConfigFormData!, BackupConfig.TomlModelOptions));
+        await File.WriteAllTextAsync(_configFile, TomlSerializer.Serialize(ConfigFormData!, BackupConfigContext.Default.BackupConfig));
 
         if (InstallService)
         {

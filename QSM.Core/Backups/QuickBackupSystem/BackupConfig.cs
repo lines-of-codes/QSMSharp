@@ -4,11 +4,6 @@ namespace QSM.Core.Backups.QuickBackupSystem;
 
 public class BackupConfig
 {
-	public static readonly TomlModelOptions TomlModelOptions = new()
-	{
-		ConvertPropertyName = s => s[0].ToString().ToLowerInvariant() + s[1..]
-	};
-	
 	public string Archive { get; set; } = "tar";
 	public string ArchiveDir { get; set; } = "/tmp/";
 	public string Compression { get; set; } = "gzip";

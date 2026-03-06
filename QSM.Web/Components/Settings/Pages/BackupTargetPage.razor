@@ -59,7 +59,7 @@
     protected override void OnInitialized()
     {
         _configFile = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "qbs/qbsgo.toml");
-        _config = Toml.ToModel<BackupConfig>(File.ReadAllText(_configFile), _configFile, BackupConfig.TomlModelOptions);
+        _config = TomlSerializer.Deserialize(File.ReadAllText(_configFile), BackupConfigContext.Default.BackupConfig)!;
 
         if (_config.Targets.TryGetValue(Id.ToString(), out var target))
         {
@@ -89,7 +89,7 @@
         if (Target == null) return;
         
         _config.Targets[Id.ToString()] = Target;
-        await File.WriteAllTextAsync(_configFile, Toml.FromModel(_config, BackupConfig.TomlModelOptions));
+        await File.WriteAllTextAsync(_configFile, TomlSerializer.Serialize(_config, BackupConfigContext.Default.BackupConfig));
         NavMan.NavigateTo("Settings/BackupSystem?InstallService=true");
     }
 
