@@ -8,7 +8,6 @@
 @using QSM.Core.Utilities
 @using QSM.Web.Data
 @using QSM.Web.Utilities
-@using Serilog
 
 @inherits ComponentBase
 
@@ -16,6 +15,7 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject ApplicationConfig AppConfig
 @inject NavigationManager NavMan
+@inject ILogger<ModrinthDownload> Log
 @inject IJSRuntime Js
 
 <NavigationLock OnBeforeInternalNavigation="InternalLocationChange" ConfirmExternalNavigation="true" />
@@ -117,13 +117,13 @@ else
         }
         catch (HttpRequestException ex)
         {
-            Log.Warning("{}", ex.Message);
+            Log.LogWarning("{}", ex.Message);
             await Task.Delay(1000);
             return await DownloadFileAsync(index, url, dest);
         }
         catch (IOException ex)
         {
-            Log.Warning("{}", ex.Message);
+            Log.LogWarning("{}", ex.Message);
             await Task.Delay(1000);
             return await DownloadFileAsync(index, url, dest);
         }
@@ -190,9 +190,9 @@ else
         if (SelectedVersion.Hash != fileHash)
         {
             await Alert("Error: Modpack file integrity check failed. File is likely corrupted, Installation aborted.");
-            Log.Error("Integrity check failed, File \"{PackPath}\" does not match provided hash.", packPath);
-            Log.Verbose("Remote hash: {}", SelectedVersion.Hash);
-            Log.Verbose("File hash: {}", fileHash);
+            Log.LogError("Integrity check failed, File \"{PackPath}\" does not match provided hash.", packPath);
+            Log.LogTrace("Remote hash: {}", SelectedVersion.Hash);
+            Log.LogTrace("File hash: {}", fileHash);
         }
 
         _currentAction = "Extracting modpack file...";

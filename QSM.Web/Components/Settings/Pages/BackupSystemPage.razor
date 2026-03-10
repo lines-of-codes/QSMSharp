@@ -358,7 +358,12 @@ else
         var extractedDir = Path.Join(directory, $"qbsgo_{os}_{arch}");
         foreach (var file in Directory.EnumerateFiles(extractedDir))
         {
-            File.Copy(file, Path.Join(directory, Path.GetFileName(file)));
+            var dest = Path.Join(directory, Path.GetFileName(file));
+            if (File.Exists(dest))
+            {
+                File.Delete(dest);
+            }
+            File.Copy(file, dest);
         }
         
         Directory.Delete(extractedDir, true);
@@ -377,6 +382,11 @@ else
             {
                 File.SetUnixFileMode(_configFile, UnixFileMode.UserRead | UnixFileMode.UserWrite);
             }
+        }
+        else
+        {
+            InstallService = true;
+            await SaveSettings();
         }
         
         _installing = false;
@@ -422,6 +432,7 @@ else
         proc.ErrorDataReceived += SystemDataReceived;
         proc.Exited += BackupSystemExit;
         proc.Start();
+        await proc.WaitForExitAsync();
     }
 
     private void BackupSystemExit(object? sender, EventArgs e)

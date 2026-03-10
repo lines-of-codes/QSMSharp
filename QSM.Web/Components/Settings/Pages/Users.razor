@@ -3,14 +3,11 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
 
 @attribute [Authorize(Roles = "Owner")]
 
 @inject UserManager<ApplicationUser> UserManager
-@inject RoleManager<IdentityRole> RoleManager
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
 <PageTitle>Users - QSM Web Console</PageTitle>
 
@@ -32,7 +29,7 @@
     }
 
     <div class="d-flex flex-column flex-md-row gap-2">
-        <InputText class="form-control" name="Input.Username" placeholder="Username" @bind-Value="Input.Username"
+        <InputText class="form-control" name="Input.Username" placeholder="Username" @bind-Value="Input!.Username"
                    aria-required="true"/>
         <InputText class="form-control" name="Input.Password" type="password" placeholder="Password"
                    @bind-Value="Input.Password"
@@ -82,7 +79,7 @@
             <div class="modal-body">
                 <ValidationSummary class="danger" role="alert"/>
                 <InputText class="form-control mb-2" id="NewPasswordInput.Id" name="NewPasswordInput.Id"
-                           @bind-Value="NewPasswordInput.Id" aria-required="true" placeholder="User ID"/>
+                           @bind-Value="NewPasswordInput!.Id" aria-required="true" placeholder="User ID"/>
                 <InputText class="form-control" name="NewPasswordInput.Password" @bind-Value="NewPasswordInput.Password"
                            aria-required="true" placeholder="New Password"/>
             </div>
@@ -97,11 +94,17 @@
 </dialog>
 
 @code {
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
-    [SupplyParameterFromForm] private PasswordInputModel NewPasswordInput { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
+    [SupplyParameterFromForm] private PasswordInputModel? NewPasswordInput { get; set; }
     private List<ApplicationUser> _users = [];
-    private Dictionary<string, string> _userRoles = [];
+    private readonly Dictionary<string, string> _userRoles = [];
     private IEnumerable<IdentityError>? _identityErrorList;
+
+    protected override void OnInitialized()
+    {
+        Input ??= new InputModel();
+        NewPasswordInput ??= new PasswordInputModel();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,7 +131,7 @@
     {
         ApplicationUser user = new()
         {
-            UserName = Input.Username!
+            UserName = Input!.Username!
         };
         
         var result = await UserManager.CreateAsync(user, Input.Password!);

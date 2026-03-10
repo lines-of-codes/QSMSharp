@@ -28,7 +28,7 @@
         @if (_requirePassword)
         {
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
+                <InputText type="password" @bind-Value="Input!.Password" id="Input.Password" class="form-control"
                            autocomplete="current-password" aria-required="true"
                            placeholder="Please enter your password."/>
                 <label for="Input.Password" class="form-label">Password</label>
@@ -46,18 +46,22 @@
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Input ??= new InputModel();
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        Input ??= new InputModel();
         _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         _requirePassword = await UserManager.HasPasswordAsync(_user);
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (_requirePassword && !await UserManager.CheckPasswordAsync(_user, Input.Password))
+        if (_requirePassword && !await UserManager.CheckPasswordAsync(_user, Input!.Password))
         {
             _message = "Error: Incorrect password.";
             return;

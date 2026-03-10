@@ -45,7 +45,7 @@ public partial class CreateServer : ComponentBase
 		_targetFolderPreview = Model.Path;
 	}
 
-	private string GetDefaultServerPath()
+	private static string GetDefaultServerPath()
 	{
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 		{
