@@ -33,6 +33,13 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <label for="user">Username</label>
+            @if (Remote!.Type == "copyparty")
+            {
+                <p class="text-secondary">
+                    Do not enter a username unless your copyparty server requires it
+                    (<code>--usernames</code> flag used)
+                </p>
+            }
             <InputText @bind-Value="Remote!.User" id="user" class="form-control" />
         </div>
         <div class="col-md-6">
@@ -45,6 +52,13 @@
             <label for="password">Password</label>
             <InputText type="password" @bind-Value="Remote!.Password" id="password" class="form-control" />
         </div>
+        @if (Remote!.Type == "copyparty")
+        {
+            <div class="col-md-6">
+                <label for="script">Script</label>
+                <InputText @bind-Value="Remote!.Script" id="script" class="form-control" placeholder="Use script in PATH" />
+            </div>
+        }
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
 </EditForm>
