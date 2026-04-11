@@ -130,22 +130,18 @@ public static class MrpackExtractor
 					yield return op;
 				}
 
-				if (!error)
-				{
-					using SHA512 sha512 = SHA512.Create();
-					string hash = sha512.GetFileHashAsString(fullPath);
-
-					if (hash != fileInfo.Hashes["sha512"])
-					{
-						error = true;
-						yield return new MrpackOperation("Checksum doesn't match!");
-					}
-				}
-
-				// Try the next download URL if the file can't be downloaded
-				// or the checksum doesn't match.
 				if (error)
 				{
+					// Try the next download URL if the file can't be downloaded
+					continue;
+				}
+
+				using SHA512 sha512 = SHA512.Create();
+				string hash = sha512.GetFileHashAsString(fullPath);
+
+				if (hash != fileInfo.Hashes["sha512"])
+				{
+					yield return new MrpackOperation("Checksum doesn't match!");
 					continue;
 				}
 
