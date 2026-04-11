@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace QSM.Web;
 
-internal class Program
+internal static class Program
 {
 	public static WebApplication App { get; private set; } = null!;
 
@@ -106,7 +106,7 @@ internal class Program
 			});
 		}
 
-		builder.Services.AddScoped<MarkdownPipeline>(services =>
+		builder.Services.AddScoped<MarkdownPipeline>(_ =>
 		{
 			MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
 				.UseAdvancedExtensions()

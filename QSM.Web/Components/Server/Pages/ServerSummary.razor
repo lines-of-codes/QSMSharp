@@ -48,9 +48,13 @@
         @_lastOutput
     </p>
 
-    <div class="my-3">
+    <div class="mt-3">
         <button class="btn btn-primary me-1" @onclick="StartButtonClicked" disabled="@_stateSwitching">@(_server.Running ? "Restart" : "Start")</button>
         <button class="btn btn-danger" @onclick="StopButtonClicked" disabled="@(!_server.Running || _stateSwitching)">Stop</button>
+    </div>
+    
+    <div class="mb-3 mt-2">
+        <a href="Server/@Id/ChangeVersion" class="btn btn-secondary">Change Version</a>
     </div>
 
     <div class="accordion">

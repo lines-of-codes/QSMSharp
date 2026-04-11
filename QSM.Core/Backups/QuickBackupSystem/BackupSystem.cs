@@ -33,4 +33,29 @@ public class BackupSystem(string path)
 			}
 		};
 	}
+
+	public Process BackupProcess(IEnumerable<string> targets)
+	{
+		return new Process
+		{
+			StartInfo = new ProcessStartInfo(BinaryPath, [
+				"-backup",
+				"-targets",
+				string.Join(',', targets)
+			])
+			{
+				RedirectStandardOutput = true,
+				WorkingDirectory = Path.GetDirectoryName(BinaryPath)
+			}
+		};
+	}
+
+	public async Task<(bool success, string? message)> BackupAsync(IEnumerable<string> targets)
+	{
+		Process proc = BackupProcess(targets);
+		proc.Start();
+		
+		await proc.WaitForExitAsync();
+		return (proc.ExitCode == 0, await proc.StandardOutput.ReadToEndAsync());
+	}
 }

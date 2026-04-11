@@ -86,14 +86,13 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 
 			var hash = file.Hashes.FirstOrDefault(data => data.Algo == CfHashAlgorithm.Sha1)?.Value;
 			
-			return new ModPluginDownloadInfo
+			return new ModPluginDownloadInfo(file.Id.ToString())
 			{
 				DisplayName = name.ToString(),
 				DownloadUri = file.DownloadUrl,
 				FileName = file.FileName,
 				Hash = hash,
 				HashAlgorithm = hash == null ? HashAlgorithm.None : HashAlgorithm.Sha1,
-				VersionId = file.Id.ToString(),
 				Dependencies = dependencies.ToArray()
 			};
 		}).ToArray();

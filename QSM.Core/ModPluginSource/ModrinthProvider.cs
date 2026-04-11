@@ -54,9 +54,8 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 
 			VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0]);
 
-			versions.Add(new ModPluginDownloadInfo
+			versions.Add(new ModPluginDownloadInfo(info.id ?? string.Empty)
 			{
-				VersionId = info.id ?? string.Empty,
 				DisplayName = $"{info.name} ({info.version_type})",
 				FileName = primaryFile.filename!,
 				Dependencies = dependencies.ToArray(),
@@ -88,9 +87,8 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		
 		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0]);
 
-		return new ModPluginDownloadInfo
+		return new ModPluginDownloadInfo(version.id ?? string.Empty)
 		{
-			VersionId = version.id ?? string.Empty,
 			DisplayName = $"{version.name} ({version.version_type})",
 			FileName = primaryFile.filename!,
 			Dependencies = dependencies.ToArray(),

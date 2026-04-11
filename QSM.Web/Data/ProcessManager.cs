@@ -37,10 +37,8 @@ public class ProcessManager
 	/// <exception cref="Exception">Failure to load the server's configuration</exception>
 	public async Task RunAsync(ServerInstance server)
 	{
-		if (Processes.TryGetValue(server.Id, out Process? process) && !process.HasExited)
-		{
+		if (Processes.TryGetValue(server.Id, out Process? process) && !process.HasExited) 
 			await StopAsync(server.Id);
-		}
 
 		if (!ServerSettings.TryLoadJson(server.ConfigPath, out ServerSettings? settings) || settings == null)
 		{
@@ -57,30 +55,7 @@ public class ProcessManager
 		}
 
 		if (settings.FirstRun)
-		{
-			DataReceivedEventHandler onDataReceived = (_, e) =>
-			{
-				OutputCache output = new(OutputType.Normal, e.Data ?? string.Empty);
-				_serverOutput[server.Id].Add(output);
-				OutputReceived?.Invoke(server.Id, output);
-			};
-			// Intended to do nothing for software that requires nothing
-			// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-			switch (server.Software) // skipcq: CS-W1009
-			{
-				case ServerSoftwares.NeoForge:
-					await new NeoForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
-					break;
-				case ServerSoftwares.Forge:
-					await new ForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
-					break;
-				case ServerSoftwares.Quilt:
-					await new QuiltFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
-					break;
-			}
-			settings.FirstRun = false;
-			await settings.SaveJsonAsync(server.ConfigPath);
-		}
+			await FirstRun(server, settings);
 
 		string args = string.Empty;
 
@@ -94,7 +69,7 @@ public class ProcessManager
 		
 		// Intended to do nothing for software that requires nothing
 		// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-		switch (server.Software) // skipcq: CS-W1009
+		switch (server.Software)
 		{
 			case ServerSoftwares.NeoForge:
 				{
@@ -117,7 +92,7 @@ public class ProcessManager
 		args +=
 			$"{settings.Java.JvmArgs} {serverJar} {settings.Java.ProgramArgs}";
 
-		var startInfo = new ProcessStartInfo
+		ProcessStartInfo startInfo = new()
 		{
 			CreateNoWindow = true,
 			UseShellExecute = false,
@@ -151,8 +126,8 @@ public class ProcessManager
 		{
 			if (!server.Running) return;
 			
-			var dbFactory = App.Services.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
-			using var ctx = dbFactory.CreateDbContext();
+			IDbContextFactory<ApplicationDbContext> dbFactory = App.Services.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+			using ApplicationDbContext ctx = dbFactory.CreateDbContext();
 			server.Running = false;
 			ctx.Update(server);
 			ctx.SaveChanges();
@@ -167,6 +142,32 @@ public class ProcessManager
 		process.BeginErrorReadLine();
 
 		_processes[server.Id] = process;
+	}
+
+	private async Task FirstRun(ServerInstance server, ServerSettings settings)
+	{
+		DataReceivedEventHandler onDataReceived = (_, e) =>
+		{
+			OutputCache output = new(OutputType.Normal, e.Data ?? string.Empty);
+			_serverOutput[server.Id].Add(output);
+			OutputReceived?.Invoke(server.Id, output);
+		};
+		// Intended to do nothing for software that requires nothing
+		// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+		switch (server.Software)
+		{
+			case ServerSoftwares.NeoForge:
+				await new NeoForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
+				break;
+			case ServerSoftwares.Forge:
+				await new ForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
+				break;
+			case ServerSoftwares.Quilt:
+				await new QuiltFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
+				break;
+		}
+		settings.FirstRun = false;
+		await settings.SaveJsonAsync(server.ConfigPath);
 	}
 
 	public async Task StopAsync(int id)

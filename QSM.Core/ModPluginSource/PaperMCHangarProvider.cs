@@ -62,7 +62,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 				}
 			);
 
-			versions.Add(new ModPluginDownloadInfo
+			versions.Add(new ModPluginDownloadInfo(version.Id.ToString())
 			{
 				DisplayName = $"{version.Name!} ({version.Channel!.Name})",
 				FileName = downloadEntry.FileInfo!.Name!,
@@ -255,6 +255,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 		string? Platform = null);
 
 	internal record class ProjectVersionEntry(
+		int Id,
 		DateTime? CreatedAt = null,
 		string? Name = null,
 		ProjectReleaseChannel? Channel = null,

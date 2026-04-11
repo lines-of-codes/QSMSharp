@@ -2,8 +2,6 @@
 
 namespace QSM.Core.ModPluginSource;
 
-// skipcq: CS-R1078
-// False positive
 public abstract class ModPluginProvider
 {
 	public abstract Task<ModPluginInfo[]> SearchAsync(string query = "", ServerMetadata? serverMetadata = null);

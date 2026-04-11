@@ -2,7 +2,7 @@
 
 namespace QSM.Core.Utilities;
 
-public class Hasher
+public static class Hasher
 {
 	public static string GetFileHash(HashAlgorithm algorithm, string path)
 	{

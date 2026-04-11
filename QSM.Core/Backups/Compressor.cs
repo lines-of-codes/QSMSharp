@@ -2,7 +2,7 @@
 
 namespace QSM.Core.Backups;
 
-public class Compressor
+public static class Compressor
 {
 	public static string GetFileExtension(ArchiveFormat archiveFormat, CompressionFormat compressionFormat)
 	{

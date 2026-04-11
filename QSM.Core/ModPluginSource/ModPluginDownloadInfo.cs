@@ -2,10 +2,23 @@
 
 namespace QSM.Core.ModPluginSource;
 
-public class ModPluginDownloadInfo
+public class ModPluginDownloadInfo(string versionId)
 {
+	public class Dependency
+	{
+		public Uri? DownloadUri;
+		public string? ExternalPageUrl;
+		public required string Name;
+		public bool Required;
+
+		/// <summary>
+		///     A unique name/identity to the dependency.
+		/// </summary>
+		public string Slug = string.Empty;
+	}
+
 	public Dependency[] Dependencies = [];
-	public string VersionId = string.Empty;
+	public readonly string VersionId = versionId;
 	public string DisplayName = string.Empty;
 
 	/// <summary>
@@ -36,21 +49,5 @@ public class ModPluginDownloadInfo
 		return DisplayName == info.DisplayName && FileName == info.FileName && Hash == info.Hash;
 	}
 
-	public override int GetHashCode()
-	{
-		return DisplayName.GetHashCode() + FileName.GetHashCode() + Hash?.GetHashCode() ?? 0;
-	}
-
-	public class Dependency
-	{
-		public Uri? DownloadUri;
-		public string? ExternalPageUrl;
-		public required string Name;
-		public bool Required;
-
-		/// <summary>
-		///     A unique name/identity to the dependency.
-		/// </summary>
-		public string Slug = string.Empty;
-	}
+	public override int GetHashCode() => VersionId.GetHashCode();
 }

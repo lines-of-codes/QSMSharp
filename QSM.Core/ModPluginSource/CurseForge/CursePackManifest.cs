@@ -33,7 +33,7 @@ public class CursePackManifest
 			"forge" => ServerSoftwares.Forge,
 			"neoforge" => ServerSoftwares.NeoForge,
 			"quilt" => ServerSoftwares.Quilt,
-			_ => throw new ArgumentOutOfRangeException()
+			_ => throw new ArgumentOutOfRangeException(nameof(Id), Id, "Unsupported server software")
 		};
 
 		public string Version => Id.Split('-').Last();
