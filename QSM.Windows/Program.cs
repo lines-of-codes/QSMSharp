@@ -2,7 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QSM.Core.ModPluginSource;
+using QSM.Core.ServerSoftware;
 using Serilog;
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -43,6 +45,20 @@ public static class Program
 			client.BaseAddress = new System.Uri(CurseForgeProvider.BaseAddress);
 			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
 		});
+
+		InfoFetcher[] fetchers =
+		[
+			new FabricFetcher(null!),
+			new QuiltFetcher(null!)
+		];
+
+		foreach (InfoFetcher fetcher in fetchers)
+		{
+			builder.Services.AddHttpClient(fetcher.HttpClientName, client =>
+			{
+				client.BaseAddress = new Uri(fetcher.HttpBaseAddress);
+			});
+		}
 
 		builder.Services.AddTransient<ModrinthProvider>();
 		builder.Services.AddTransient<PaperMCHangarProvider>();

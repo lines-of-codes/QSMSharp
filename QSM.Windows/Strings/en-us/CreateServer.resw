@@ -141,9 +141,6 @@
   <data name="ServerFolderPathInput.PlaceholderText" xml:space="preserve">
     <value>Path to the server folder...</value>
   </data>
-  <data name="ServerFolderBrowseBtn.Content" xml:space="preserve">
-    <value>Browse...</value>
-  </data>
   <data name="ServerSoftwareComboBox.Header" xml:space="preserve">
     <value>Server Software:</value>
   </data>

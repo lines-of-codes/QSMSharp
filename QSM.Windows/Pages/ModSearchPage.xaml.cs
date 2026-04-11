@@ -251,6 +251,6 @@ public sealed partial class ModSearchPage : Page
 
 	private void ModDescription_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
 	{
-		Process.Start("explorer", e.Link);
+		Process.Start(@"C:\Windows\explorer.exe", e.Link);
 	}
 }

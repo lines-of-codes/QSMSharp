@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -145,9 +146,11 @@ public sealed partial class ModrinthImportPage : Page
 		//	}
 		//}
 
+		IHttpClientFactory clientFactory = Program.Hoster.Services.GetRequiredService<IHttpClientFactory>();
 		InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch
 		{
-			ServerSoftwares.Fabric => new FabricFetcher(),
+			ServerSoftwares.Fabric => new FabricFetcher(clientFactory),
+			ServerSoftwares.Quilt => new QuiltFetcher(clientFactory),
 			ServerSoftwares.NeoForge => new NeoForgeFetcher(),
 			ServerSoftwares.Forge => new ForgeFetcher(),
 			_ => throw new InvalidOperationException("Unsupported Minecraft server software.")

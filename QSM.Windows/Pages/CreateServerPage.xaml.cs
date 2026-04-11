@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using QSM.Core.ServerSettings;
@@ -6,6 +7,7 @@ using QSM.Windows.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -20,52 +22,17 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class CreateServerPage : Page
 {
-	string _defaultServersLocation;
+	readonly string _defaultServersLocation;
 
-	ServerSoftware[] _serverSoftwares = [
-		new() {
-			Name = "Paper",
-			Icon = "/Assets/ServerSoftware/papermc-logomark.png",
-			InfoFetcher = new PaperMCFetcher("paper")
-		},
-		new () {
-			Name = "Purpur",
-			Icon = "/Assets/ServerSoftware/purpur.svg",
-			InfoFetcher = new PurpurFetcher()
-		},
-		new() {
-			Name = "Vanilla",
-			Icon = "/Assets/ServerSoftware/minecraft_logo.svg",
-			InfoFetcher = new VanillaFetcher()
-		},
-		new() {
-			Name = "Fabric",
-			Icon = "/Assets/ServerSoftware/Fabric.png",
-			InfoFetcher = new FabricFetcher()
-		},
-		new () {
-			Name = "NeoForge",
-			Icon = "/Assets/ServerSoftware/NeoForged.png",
-			InfoFetcher = new NeoForgeFetcher()
-		},
-		new() {
-			Name = "Forge",
-			Icon = "/Assets/ServerSoftware/forge.png",
-			InfoFetcher = new ForgeFetcher()
-		},
-		new() {
-			Name = "Velocity",
-			Icon = "/Assets/ServerSoftware/velocity-blue.svg",
-			InfoFetcher = new PaperMCFetcher("velocity")
-		},
-	];
+	readonly ServerSoftware[] _serverSoftwares;
 
-	static Dictionary<string, ServerSoftwares> s_softwareDisplayNameToEnumMapping = new()
+	static readonly Dictionary<string, ServerSoftwares> s_softwareDisplayNameToEnumMapping = new()
 	{
 		{ "Paper", ServerSoftwares.Paper },
 		{ "Purpur", ServerSoftwares.Purpur },
 		{ "Vanilla", ServerSoftwares.Vanilla },
 		{ "Fabric", ServerSoftwares.Fabric },
+		{ "Quilt", ServerSoftwares.Quilt },
 		{ "NeoForge", ServerSoftwares.NeoForge },
 		{ "Forge", ServerSoftwares.Forge },
 		{ "Velocity", ServerSoftwares.Velocity },
@@ -77,6 +44,51 @@ public sealed partial class CreateServerPage : Page
 	public CreateServerPage()
 	{
 		this.InitializeComponent();
+
+		IHttpClientFactory clientFactory = Program.Hoster.Services.GetRequiredService<IHttpClientFactory>();
+		_serverSoftwares = [
+			new() {
+				Name = "Paper",
+				Icon = "/Assets/ServerSoftware/papermc-logomark.png",
+				InfoFetcher = new PaperMCFetcher("paper")
+			},
+			new () {
+				Name = "Purpur",
+				Icon = "/Assets/ServerSoftware/purpur.svg",
+				InfoFetcher = new PurpurFetcher()
+			},
+			new() {
+				Name = "Vanilla",
+				Icon = "/Assets/ServerSoftware/minecraft_logo.svg",
+				InfoFetcher = new VanillaFetcher()
+			},
+			new() {
+				Name = "Fabric",
+				Icon = "/Assets/ServerSoftware/Fabric.png",
+				InfoFetcher = new FabricFetcher(clientFactory)
+			},
+			new () {
+				Name = "Quilt",
+				Icon = "/Assets/ServerSoftware/quilt-logo.svg",
+				InfoFetcher = new QuiltFetcher(clientFactory)
+			},
+			new () {
+				Name = "NeoForge",
+				Icon = "/Assets/ServerSoftware/NeoForged.png",
+				InfoFetcher = new NeoForgeFetcher()
+			},
+			new() {
+				Name = "Forge",
+				Icon = "/Assets/ServerSoftware/forge.png",
+				InfoFetcher = new ForgeFetcher()
+			},
+			new() {
+				Name = "Velocity",
+				Icon = "/Assets/ServerSoftware/velocity-blue.svg",
+				InfoFetcher = new PaperMCFetcher("velocity")
+			},
+		];
+
 		_defaultServersLocation = ApplicationData.ServersFolderPath;
 		serverFolderPathInput.Text = _defaultServersLocation;
 		serverSoftware.SelectedIndex = 0;

@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <StackPanel Margin="30,20" Spacing="12">
-        <TextBlock Text="Import File" Style="{StaticResource TitleTextBlockStyle}" />
+        <TextBlock x:Uid="/Import/ImportFile" Style="{StaticResource TitleTextBlockStyle}" />
 
         <Grid ColumnSpacing="8">
             <Grid.ColumnDefinitions>
@@ -17,17 +17,17 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
-            <TextBox x:Name="URIInput" PlaceholderText="File URI..." />
+            <TextBox x:Name="URIInput" x:Uid="/Import/URIInput" />
             <Button Grid.Column="1" 
                     x:Name="BrowseBtn" 
-                    Content="Browse..."
+                    x:Uid="/Common/BrowseBtn"
                     Click="BrowseBtn_Click" />
         </Grid>
         
-        <TextBlock Text="Currently only supports Modrinth modpack (.mrpack) files." Style="{StaticResource CaptionTextBlockStyle}" />
+        <TextBlock x:Uid="/Import/ImportNotice" Style="{StaticResource CaptionTextBlockStyle}" />
 
         <Button x:Name="ImportBtn"
-                Content="Import" 
+                x:Uid="/Import/ImportBtn"
                 Style="{StaticResource AccentButtonStyle}"
                 Click="ImportBtn_Click"/>
     </StackPanel>

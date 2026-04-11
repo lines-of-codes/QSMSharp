@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using QSM.Core.ModPluginSource.Modrinth;
@@ -8,6 +9,7 @@ using QSM.Windows.Utilities;
 using Serilog;
 using System;
 using System.IO;
+using System.Net.Http;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
@@ -93,9 +95,11 @@ public sealed partial class ImportLocalPage : Page
 			extractResult.Index.MinecraftSoftwareVersion,
 			serverDir);
 
+		IHttpClientFactory clientFactory = Program.Hoster.Services.GetRequiredService<IHttpClientFactory>();
 		InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch
 		{
-			ServerSoftwares.Fabric => new FabricFetcher(),
+			ServerSoftwares.Fabric => new FabricFetcher(clientFactory),
+			ServerSoftwares.Quilt => new QuiltFetcher(clientFactory),
 			ServerSoftwares.NeoForge => new NeoForgeFetcher(),
 			_ => throw new InvalidOperationException("Unsupported Minecraft server software.")
 		};

@@ -53,7 +53,10 @@ public partial class App : Application
 				config.AddDarkTheme();
 			}
 
-			config.HasGlobalSKTypeface(SKFontManager.Default.MatchCharacter('ก'));
+			config.HasTextSettings(new TextSettings()
+			{
+				DefaultTypeface = SKFontManager.Default.MatchCharacter('ก')
+			});
 		});
 
 		MainWindow.AppWindow.Closing += OnClosing;

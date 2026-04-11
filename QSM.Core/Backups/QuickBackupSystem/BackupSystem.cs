@@ -11,7 +11,7 @@ public class BackupSystem(string path)
 
 	public static async Task<bool> CheckSystemdAsync()
 	{
-		Process proc = Process.Start("systemctl", "--version");
+		Process proc = Process.Start("/usr/bin/systemctl", "--version");
 		await proc.WaitForExitAsync();
 		return proc.ExitCode == 0;
 	}

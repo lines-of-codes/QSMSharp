@@ -39,6 +39,6 @@ public sealed partial class CurseExtraDownloads : Page
 
 	private void OpenModsFolderBtn_Click(object sender, RoutedEventArgs e)
 	{
-		Process.Start("explorer.exe", _modsFolder);
+		Process.Start(@"C:\Windows\explorer.exe", _modsFolder);
 	}
 }

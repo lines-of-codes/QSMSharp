@@ -70,6 +70,7 @@
 							<x:String>Forge</x:String>
                             <x:String>NeoForge</x:String>
                             <x:String>Fabric</x:String>
+							<x:String>Quilt</x:String>
                         </ListView>
                     </StackPanel>
                 </ScrollView>

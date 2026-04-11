@@ -159,7 +159,7 @@ public sealed partial class ServerSummaryPage : Page
 
 	private void OpenServerFolderButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-		Process.Start("explorer.exe", _metadata.ServerPath);
+		Process.Start(@"C:\Windows\explorer.exe", _metadata.ServerPath);
 	}
 
 	private void ChangeVersionButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

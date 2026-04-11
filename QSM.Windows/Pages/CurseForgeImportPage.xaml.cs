@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -131,9 +132,11 @@ public sealed partial class CurseForgeImportPage : Page
 
 		downloadPage.SetIsIndeterminate(true);
 
+		IHttpClientFactory clientFactory = Program.Hoster.Services.GetRequiredService<IHttpClientFactory>();
 		InfoFetcher api = manifest.Minecraft.PrimaryLoader.Software switch
 		{
-			ServerSoftwares.Fabric => new FabricFetcher(),
+			ServerSoftwares.Fabric => new FabricFetcher(clientFactory),
+			ServerSoftwares.Quilt => new QuiltFetcher(clientFactory),
 			ServerSoftwares.NeoForge => new NeoForgeFetcher(),
 			ServerSoftwares.Forge => new ForgeFetcher(),
 			_ => throw new InvalidOperationException("Unsupported Minecraft server software.")
@@ -236,6 +239,7 @@ public sealed partial class CurseForgeImportPage : Page
 				"Forge" => CurseForgeProvider.ModLoaderType.Forge,
 				"NeoForge" => CurseForgeProvider.ModLoaderType.NeoForge,
 				"Fabric" => CurseForgeProvider.ModLoaderType.Fabric,
+				"Quilt" => CurseForgeProvider.ModLoaderType.Quilt,
 				_ => throw new InvalidOperationException("Unsupported server software")
 			})
 			);
