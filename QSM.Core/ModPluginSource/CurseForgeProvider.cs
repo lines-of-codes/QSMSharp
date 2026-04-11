@@ -43,12 +43,12 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	///  <summary>
 	/// 	Fetch the list of files for a mod from CurseForge
 	///  </summary>
-	///  <param name="modId">String version of the Mod ID integer</param>
+	///  <param name="slug">String version of the Mod ID integer</param>
 	///  <param name="serverMetadata"></param>
 	///  <returns>List of files</returns>
-	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string modId, ServerMetadata? serverMetadata = null)
+	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug, ServerMetadata? serverMetadata = null)
 	{
-		string path = $"mods/{modId}/files";
+		string path = $"mods/{slug}/files";
 		
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		GetModFilesResponse response = await client.GetFromJsonAsync<GetModFilesResponse>(path)
@@ -214,11 +214,11 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		})), skipped);
 	}
 
-	private record GetModsByIdsListRequestBody(uint[] modIds, bool? filterPcOnly = null);
+	private sealed record GetModsByIdsListRequestBody(uint[] modIds, bool? filterPcOnly = null);
 
-	private record GetModFilesRequestBody([UsedImplicitly] List<uint> fileIds);
+	private sealed record GetModFilesRequestBody([UsedImplicitly] List<uint> fileIds);
 
-	private record GetModsResponse(Mod[] Data);
+	private sealed record GetModsResponse(Mod[] Data);
 
 	public enum ModLoaderType
 	{
@@ -231,35 +231,35 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		NeoForge
 	}
 
-	private record GetCategoriesResponse(
+	private sealed record GetCategoriesResponse(
 		CurseCategory[] Data);
 
-	private record Pagination(
+	private sealed record Pagination(
 		uint Index,
 		uint PageSize,
 		uint ResultCount,
 		uint TotalCount);
 
 	[UsedImplicitly]
-	private record ModAuthor(
+	private sealed record ModAuthor(
 		uint Id,
 		string Name,
 		string Url);
 
 	[UsedImplicitly]
-	private record ModLinks(
+	private sealed record ModLinks(
 		string WebsiteUrl,
 		string? WikiUrl,
 		string? IssuesUrl,
 		string? SourceUrl);
 
 	[UsedImplicitly]
-	private record ModAsset(
+	private sealed record ModAsset(
 		uint Id,
 		string Url);
 
 	[UsedImplicitly]
-	private record Mod(
+	private sealed record Mod(
 		uint Id,
 		string Name,
 		string Slug,
@@ -278,7 +278,7 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	}
 
 	[UsedImplicitly]
-	public record FileHash(
+	public sealed record FileHash(
 		string Value,
 		CfHashAlgorithm Algo);
 
@@ -300,12 +300,12 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	}
 
 	[UsedImplicitly]
-	public record FileDependency(
+	public sealed record FileDependency(
 		uint ModId,
 		FileRelationType RelationType);
 
 	[UsedImplicitly]
-	public record File(
+	public sealed record File(
 		uint Id,
 		uint ModId,
 		string DisplayName,
@@ -316,16 +316,16 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		string[] GameVersions,
 		FileDependency[] Dependencies);
 
-	private record GetFilesResponse(File[] Data);
+	private sealed record GetFilesResponse(File[] Data);
 
-	private record GetModFilesResponse(
+	private sealed record GetModFilesResponse(
 		File[] Data,
 		Pagination Pagination);
 
-	private record SearchModsResponse(
+	private sealed record SearchModsResponse(
 		Mod[] Data,
 		Pagination Pagination);
 
-	private record StringResponse(
+	private sealed record StringResponse(
 		string Data);
 }

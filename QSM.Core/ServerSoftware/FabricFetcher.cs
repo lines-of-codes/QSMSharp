@@ -64,14 +64,14 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 	}
 
 	[UsedImplicitly]
-	private record FabricInstaller(
+	private sealed record FabricInstaller(
 		string? Url = null,
 		string? Maven = null,
 		string? Version = null,
 		bool? Stable = null);
 
 	[UsedImplicitly]
-	private record FabricLoader(
+	private sealed record FabricLoader(
 		string? Separator = null,
 		int? Build = null,
 		string? Maven = null,
@@ -79,11 +79,11 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 		bool? Stable = null);
 
 	[UsedImplicitly]
-	private record AvailableFabricVersion(
+	private sealed record AvailableFabricVersion(
 		FabricLoader? Loader = null);
 
 	[UsedImplicitly]
-	private record SupportedMinecraftVersion(
+	private sealed record SupportedMinecraftVersion(
 		string? Version = null,
 		bool? Stable = null);
 }

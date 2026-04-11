@@ -95,7 +95,11 @@ internal static class Program
 		InfoFetcher[] fetchers =
 		[
 			new FabricFetcher(null!),
-			new QuiltFetcher(null!)
+			new QuiltFetcher(null!),
+			new PaperMCFetcher("paper", null!),
+			new PaperMCFetcher("velocity", null!),
+			new PaperMCFetcher("folia", null!),
+			new PurpurFetcher(null!)
 		];
 
 		foreach (InfoFetcher fetcher in fetchers)

@@ -2,19 +2,19 @@
 
 public class ModPluginInfo
 {
-	public object? Id;
-	public string Description = string.Empty;
-	public ulong DownloadCount;
-	public string? IconUrl = null;
-	public required string License;
-	public string LicenseUrl = string.Empty;
-	public string LongDescription = string.Empty;
-	public required string Name;
-	public required string Owner;
-	public required string Slug;
+	public object? Id { get; init; }
+	public string Description { get; init; } = string.Empty;
+	public ulong DownloadCount { get; init; }
+	public string? IconUrl { get; init; }
+	public required string License { get; init; }
+	public string LicenseUrl { get; set; } = string.Empty;
+	public string LongDescription { get; set; } = string.Empty;
+	public required string Name { get; init; }
+	public required string Owner { get; init; }
+	public required string Slug { get; init; }
 	
 	/// <summary>
 	/// URL to the mod's page
 	/// </summary>
-	public string? Url;
+	public string? Url { get; set; }
 }

@@ -12,7 +12,7 @@ public class AdoptiumProvider : IJavaProvider
 		HttpClient = new HttpClient { BaseAddress = new Uri("https://api.adoptium.net/v3/") };
 	}
 
-	private string _processArchitecture => RuntimeInformation.ProcessArchitecture switch
+	private static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
 		Architecture.X86 => "x32",
 		Architecture.X64 => "x64",
@@ -23,24 +23,18 @@ public class AdoptiumProvider : IJavaProvider
 		_ => throw new NotSupportedException("Invalid CPU architecture")
 	};
 
-	private string _os
+	private static string OS
 	{
 		get
 		{
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-			{
 				return "windows";
-			}
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-			{
 				return "linux";
-			}
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-			{
 				return "mac";
-			}
 
 			throw new NotSupportedException("Unidentified platform.");
 		}
@@ -68,18 +62,18 @@ public class AdoptiumProvider : IJavaProvider
 	public Task<string> GetDownloadUrlAsync(string releaseName)
 	{
 		return Task.FromResult(
-			$"{HttpClient.BaseAddress}binary/version/{releaseName}/{_os}/{_processArchitecture}/jre/hotspot/normal/eclipse");
+			$"{HttpClient.BaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse");
 	}
 
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
 		ReleaseNamesRequest? response = await HttpClient.GetFromJsonAsync<ReleaseNamesRequest>(
-			$"info/release_names?architecture={_processArchitecture}&heap_size=normal&image_type=jre&os={_os}&page=0&page_size=10&project=jdk&release_type=ga&semver=false&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse&version=%5B{javaMajorRelease}%2C{javaMajorRelease + 1}%5D");
+			$"info/release_names?architecture={ProcessArchitecture}&heap_size=normal&image_type=jre&os={OS}&page=0&page_size=10&project=jdk&release_type=ga&semver=false&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse&version=%5B{javaMajorRelease}%2C{javaMajorRelease + 1}%5D");
 
 		return response!.releases!;
 	}
 
-	internal record class AvailableReleasesRequest(
+	internal sealed record AvailableReleasesRequest(
 		int[]? available_lts_releases = null,
 		int[]? available_releases = null,
 		int? most_recent_feature_release = null,
@@ -87,6 +81,6 @@ public class AdoptiumProvider : IJavaProvider
 		int? most_recent_lts = null,
 		int? tip_version = null);
 
-	internal record class ReleaseNamesRequest(
+	internal sealed record ReleaseNamesRequest(
 		string[]? releases = null);
 }

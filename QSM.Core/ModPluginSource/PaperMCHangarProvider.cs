@@ -126,7 +126,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 
 				if (dependency.ExternalPageUrl == null)
 				{
-					downloadUri = new Uri((await GetVersionsAsync(dependency.Name, null)).First().DownloadUri!);
+					downloadUri = new Uri((await GetVersionsAsync(dependency.Name))[0].DownloadUri!);
 				}
 
 				return new ModPluginDownloadInfo.Dependency

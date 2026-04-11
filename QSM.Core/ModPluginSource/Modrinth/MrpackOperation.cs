@@ -1,21 +1,10 @@
 ﻿namespace QSM.Core.ModPluginSource.Modrinth;
 
-public class MrpackOperation
+public class MrpackOperation(string operation, bool error = false)
 {
-	public bool Error;
-	public string Operation = string.Empty;
-	public double? Progress;
-
-	public MrpackOperation(string operation)
-	{
-		Operation = operation;
-	}
-
-	public MrpackOperation(string operation, bool error)
-	{
-		Operation = operation;
-		Error = error;
-	}
+	public bool Error { get; } = error;
+	public string Operation { get; } = operation;
+	public double? Progress { get; set; }
 
 	public MrpackOperation(string operation, double? progress) : this(operation)
 	{

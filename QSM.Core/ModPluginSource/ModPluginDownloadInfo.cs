@@ -6,31 +6,31 @@ public class ModPluginDownloadInfo(string versionId)
 {
 	public class Dependency
 	{
-		public Uri? DownloadUri;
-		public string? ExternalPageUrl;
-		public required string Name;
-		public bool Required;
+		public Uri? DownloadUri { get; init; }
+		public string? ExternalPageUrl { get; init; }
+		public required string Name { get; init; }
+		public bool Required { get; init; }
 
 		/// <summary>
 		///     A unique name/identity to the dependency.
 		/// </summary>
-		public string Slug = string.Empty;
+		public string Slug { get; init; } = string.Empty;
 	}
 
-	public Dependency[] Dependencies = [];
+	public Dependency[] Dependencies { get; set; } = [];
 	public readonly string VersionId = versionId;
-	public string DisplayName = string.Empty;
+	public string DisplayName { get; set; } = string.Empty;
 
 	/// <summary>
 	///     A boolean specifying whether this mod should be downloaded
 	/// </summary>
-	public bool Download = true;
+	public bool Download { get; set; } = true;
 
-	public string? DownloadUri;
-	public string? ExternalPageUrl;
-	public string FileName = string.Empty;
-	public string? Hash;
-	public HashAlgorithm HashAlgorithm = HashAlgorithm.None;
+	public string? DownloadUri { get; set; }
+	public string? ExternalPageUrl { get; set; }
+	public string FileName { get; set; } = string.Empty;
+	public string? Hash { get; set; }
+	public HashAlgorithm HashAlgorithm { get; set; } = HashAlgorithm.None;
 
 	public override bool Equals(object? obj)
 	{

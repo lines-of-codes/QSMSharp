@@ -53,16 +53,8 @@ public partial class NeoForgeFetcher : InfoFetcher
 			return Task.FromResult(buildInfo);
 		}
 
-		string majorMinorVersion = minecraftVersion.Substring(2) + ".";
-		List<string> versions = [];
-
-		foreach (string version in _availableVersionsCache)
-		{
-			if (version.StartsWith(majorMinorVersion))
-			{
-				versions.Add(version);
-			}
-		}
+		string majorMinorVersion = minecraftVersion[2..] + ".";
+		List<string> versions = _availableVersionsCache.Where(version => version.StartsWith(majorMinorVersion)).ToList();
 
 		versions.Reverse();
 

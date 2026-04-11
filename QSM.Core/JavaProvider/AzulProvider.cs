@@ -5,7 +5,7 @@ namespace QSM.Core.JavaProvider;
 
 public class AzulProvider : IJavaProvider
 {
-	private readonly Dictionary<int, Dictionary<string, string>> DownloadURLCache = [];
+	private readonly Dictionary<int, Dictionary<string, string>> _downloadUrlCache = [];
 
 	private readonly HttpClient HttpClient;
 
@@ -14,7 +14,7 @@ public class AzulProvider : IJavaProvider
 		HttpClient = new HttpClient { BaseAddress = new Uri("https://api.azul.com/metadata/v1/zulu/") };
 	}
 
-	private string _processArchitecture => RuntimeInformation.ProcessArchitecture switch
+	private static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
 		Architecture.X86 => "i686",
 		Architecture.X64 => "amd64",
@@ -23,7 +23,8 @@ public class AzulProvider : IJavaProvider
 		_ => throw new NotSupportedException("Invalid CPU architecture")
 	};
 
-	private string _os
+	// ReSharper disable once InconsistentNaming
+	private static string OS
 	{
 		get
 		{
@@ -46,17 +47,9 @@ public class AzulProvider : IJavaProvider
 		}
 	}
 
-	private string _archiveType
+	private static string ArchiveType
 	{
-		get
-		{
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-			{
-				return "zip";
-			}
-
-			return "tar.gz";
-		}
+		get => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "tar.gz";
 	}
 
 	public string Terms => "https://www.azul.com/products/core/openjdk-terms-of-use/";
@@ -65,10 +58,10 @@ public class AzulProvider : IJavaProvider
 	{
 		Dictionary<int, string> availableMajorReleases = new();
 
-		ZuluJVMData[]? response = await HttpClient.GetFromJsonAsync<ZuluJVMData[]>(
-			$"packages?latest=true&arch={_processArchitecture}&os={_os}&java_package_type=jre&javafx_bundled=false&archive_type={_archiveType}&include_fields=support_term");
+		ZuluJvmData[]? response = await HttpClient.GetFromJsonAsync<ZuluJvmData[]>(
+			$"packages?latest=true&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=support_term");
 
-		foreach (ZuluJVMData runtime in response!)
+		foreach (ZuluJvmData runtime in response!)
 		{
 			int majorVersion = runtime.java_version![0];
 
@@ -91,18 +84,18 @@ public class AzulProvider : IJavaProvider
 			throw new FormatException();
 		}
 
-		return Task.FromResult(DownloadURLCache[major][releaseName]);
+		return Task.FromResult(_downloadUrlCache[major][releaseName]);
 	}
 
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
-		ZuluJVMData[]? response = await HttpClient.GetFromJsonAsync<ZuluJVMData[]>(
-			$"packages?java_version={javaMajorRelease}&arch={_processArchitecture}&os={_os}&java_package_type=jre&javafx_bundled=false&archive_type={_archiveType}&include_fields=lib_c_type");
+		ZuluJvmData[]? response = await HttpClient.GetFromJsonAsync<ZuluJvmData[]>(
+			$"packages?java_version={javaMajorRelease}&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=lib_c_type");
 
 		List<string> jres = new();
 		Dictionary<string, string> downloadUrlCache = new();
 
-		foreach (ZuluJVMData runtime in response!)
+		foreach (ZuluJvmData runtime in response!)
 		{
 			string version =
 				$"{runtime.java_version![0]}.{runtime.java_version[1]}.{runtime.java_version[2]}+{runtime.openjdk_build_number}";
@@ -110,12 +103,12 @@ public class AzulProvider : IJavaProvider
 			_ = downloadUrlCache.TryAdd(version, runtime.download_url!);
 		}
 
-		DownloadURLCache.TryAdd(javaMajorRelease, downloadUrlCache);
+		_downloadUrlCache.TryAdd(javaMajorRelease, downloadUrlCache);
 
 		return jres.ToArray();
 	}
 
-	internal record class ZuluJVMData(
+	private sealed record ZuluJvmData(
 		string? availability_type = null,
 		int[]? distro_version = null,
 		string? download_url = null,

@@ -5,7 +5,7 @@
 /// </summary>
 public class ServerMetadata
 {
-	public static ServerMetadata? Selected = null;
+	public static ServerMetadata? Selected { get; set; } = null;
 
 	public static readonly ServerSoftwares[] SupportMods =
 	[

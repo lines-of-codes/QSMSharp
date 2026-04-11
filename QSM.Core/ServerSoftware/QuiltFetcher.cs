@@ -75,17 +75,17 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 	}
 
 	[UsedImplicitly]
-	private record GameVersion(string Version, bool Stable);
+	private sealed record GameVersion(string Version, bool Stable);
 
 	[UsedImplicitly]
-	private record LoaderVersion(
+	private sealed record LoaderVersion(
 		string Separator,
 		byte Build,
 		string Maven,
 		string Version);
 
 	[UsedImplicitly]
-	private record InstallerVersion(
+	private sealed record InstallerVersion(
 		string Url,
 		string Maven,
 		string Version);

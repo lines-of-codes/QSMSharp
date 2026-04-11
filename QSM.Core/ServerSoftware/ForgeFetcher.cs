@@ -54,16 +54,10 @@ public partial class ForgeFetcher : InfoFetcher
 		}
 
 		string prefix = minecraftVersion + "-";
-		List<string> versions = [];
-
-		foreach (string version in _availableVersionsCache)
-		{
-			if (version.StartsWith(prefix))
-			{
-				versions.Add(version.Substring(prefix.Length));
-			}
-		}
-
+		List<string> versions = (from version in _availableVersionsCache
+			where version.StartsWith(prefix)
+			select version[prefix.Length..]).ToList();
+		
 		versions.Reverse();
 
 		BuildInfoCache[minecraftVersion] = versions.ToArray();

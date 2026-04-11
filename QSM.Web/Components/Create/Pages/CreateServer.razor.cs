@@ -30,13 +30,13 @@ public partial class CreateServer : ComponentBase
 	{
 		_infoFetchers = new Dictionary<ServerSoftwares, InfoFetcher>
 		{
-			{ ServerSoftwares.Paper, new PaperMCFetcher("paper") },
-			{ ServerSoftwares.Purpur, new PurpurFetcher() },
+			{ ServerSoftwares.Paper, new PaperMCFetcher("paper", HttpClientFactory) },
+			{ ServerSoftwares.Purpur, new PurpurFetcher(HttpClientFactory) },
 			{ ServerSoftwares.Vanilla, new VanillaFetcher() },
 			{ ServerSoftwares.Fabric, new FabricFetcher(HttpClientFactory) },
 			{ ServerSoftwares.NeoForge, new NeoForgeFetcher() },
-			{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity") },
-			{ ServerSoftwares.Folia, new PaperMCFetcher("folia") },
+			{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity", HttpClientFactory) },
+			{ ServerSoftwares.Folia, new PaperMCFetcher("folia", HttpClientFactory) },
 			{ ServerSoftwares.Forge, new ForgeFetcher() },
 			{ ServerSoftwares.Quilt, new QuiltFetcher(HttpClientFactory) }
 		};

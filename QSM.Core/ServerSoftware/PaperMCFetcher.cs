@@ -5,17 +5,10 @@ namespace QSM.Core.ServerSoftware;
 /// <summary>
 ///     An information fetcher that can fetch PaperMC's project (Paper and Velocity)
 /// </summary>
-public class PaperMCFetcher : InfoFetcher
+public class PaperMCFetcher(string project, IHttpClientFactory factory) : InfoFetcher
 {
-	private readonly HttpClient _httpClient;
-
-	private readonly string _prefixPath;
-
-	public PaperMCFetcher(string project)
-	{
-		_httpClient = new HttpClient { BaseAddress = new Uri("https://fill.papermc.io/") };
-		_prefixPath = $"/v3/projects/{project}";
-	}
+	public override string HttpClientName => $"PaperMC{project}";
+	public override string HttpBaseAddress => $"https://fill.papermc.io/v3/projects/{project}/";
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
@@ -24,8 +17,9 @@ public class PaperMCFetcher : InfoFetcher
 			return buildInfo;
 		}
 
+		using HttpClient client = factory.CreateClient(HttpClientName);
 		AvailableBuildsRequest? response =
-			await _httpClient.GetFromJsonAsync<AvailableBuildsRequest>($"{_prefixPath}/versions/{minecraftVersion}");
+			await client.GetFromJsonAsync<AvailableBuildsRequest>($"versions/{minecraftVersion}");
 
 		if (response == null)
 		{
@@ -46,7 +40,8 @@ public class PaperMCFetcher : InfoFetcher
 			return MinecraftVersionsCache;
 		}
 
-		ProjectInformation? response = await _httpClient.GetFromJsonAsync<ProjectInformation>(_prefixPath);
+		using HttpClient client = factory.CreateClient(HttpClientName);
+		ProjectInformation? response = await client.GetFromJsonAsync<ProjectInformation>($"/v3/projects/{project}");
 
 		if (response == null)
 			throw new NetworkResourceUnavailableException();
@@ -60,7 +55,8 @@ public class PaperMCFetcher : InfoFetcher
 
 	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		BuildInfo? response = await _httpClient.GetFromJsonAsync<BuildInfo>($"{_prefixPath}/versions/{minecraftVersion}/builds/{build}");
+		using HttpClient client = factory.CreateClient(HttpClientName);
+		BuildInfo? response = await client.GetFromJsonAsync<BuildInfo>($"versions/{minecraftVersion}/builds/{build}");
 
 		if (response == null)
 			throw new NetworkResourceUnavailableException();
@@ -68,15 +64,15 @@ public class PaperMCFetcher : InfoFetcher
 		return response.Downloads?.First().Value.Url ?? throw new NetworkResourceUnavailableException();
 	}
 
-	internal record AvailableBuildsRequest(
+	internal sealed record AvailableBuildsRequest(
 		int[]? Builds = null);
 
-	internal record ProjectInformation(
+	internal sealed record ProjectInformation(
 		Dictionary<string, string[]>? Versions);
 
-	internal record BuildInfo(Dictionary<string, BuildFileInfo>? Downloads);
+	internal sealed record BuildInfo(Dictionary<string, BuildFileInfo>? Downloads);
 
-	internal record BuildFileInfo(
+	internal sealed record BuildFileInfo(
 		string? Name,
 		Dictionary<string, string>? Checksums,
 		int? Size,

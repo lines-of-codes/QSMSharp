@@ -2,15 +2,10 @@
 
 namespace QSM.Core.ServerSoftware;
 
-public class PurpurFetcher : InfoFetcher
+public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 {
-	private const string prefixPath = "/v2/purpur/";
-	private readonly HttpClient httpClient;
-
-	public PurpurFetcher()
-	{
-		httpClient = new HttpClient { BaseAddress = new Uri("https://api.purpurmc.org/") };
-	}
+	public override string HttpClientName => "PurpurFetcher";
+	public override string HttpBaseAddress => "https://api.purpurmc.org/v2/purpur/";
 
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
@@ -19,7 +14,8 @@ public class PurpurFetcher : InfoFetcher
 			return buildInfo;
 		}
 
-		BuildInfoRequest? response = await httpClient.GetFromJsonAsync<BuildInfoRequest>(prefixPath + minecraftVersion);
+		using HttpClient client = factory.CreateClient(HttpClientName);
+		BuildInfoRequest? response = await client.GetFromJsonAsync<BuildInfoRequest>(minecraftVersion);
 
 		if (response == null)
 		{
@@ -50,7 +46,8 @@ public class PurpurFetcher : InfoFetcher
 			return MinecraftVersionsCache;
 		}
 
-		ProjectInfoRequest? response = await httpClient.GetFromJsonAsync<ProjectInfoRequest>(prefixPath);
+		using HttpClient client = factory.CreateClient(HttpClientName);
+		ProjectInfoRequest? response = await client.GetFromJsonAsync<ProjectInfoRequest>("");
 
 		if (response == null)
 		{
@@ -68,16 +65,16 @@ public class PurpurFetcher : InfoFetcher
 		return Task.FromResult($"https://api.purpurmc.org/v2/purpur/{minecraftVersion}/{build}/download");
 	}
 
-	internal record class BuildsInfo(
+	internal sealed record BuildsInfo(
 		string? Latest = null,
 		string[]? All = null);
 
-	internal record BuildInfoRequest(
+	internal sealed record BuildInfoRequest(
 		string? Project = null,
 		string? Version = null,
 		BuildsInfo? Builds = null);
 
-	internal record ProjectInfoRequest(
+	internal sealed record ProjectInfoRequest(
 		string? Project = null,
 		string[]? Versions = null);
 }
