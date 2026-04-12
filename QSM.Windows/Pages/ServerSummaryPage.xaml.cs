@@ -80,7 +80,7 @@ public sealed partial class ServerSummaryPage : Page
 			if (defaultJava == null)
 			{
 				await InfoDialog.CreateDialog("Java Not Selected", "No registered Java installation. Please add one in the Settings › Manage Java menu.", this).ShowAsync();
-				Log.Error($"No registed Java installation (Server \"{_metadata.Name}\")");
+				Log.Error("No registed Java installation (Server \"{ServerName}\")", _metadata.Name);
 				return;
 			}
 
@@ -99,19 +99,33 @@ public sealed partial class ServerSummaryPage : Page
 
 		if (settings.FirstRun)
 		{
-			if (_metadata.Software == ServerSoftwares.NeoForge)
+			switch (_metadata.Software)
 			{
-				await new NeoForgeFetcher(null!).InitializeOnFirstRun(
-					_metadata,
-					settings,
-					(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
-			}
-			else if (_metadata.Software == ServerSoftwares.Forge)
-			{
-				await new ForgeFetcher(null!).InitializeOnFirstRun(
-					_metadata,
-					settings,
-					(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
+				case ServerSoftwares.NeoForge:
+					{
+						await new NeoForgeFetcher(null!).InitializeOnFirstRun(
+							_metadata,
+							settings,
+							(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
+						break;
+					}
+
+				case ServerSoftwares.Forge:
+					{
+						await new ForgeFetcher(null!).InitializeOnFirstRun(
+							_metadata,
+							settings,
+							(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
+						break;
+					}
+				case ServerSoftwares.Quilt:
+					{
+						await new QuiltFetcher(null!).InitializeOnFirstRun(
+							_metadata, 
+							settings, 
+							(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
+						break;
+					}
 			}
 
 			settings.FirstRun = false;
@@ -164,6 +178,6 @@ public sealed partial class ServerSummaryPage : Page
 
 	private void ChangeVersionButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
-
+		// TODO: Implement this
 	}
 }

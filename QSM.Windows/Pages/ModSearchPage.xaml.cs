@@ -27,10 +27,10 @@ public sealed partial class ModSearchPage : Page
 	ServerMetadata _metadata;
 	ModPluginInfo SelectedMod;
 	ProviderInfo CurrentProvider;
-	List<ModPluginDownloadInfo> SelectedMods = [];
-	ObservableCollection<ProviderInfo> Providers = [];
-	ExtendedObservableCollection<ModPluginInfo> SearchResults = [];
-	ExtendedObservableCollection<ModPluginDownloadInfo> AvailableVersions = [];
+	readonly List<ModPluginDownloadInfo> SelectedMods = [];
+	readonly ObservableCollection<ProviderInfo> Providers = [];
+	readonly ExtendedObservableCollection<ModPluginInfo> SearchResults = [];
+	readonly ExtendedObservableCollection<ModPluginDownloadInfo> AvailableVersions = [];
 
 	public ModSearchPage()
 	{
@@ -148,7 +148,7 @@ public sealed partial class ModSearchPage : Page
 		catch (HttpRequestException reqEx)
 		{
 			SelectButton.IsEnabled = false;
-			Log.Error("[GetVersionsAsync] {Exception}", reqEx.Message);
+			Log.Error(reqEx, "[GetVersionsAsync] An error occurred while fetching versions");
 		}
 	}
 

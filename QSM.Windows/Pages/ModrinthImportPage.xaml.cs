@@ -96,7 +96,7 @@ public sealed partial class ModrinthImportPage : Page
 
 		if (selected.Hash != sha512.GetFileHashAsString(packPath))
 		{
-			Log.Error($"The file {Path.GetFileName(packPath)} seems to be corrupted and its integrity cannot be verified.");
+			Log.Error("The file \"{PackPath}\" seems to be corrupted and its integrity cannot be verified.", Path.GetFileName(packPath));
 			Log.Verbose("The application won't try to install the modpack.");
 			dialog.Hide();
 			return;
@@ -128,23 +128,6 @@ public sealed partial class ModrinthImportPage : Page
 		{
 			downloadPage.SetOperation(operation.Operation);
 		}
-
-		//var downloader = MrpackExtractor.DownloadMods(index, serverDir);
-
-		//await foreach (var operation in downloader)
-		//{
-		//	downloadPage.SetOperation(operation.Operation);
-
-		//	if (operation.Progress == null)
-		//	{
-		//		downloadPage.SetIsIndeterminate(true);
-		//	}
-		//	else
-		//	{
-		//		downloadPage.SetIsIndeterminate(false);
-		//		downloadPage.UpdateProgress((double)operation.Progress);
-		//	}
-		//}
 
 		IHttpClientFactory clientFactory = Program.Hoster.Services.GetRequiredService<IHttpClientFactory>();
 		InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch

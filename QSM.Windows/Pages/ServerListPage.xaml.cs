@@ -20,12 +20,14 @@ public sealed partial class ServerListPage : Page
 	private static readonly Dictionary<ServerSoftwares, string> SoftwareIconPaths = new()
 	{
 		{ ServerSoftwares.Paper, "ms-appx:///Assets/ServerSoftware/papermc-logomark.png" },
+		{ ServerSoftwares.Folia, "ms-appx:///Assets/ServerSoftware/folia.png" },
 		{ ServerSoftwares.Purpur, "ms-appx:///Assets/ServerSoftware/purpur.svg" },
 		{ ServerSoftwares.Vanilla, "ms-appx:///Assets/ServerSoftware/minecraft_logo.svg" },
 		{ ServerSoftwares.Fabric, "ms-appx:///Assets/ServerSoftware/Fabric.png" },
 		{ ServerSoftwares.NeoForge, "ms-appx:///Assets/ServerSoftware/NeoForged.png" },
 		{ ServerSoftwares.Velocity, "ms-appx:///Assets/ServerSoftware/velocity-blue.svg" },
-		{ ServerSoftwares.Forge, "ms-appx:///Assets/ServerSoftware/forge.png" }
+		{ ServerSoftwares.Forge, "ms-appx:///Assets/ServerSoftware/forge.png" },
+		{ ServerSoftwares.Quilt, "ms-appx:///Assets/ServerSoftware/quilt-logo.png" }
 	};
 
 	public ServerListPage()

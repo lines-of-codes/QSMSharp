@@ -99,7 +99,7 @@ public sealed partial class CurseForgeImportPage : Page
 
 			if (selected.Hash != sha1.GetFileHashAsString(packPath))
 			{
-				Log.Error($"The file {Path.GetFileName(packPath)} seems to be corrupted and its integrity cannot be verified.");
+				Log.Error("The file \"{PackPath}\" seems to be corrupted and its integrity cannot be verified.", Path.GetFileName(packPath));
 				Log.Verbose("The application won't try to install the modpack.");
 				progressDialog.Hide();
 				return;

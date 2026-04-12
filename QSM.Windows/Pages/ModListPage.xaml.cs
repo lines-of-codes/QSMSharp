@@ -76,7 +76,7 @@ public sealed partial class ModListPage : Page
 		Log.Information("Copying selected mods to target folder...");
 		foreach (var file in files)
 		{
-			Log.Debug($"Copying \"{file.Name}\"...");
+			Log.Debug("Copying \"{FileName}\"...", file.Name);
 			await file.CopyAsync(targetFolder);
 			_mods.Add(file.Name);
 		}

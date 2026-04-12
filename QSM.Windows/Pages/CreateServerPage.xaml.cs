@@ -29,6 +29,7 @@ public sealed partial class CreateServerPage : Page
 	static readonly Dictionary<string, ServerSoftwares> s_softwareDisplayNameToEnumMapping = new()
 	{
 		{ "Paper", ServerSoftwares.Paper },
+		{ "Folia", ServerSoftwares.Folia },
 		{ "Purpur", ServerSoftwares.Purpur },
 		{ "Vanilla", ServerSoftwares.Vanilla },
 		{ "Fabric", ServerSoftwares.Fabric },
@@ -53,6 +54,11 @@ public sealed partial class CreateServerPage : Page
 				InfoFetcher = new PaperMCFetcher("paper", clientFactory)
 			},
 			new () {
+				Name = "Folia",
+				Icon = "/Assets/ServerSoftware/folia.png",
+				InfoFetcher = new PaperMCFetcher("folia", clientFactory)
+			},
+			new () {
 				Name = "Purpur",
 				Icon = "/Assets/ServerSoftware/purpur.svg",
 				InfoFetcher = new PurpurFetcher(clientFactory)
@@ -69,7 +75,7 @@ public sealed partial class CreateServerPage : Page
 			},
 			new () {
 				Name = "Quilt",
-				Icon = "/Assets/ServerSoftware/quilt-logo.svg",
+				Icon = "/Assets/ServerSoftware/quilt-logo.png",
 				InfoFetcher = new QuiltFetcher(clientFactory)
 			},
 			new () {
