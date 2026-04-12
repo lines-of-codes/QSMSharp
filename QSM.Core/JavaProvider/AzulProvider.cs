@@ -1,18 +1,15 @@
-﻿using System.Net.Http.Json;
+﻿using QSM.Core.Utilities;
+using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 
 namespace QSM.Core.JavaProvider;
 
-public class AzulProvider : IJavaProvider
+public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpConsumer
 {
+	public string HttpClientName => "AzulFetcher";
+	public string HttpBaseAddress => "https://api.azul.com/metadata/v1/zulu/";
+
 	private readonly Dictionary<int, Dictionary<string, string>> _downloadUrlCache = [];
-
-	private readonly HttpClient HttpClient;
-
-	public AzulProvider()
-	{
-		HttpClient = new HttpClient { BaseAddress = new Uri("https://api.azul.com/metadata/v1/zulu/") };
-	}
 
 	private static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
@@ -58,7 +55,8 @@ public class AzulProvider : IJavaProvider
 	{
 		Dictionary<int, string> availableMajorReleases = new();
 
-		ZuluJvmData[]? response = await HttpClient.GetFromJsonAsync<ZuluJvmData[]>(
+		HttpClient client = factory.CreateClient(HttpClientName);
+		ZuluJvmData[]? response = await client.GetFromJsonAsync<ZuluJvmData[]>(
 			$"packages?latest=true&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=support_term");
 
 		foreach (ZuluJvmData runtime in response!)
@@ -89,7 +87,8 @@ public class AzulProvider : IJavaProvider
 
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
-		ZuluJvmData[]? response = await HttpClient.GetFromJsonAsync<ZuluJvmData[]>(
+		HttpClient client = factory.CreateClient(HttpClientName);
+		ZuluJvmData[]? response = await client.GetFromJsonAsync<ZuluJvmData[]>(
 			$"packages?java_version={javaMajorRelease}&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=lib_c_type");
 
 		List<string> jres = new();

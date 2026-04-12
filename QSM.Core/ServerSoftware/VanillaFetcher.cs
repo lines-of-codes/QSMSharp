@@ -9,6 +9,9 @@ public class VanillaFetcher : InfoFetcher
 	private readonly Dictionary<string, string> _downloadUrls = new();
 	private readonly PasteMystClient _pasteMystClient;
 
+	public override string HttpClientName => throw new NotImplementedException();
+	public override string HttpBaseAddress => throw new NotImplementedException();
+
 	public VanillaFetcher()
 	{
 		_pasteMystClient = new PasteMystClient();

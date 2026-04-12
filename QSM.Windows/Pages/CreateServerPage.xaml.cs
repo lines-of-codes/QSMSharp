@@ -50,12 +50,12 @@ public sealed partial class CreateServerPage : Page
 			new() {
 				Name = "Paper",
 				Icon = "/Assets/ServerSoftware/papermc-logomark.png",
-				InfoFetcher = new PaperMCFetcher("paper")
+				InfoFetcher = new PaperMCFetcher("paper", clientFactory)
 			},
 			new () {
 				Name = "Purpur",
 				Icon = "/Assets/ServerSoftware/purpur.svg",
-				InfoFetcher = new PurpurFetcher()
+				InfoFetcher = new PurpurFetcher(clientFactory)
 			},
 			new() {
 				Name = "Vanilla",
@@ -75,17 +75,17 @@ public sealed partial class CreateServerPage : Page
 			new () {
 				Name = "NeoForge",
 				Icon = "/Assets/ServerSoftware/NeoForged.png",
-				InfoFetcher = new NeoForgeFetcher()
+				InfoFetcher = new NeoForgeFetcher(clientFactory)
 			},
 			new() {
 				Name = "Forge",
 				Icon = "/Assets/ServerSoftware/forge.png",
-				InfoFetcher = new ForgeFetcher()
+				InfoFetcher = new ForgeFetcher(clientFactory)
 			},
 			new() {
 				Name = "Velocity",
 				Icon = "/Assets/ServerSoftware/velocity-blue.svg",
-				InfoFetcher = new PaperMCFetcher("velocity")
+				InfoFetcher = new PaperMCFetcher("velocity", clientFactory)
 			},
 		];
 

@@ -3,7 +3,7 @@ using System;
 
 namespace QSM.Windows;
 
-internal class AppEvents
+internal static class AppEvents
 {
 	public static event Action<ServerMetadata> NewServerAdded;
 	public static event Action<ServerMetadata> ServerRemoved;

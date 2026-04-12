@@ -5,14 +5,17 @@ using System.Text.RegularExpressions;
 
 namespace QSM.Core.ServerSoftware;
 
-public partial class NeoForgeFetcher : InfoFetcher
+public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 {
-	private readonly HttpClient _httpClient = new();
 	private readonly Regex _majorMinorVersionMatch = MajorMinorVersionMatch();
 
 	private string[] _availableVersionsCache = [];
 
 	public override string FirstRunArgs => "--install-server";
+
+	public override string HttpClientName => "NeoForgeFetcher";
+
+	public override string HttpBaseAddress => "";
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
@@ -21,8 +24,9 @@ public partial class NeoForgeFetcher : InfoFetcher
 			return MinecraftVersionsCache;
 		}
 
+		HttpClient client = factory.CreateClient(HttpClientName);
 		NeoForgeVersions? response =
-			await _httpClient.GetFromJsonAsync<NeoForgeVersions>(
+			await client.GetFromJsonAsync<NeoForgeVersions>(
 				"https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge");
 
 		_availableVersionsCache = response!.Versions!;

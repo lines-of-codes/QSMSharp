@@ -137,8 +137,8 @@ public sealed partial class CurseForgeImportPage : Page
 		{
 			ServerSoftwares.Fabric => new FabricFetcher(clientFactory),
 			ServerSoftwares.Quilt => new QuiltFetcher(clientFactory),
-			ServerSoftwares.NeoForge => new NeoForgeFetcher(),
-			ServerSoftwares.Forge => new ForgeFetcher(),
+			ServerSoftwares.NeoForge => new NeoForgeFetcher(clientFactory),
+			ServerSoftwares.Forge => new ForgeFetcher(clientFactory),
 			_ => throw new InvalidOperationException("Unsupported Minecraft server software.")
 		};
 		string url = await api.GetDownloadUrlAsync(manifest.Minecraft.Version, manifest.Minecraft.PrimaryLoader.Version);

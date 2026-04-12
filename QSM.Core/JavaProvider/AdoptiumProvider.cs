@@ -1,16 +1,13 @@
-﻿using System.Net.Http.Json;
+﻿using QSM.Core.Utilities;
+using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 
 namespace QSM.Core.JavaProvider;
 
-public class AdoptiumProvider : IJavaProvider
+public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttpConsumer
 {
-	private readonly HttpClient HttpClient;
-
-	public AdoptiumProvider()
-	{
-		HttpClient = new HttpClient { BaseAddress = new Uri("https://api.adoptium.net/v3/") };
-	}
+	public string HttpClientName => "AdoptiumFetcher";
+	public string HttpBaseAddress => "https://api.adoptium.net/v3/";
 
 	private static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
@@ -44,8 +41,9 @@ public class AdoptiumProvider : IJavaProvider
 
 	public async Task<Dictionary<string, int>> GetAvailableReleasesAsync()
 	{
+		HttpClient client = factory.CreateClient(HttpClientName);
 		AvailableReleasesRequest? response =
-			await HttpClient.GetFromJsonAsync<AvailableReleasesRequest>("info/available_releases");
+			await client.GetFromJsonAsync<AvailableReleasesRequest>("info/available_releases");
 
 		Dictionary<string, int> versions = new();
 
@@ -61,13 +59,15 @@ public class AdoptiumProvider : IJavaProvider
 
 	public Task<string> GetDownloadUrlAsync(string releaseName)
 	{
+		HttpClient client = factory.CreateClient(HttpClientName);
 		return Task.FromResult(
-			$"{HttpClient.BaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse");
+			$"{client.BaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse");
 	}
 
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
-		ReleaseNamesRequest? response = await HttpClient.GetFromJsonAsync<ReleaseNamesRequest>(
+		HttpClient client = factory.CreateClient(HttpClientName);
+		ReleaseNamesRequest? response = await client.GetFromJsonAsync<ReleaseNamesRequest>(
 			$"info/release_names?architecture={ProcessArchitecture}&heap_size=normal&image_type=jre&os={OS}&page=0&page_size=10&project=jdk&release_type=ga&semver=false&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse&version=%5B{javaMajorRelease}%2C{javaMajorRelease + 1}%5D");
 
 		return response!.releases!;

@@ -6,18 +6,18 @@ using System.Text.Json;
 
 namespace QSM.Windows;
 
-internal class ApplicationData
+internal static class ApplicationData
 {
-	public static string ApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QSM");
-	public static string DownloadFolderPath = Path.Combine(ApplicationDataPath, "Downloads");
-	public static string ServersFolderPath = Path.Combine(ApplicationDataPath, "Servers");
-	public static string BackupsFolderPath = Path.Combine(ApplicationDataPath, "Backups");
-	public static string JavaInstallsPath = Path.Combine(ApplicationDataPath, "Java");
-	public static string LogsFolderPath = Path.Combine(ApplicationDataPath, "Logs");
-	public static string ConfigFile = Path.Combine(ApplicationDataPath, "config.json");
+	public static readonly string ApplicationDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QSM");
+	public static readonly string DownloadFolderPath = Path.Combine(ApplicationDataPath, "Downloads");
+	public static readonly string ServersFolderPath = Path.Combine(ApplicationDataPath, "Servers");
+	public static readonly string BackupsFolderPath = Path.Combine(ApplicationDataPath, "Backups");
+	public static readonly string JavaInstallsPath = Path.Combine(ApplicationDataPath, "Java");
+	public static readonly string LogsFolderPath = Path.Combine(ApplicationDataPath, "Logs");
+	public static readonly string ConfigFile = Path.Combine(ApplicationDataPath, "config.json");
 	public static ApplicationConfiguration Configuration { get; set; } = new();
 	public static Dictionary<Guid, ServerSettings> ServerSettings { get; set; } = [];
-	public static JsonSerializerOptions SerializerOptions = new()
+	public static readonly JsonSerializerOptions SerializerOptions = new()
 	{
 		IgnoreReadOnlyProperties = true
 	};

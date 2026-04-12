@@ -5,7 +5,7 @@ public class ModPluginInfo
 	public object? Id { get; init; }
 	public string Description { get; init; } = string.Empty;
 	public ulong DownloadCount { get; init; }
-	public string? IconUrl { get; init; }
+	public string? IconUrl { get; set; }
 	public required string License { get; init; }
 	public string LicenseUrl { get; set; } = string.Empty;
 	public string LongDescription { get; set; } = string.Empty;

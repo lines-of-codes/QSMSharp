@@ -100,7 +100,7 @@ public sealed partial class ImportLocalPage : Page
 		{
 			ServerSoftwares.Fabric => new FabricFetcher(clientFactory),
 			ServerSoftwares.Quilt => new QuiltFetcher(clientFactory),
-			ServerSoftwares.NeoForge => new NeoForgeFetcher(),
+			ServerSoftwares.NeoForge => new NeoForgeFetcher(clientFactory),
 			_ => throw new InvalidOperationException("Unsupported Minecraft server software.")
 		};
 		string url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);

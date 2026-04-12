@@ -4,6 +4,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Serilog;
 using SkiaSharp;
+using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -28,7 +29,7 @@ public partial class App : Application
 		ApplicationData.LoadConfiguration();
 	}
 
-	private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+	private static void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 	{
 		Log.Fatal(e.Exception, e.Message);
 	}
@@ -62,13 +63,13 @@ public partial class App : Application
 		MainWindow.AppWindow.Closing += OnClosing;
 	}
 
-	private async void OnClosing(object sender, AppWindowClosingEventArgs e)
+	private static async void OnClosing(object sender, AppWindowClosingEventArgs e)
 	{
-		foreach (var process in ServerProcessManager.Instance.Processes)
+		foreach (var process in ServerProcessManager.Instance.Processes.Where(process => !process.Value.HasExited))
 		{
-			if (!process.Value.HasExited)
-				process.Value.Kill();
+			process.Value.Kill();
 		}
+
 		await Log.CloseAndFlushAsync();
 	}
 

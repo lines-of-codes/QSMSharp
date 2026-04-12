@@ -14,10 +14,10 @@ public class ServerProcessManager
 		Error
 	}
 
-	public class OutputCache(ServerProcessManager.OutputType type, string message)
+	public class OutputCache(OutputType type, string message)
 	{
-		public OutputType Type = type;
-		public string Message = message;
+		public OutputType Type { get; init; } = type;
+		public string Message { get; init; } = message;
 	}
 
 	private static ServerProcessManager s_instance = null;

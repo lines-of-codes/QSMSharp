@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
@@ -20,8 +21,8 @@ public sealed partial class JavaDownloadPage : Page
 {
 	private static readonly Dictionary<string, IJavaProvider> Providers = new()
 	{
-		{ "Azul Zulu", new AzulProvider() },
-		{ "Eclipse Temurin", new AdoptiumProvider() }
+		{ "Azul Zulu", Program.Hoster.Services.GetService<AzulProvider>() },
+		{ "Eclipse Temurin", Program.Hoster.Services.GetService<AdoptiumProvider>() }
 	};
 
 	string _selectedProviderName = "Azul Zulu";

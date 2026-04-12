@@ -5,14 +5,17 @@ using System.Text.RegularExpressions;
 
 namespace QSM.Core.ServerSoftware;
 
-public partial class ForgeFetcher : InfoFetcher
+public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 {
-	private readonly HttpClient _httpClient = new();
 	private readonly Regex _majorMinorVersionMatch = MajorMinorVersionMatch();
 
 	private string[] _availableVersionsCache = [];
 
 	public override string FirstRunArgs => "--installServer";
+
+	public override string HttpClientName => "ForgeFetcher";
+
+	public override string HttpBaseAddress => "";
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
@@ -21,8 +24,9 @@ public partial class ForgeFetcher : InfoFetcher
 			return MinecraftVersionsCache;
 		}
 
+		HttpClient client = factory.CreateClient(HttpClientName);
 		ForgeVersions? response =
-			await _httpClient.GetFromJsonAsync<ForgeVersions>(
+			await client.GetFromJsonAsync<ForgeVersions>(
 				"https://maven.minecraftforge.net/api/maven/versions/releases/net/minecraftforge/forge");
 
 		_availableVersionsCache = response!.Versions!;
@@ -65,7 +69,7 @@ public partial class ForgeFetcher : InfoFetcher
 		return Task.FromResult(BuildInfoCache[minecraftVersion]);
 	}
 
-	[GeneratedRegex("1\\..+-")]
+	[GeneratedRegex(".+-")]
 	private static partial Regex MajorMinorVersionMatch();
 
 	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)

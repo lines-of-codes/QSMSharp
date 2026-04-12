@@ -1,8 +1,10 @@
 ﻿using HappyCoding.Hosting.Desktop.WinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using QSM.Core.JavaProvider;
 using QSM.Core.ModPluginSource;
 using QSM.Core.ServerSoftware;
+using QSM.Core.Utilities;
 using Serilog;
 using System;
 using System.IO;
@@ -12,7 +14,7 @@ namespace QSM.Windows;
 
 public static class Program
 {
-	public static IHost Hoster;
+	public static IHost Hoster { get; private set; }
 
 	public static void Main(string[] args)
 	{
@@ -31,28 +33,34 @@ public static class Program
 
 		builder.Services.AddHttpClient(ModrinthProvider.HttpClientName, client =>
 		{
-			client.BaseAddress = new System.Uri(ModrinthProvider.BaseAddress);
+			client.BaseAddress = new Uri(ModrinthProvider.BaseAddress);
 			client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"lines-of-codes/QSMSharp/{Assembly.GetEntryAssembly()!.GetName().Version} (linesofcodes@dailitation.xyz)");
 		});
 
 		builder.Services.AddHttpClient(PaperMCHangarProvider.HttpClientName, client =>
 		{
-			client.BaseAddress = new System.Uri(PaperMCHangarProvider.BaseAddress);
+			client.BaseAddress = new Uri(PaperMCHangarProvider.BaseAddress);
 		});
 
 		builder.Services.AddHttpClient(CurseForgeProvider.HttpClientName, client =>
 		{
-			client.BaseAddress = new System.Uri(CurseForgeProvider.BaseAddress);
+			client.BaseAddress = new Uri(CurseForgeProvider.BaseAddress);
 			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
 		});
 
-		InfoFetcher[] fetchers =
+		IHttpConsumer[] fetchers =
 		[
 			new FabricFetcher(null!),
-			new QuiltFetcher(null!)
+			new QuiltFetcher(null!),
+			new PaperMCFetcher("paper", null!),
+			new PaperMCFetcher("velocity", null!),
+			new PaperMCFetcher("folia", null!),
+			new PurpurFetcher(null!),
+			new AdoptiumProvider(null!),
+			new AzulProvider(null!),
 		];
 
-		foreach (InfoFetcher fetcher in fetchers)
+		foreach (IHttpConsumer fetcher in fetchers)
 		{
 			builder.Services.AddHttpClient(fetcher.HttpClientName, client =>
 			{
@@ -63,6 +71,9 @@ public static class Program
 		builder.Services.AddTransient<ModrinthProvider>();
 		builder.Services.AddTransient<PaperMCHangarProvider>();
 		builder.Services.AddTransient<CurseForgeProvider>();
+
+		builder.Services.AddTransient<AdoptiumProvider>();
+		builder.Services.AddTransient<AzulProvider>();
 
 		((IHostApplicationBuilder)builder).Properties.Add(
 			key: HostingExtensions.HostingContextKey,

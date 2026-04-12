@@ -1,13 +1,16 @@
-﻿namespace QSM.Core.ServerSoftware;
+﻿using QSM.Core.Utilities;
 
-public abstract class InfoFetcher
+namespace QSM.Core.ServerSoftware;
+
+public abstract class InfoFetcher : IHttpConsumer
 {
 	protected readonly Dictionary<string, string[]> BuildInfoCache = [];
 	protected string[] MinecraftVersionsCache = [];
 
-	public virtual string HttpClientName => "InfoFetcher";
 	public virtual string FirstRunArgs => "";
-	public virtual string HttpBaseAddress => "";
+
+	public abstract string HttpClientName { get; }
+	public abstract string HttpBaseAddress { get; }
 
 	public abstract Task<string[]> FetchAvailableMinecraftVersionsAsync();
 
