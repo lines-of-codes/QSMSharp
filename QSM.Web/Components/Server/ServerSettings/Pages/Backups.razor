@@ -43,6 +43,6 @@
         _properties.Load();
         // Input.Load(_properties);
 
-        _installed = File.Exists(QuickBackupSystem.InstallPath());
+        _installed = File.Exists(ApplicationConfig.BackupSystemPath());
     }
 }

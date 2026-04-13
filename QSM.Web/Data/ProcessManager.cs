@@ -157,10 +157,10 @@ public class ProcessManager
 		switch (server.Software)
 		{
 			case ServerSoftwares.NeoForge:
-				await new NeoForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
+				await new NeoForgeFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
 				break;
 			case ServerSoftwares.Forge:
-				await new ForgeFetcher().InitializeOnFirstRun(server, settings, onDataReceived);
+				await new ForgeFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
 				break;
 			case ServerSoftwares.Quilt:
 				await new QuiltFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);

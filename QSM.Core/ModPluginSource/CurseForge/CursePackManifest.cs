@@ -27,7 +27,7 @@ public class CursePackManifest
 		[JsonPropertyName("id")] public string Id { get; set; }
 		[JsonPropertyName("primary")] public bool Primary { get; set; }
 
-		public ServerSoftwares Software => Id.Split('-').First() switch
+		public ServerSoftwares Software => Id.Split('-')[0] switch
 		{
 			"fabric" => ServerSoftwares.Fabric,
 			"forge" => ServerSoftwares.Forge,

@@ -1,4 +1,4 @@
-window.keyDownListener = {
+globalThis.keyDownListener = {
     listener: null,
     initialize: function(helper) {
         this.listener = function (e) {
@@ -11,7 +11,7 @@ window.keyDownListener = {
     }
 };
 
-window.keyUpListener = {
+globalThis.keyUpListener = {
     listener: null,
     initialize: function(helper) {
         this.listener = function (e) {

@@ -27,6 +27,18 @@ public class ApplicationConfig
 
 		return string.Empty;
 	}
+	
+	public static string BackupSystemPath()
+	{
+		string installPath = Path.Join(GetDefaultAppDataFolder(), "qbs/qbsgo");
+
+		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+		{
+			installPath += ".exe";
+		}
+		
+		return installPath;
+	}
 
 	public static ApplicationConfig? LoadConfig()
 	{

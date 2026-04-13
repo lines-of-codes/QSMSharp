@@ -219,8 +219,8 @@ else
         InfoFetcher api = extractResult.Index.MinecraftServerSoftware switch
         {
             ServerSoftwares.Fabric => new FabricFetcher(HttpClientFactory),
-            ServerSoftwares.NeoForge => new NeoForgeFetcher(),
-            ServerSoftwares.Forge => new ForgeFetcher(),
+            ServerSoftwares.NeoForge => new NeoForgeFetcher(HttpClientFactory),
+            ServerSoftwares.Forge => new ForgeFetcher(HttpClientFactory),
             ServerSoftwares.Quilt => new QuiltFetcher(HttpClientFactory),
             _ => throw new InvalidOperationException("Unsupported server software")
         };

@@ -34,10 +34,10 @@ public partial class CreateServer : ComponentBase
 			{ ServerSoftwares.Purpur, new PurpurFetcher(HttpClientFactory) },
 			{ ServerSoftwares.Vanilla, new VanillaFetcher() },
 			{ ServerSoftwares.Fabric, new FabricFetcher(HttpClientFactory) },
-			{ ServerSoftwares.NeoForge, new NeoForgeFetcher() },
+			{ ServerSoftwares.NeoForge, new NeoForgeFetcher(HttpClientFactory) },
 			{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity", HttpClientFactory) },
 			{ ServerSoftwares.Folia, new PaperMCFetcher("folia", HttpClientFactory) },
-			{ ServerSoftwares.Forge, new ForgeFetcher() },
+			{ ServerSoftwares.Forge, new ForgeFetcher(HttpClientFactory) },
 			{ ServerSoftwares.Quilt, new QuiltFetcher(HttpClientFactory) }
 		};
 		Model ??= new NewServerModel();
@@ -98,7 +98,7 @@ public partial class CreateServer : ComponentBase
 			.GetDownloadUrlAsync(Model.MinecraftVersion ?? _minecraftVersions[0],
 				Model.ServerBuild ?? _availableBuilds[0]);
 
-		using (HttpClient client = new())
+		using (HttpClient client = HttpClientFactory.CreateClient())
 		{
 			await using Stream stream = await client.GetStreamAsync(downloadUrl);
 			await using FileStream fs = new(Path.Join(_targetFolderPreview, "server.jar"), FileMode.OpenOrCreate);
