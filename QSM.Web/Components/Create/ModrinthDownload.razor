@@ -117,13 +117,13 @@ else
         }
         catch (HttpRequestException ex)
         {
-            Log.LogWarning("{}", ex.Message);
+            Log.LogWarning(ex, "An error occurred while downloading the file, trying again");
             await Task.Delay(1000);
             return await DownloadFileAsync(index, url, dest);
         }
         catch (IOException ex)
         {
-            Log.LogWarning("{}", ex.Message);
+            Log.LogWarning(ex, "An error occurred while writing the file, trying again");
             await Task.Delay(1000);
             return await DownloadFileAsync(index, url, dest);
         }
@@ -191,8 +191,8 @@ else
         {
             await Alert("Error: Modpack file integrity check failed. File is likely corrupted, Installation aborted.");
             Log.LogError("Integrity check failed, File \"{PackPath}\" does not match provided hash.", packPath);
-            Log.LogTrace("Remote hash: {}", SelectedVersion.Hash);
-            Log.LogTrace("File hash: {}", fileHash);
+            Log.LogTrace("Remote hash: {RemoteHash}", SelectedVersion.Hash);
+            Log.LogTrace("File hash: {Hash}", fileHash);
         }
 
         _currentAction = "Extracting modpack file...";

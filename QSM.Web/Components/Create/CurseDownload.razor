@@ -177,8 +177,8 @@ else
         {
             await Alert("Error: Modpack file integrity check failed. File is likely corrupted, Installation aborted.");
             Log.Error("Integrity check failed, File \"{PackPath}\" does not match provided hash.", packPath);
-            Log.Verbose("Remote hash: {}", SelectedVersion.Hash);
-            Log.Verbose("File hash: {}", fileHash);
+            Log.Verbose("Remote hash: {RemoteHash}", SelectedVersion.Hash);
+            Log.Verbose("File hash: {Hash}", fileHash);
         }
 
         _currentAction = "Extracting modpack file...";
@@ -216,6 +216,7 @@ else
         _currentAction = "Downloading mods...";
         StateHasChanged();
         var downloadList = await Curse.GetDownloadQueueFromManifest(manifest, ServerPath);
+        var listLockObj = new object();
         
         _downloadProgress.Clear();
 
@@ -233,7 +234,7 @@ else
                 await _downloadSemaphore.WaitAsync();
                 FileDownloadRequest item;
 
-                lock (downloadList.Queue)
+                lock (listLockObj)
                 {
                     item = downloadList.Queue.Dequeue();
                 }

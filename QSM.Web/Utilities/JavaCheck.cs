@@ -7,7 +7,7 @@ namespace QSM.Web.Utilities;
 
 public static class JavaCheck
 {
-	private static readonly string s_pathToJavaCheck = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utilities", "JavaCheck.jar");
+	private static readonly string s_pathToJavaCheck = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Utilities", "JavaCheck.jar");
 	private static readonly string[] s_newLineSeparator = ["\r\n", "\n"];
 
 	public static async Task<JavaInstallation> CheckJavaInstallationAsync(string javaHome)
@@ -16,7 +16,7 @@ public static class JavaCheck
 		{
 			CreateNoWindow = true,
 			UseShellExecute = false,
-			FileName = Path.Combine(javaHome, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "bin/java.exe" : "bin/java"),
+			FileName = Path.Join(javaHome, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "bin/java.exe" : "bin/java"),
 			WindowStyle = ProcessWindowStyle.Hidden,
 			Arguments = $"-jar \"{s_pathToJavaCheck}\"",
 			RedirectStandardOutput = true,
@@ -38,9 +38,8 @@ public static class JavaCheck
 			string output = await process.StandardOutput.ReadToEndAsync();
 			string error = await process.StandardOutput.ReadToEndAsync();
 			await process.WaitForExitAsync();
-
-
-			var properties = output.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+			
+			string[] properties = output.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
 			if (!string.IsNullOrWhiteSpace(error))
 				Debug.WriteLine($"err: {error}");

@@ -179,9 +179,9 @@ public class PaperMCHangarProvider : ModPluginProvider
 
 		foreach (string fileName in modFiles)
 		{
-			using FileStream file = File.OpenRead(fileName);
+			await using FileStream file = File.OpenRead(fileName);
 			using SHA256 hasher = SHA256.Create();
-			byte[] hashed = hasher.ComputeHash(file);
+			byte[] hashed = await hasher.ComputeHashAsync(file);
 			StringBuilder sb = new();
 
 			foreach (byte b in hashed)
@@ -195,16 +195,16 @@ public class PaperMCHangarProvider : ModPluginProvider
 		return [.. updates];
 	}
 
-	internal record class PaginationInfo(
+	internal sealed record PaginationInfo(
 		int? Limit = null,
 		int? Offset = null,
 		int? Count = null);
 
-	internal record class HangarNamespace(
+	internal sealed record HangarNamespace(
 		string? Owner = null,
 		string? Slug = null);
 
-	internal record class HangarStats(
+	internal sealed record HangarStats(
 		int? Views = null,
 		int? Downloads = null,
 		int? RecentViews = null,
@@ -212,18 +212,18 @@ public class PaperMCHangarProvider : ModPluginProvider
 		int? Stars = null,
 		int? Watchers = null);
 
-	internal record class HangarLicense(
+	internal sealed record HangarLicense(
 		string? Name = null,
 		string? Url = null,
 		string? Type = null);
 
-	internal record class HangarSettings(
+	internal sealed record HangarSettings(
 		string[]? Tags = null,
 		HangarLicense? License = null,
 		string[]? Keywords = null,
 		string? Sponsors = null);
 
-	internal record class HangarProject(
+	internal sealed record HangarProject(
 		DateTime? CreatedAt = null,
 		string? Name = null,
 		HangarNamespace? Namespace = null,
@@ -235,26 +235,26 @@ public class PaperMCHangarProvider : ModPluginProvider
 		string? Description = null,
 		HangarSettings? Settings = null);
 
-	internal record class ProjectReleaseChannel(
+	internal sealed record ProjectReleaseChannel(
 		string? Name = null);
 
-	internal record class HangarFileInfo(
+	internal sealed record HangarFileInfo(
 		string? Name = null,
 		int? SizeBytes = null,
 		string? Sha256Hash = null);
 
-	internal record class HangarDownloadEntry(
+	internal sealed record HangarDownloadEntry(
 		HangarFileInfo? FileInfo = null,
 		string? ExternalUrl = null,
 		string? DownloadUrl = null);
 
-	internal record class Dependency(
+	internal sealed record Dependency(
 		string? Name = null,
 		bool? Required = null,
 		string? ExternalUrl = null,
 		string? Platform = null);
 
-	internal record class ProjectVersionEntry(
+	internal sealed record ProjectVersionEntry(
 		int Id,
 		DateTime? CreatedAt = null,
 		string? Name = null,
@@ -262,11 +262,11 @@ public class PaperMCHangarProvider : ModPluginProvider
 		Dictionary<string, HangarDownloadEntry>? Downloads = null,
 		Dictionary<string, Dependency[]>? PluginDependencies = null);
 
-	internal record class SearchRequest(
+	internal sealed record SearchRequest(
 		PaginationInfo? Pagination = null,
 		HangarProject[]? Result = null);
 
-	internal record class VersionRequest(
+	internal sealed record VersionRequest(
 		PaginationInfo? Pagination = null,
 		ProjectVersionEntry[]? Result = null);
 }
