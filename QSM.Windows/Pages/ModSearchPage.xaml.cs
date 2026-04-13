@@ -73,7 +73,7 @@ public sealed partial class ModSearchPage : Page
 
 	private async void ProviderSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
-		var provider = (ProviderInfo)e.AddedItems.First();
+		var provider = (ProviderInfo)e.AddedItems[0];
 		CurrentProvider = provider;
 
 		ModPluginInfo[] mods;
@@ -83,7 +83,7 @@ public sealed partial class ModSearchPage : Page
 		}
 		catch (HttpRequestException ex)
 		{
-			Log.Error(ex, $"An error occurred while requesting mod information. {ex}");
+			Log.Error(ex, "An error occurred while requesting mod information.");
 			return;
 		}
 
@@ -95,7 +95,7 @@ public sealed partial class ModSearchPage : Page
 	{
 		if (e.AddedItems.Count == 0) return;
 
-		var mod = (ModPluginInfo)e.AddedItems.First();
+		var mod = (ModPluginInfo)e.AddedItems[0];
 
 		mod = await CurrentProvider.Provider.GetDetailedInfoAsync(mod);
 
@@ -245,7 +245,7 @@ public sealed partial class ModSearchPage : Page
 	{
 		if (e.AddedItems.Count == 0) return;
 
-		var selectedVersion = (ModPluginDownloadInfo)e.AddedItems.First();
+		var selectedVersion = (ModPluginDownloadInfo)e.AddedItems[0];
 		SelectButton.IsChecked = SelectedMods.Contains(selectedVersion);
 	}
 

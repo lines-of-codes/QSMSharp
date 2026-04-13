@@ -184,7 +184,7 @@ public sealed partial class CurseForgeImportPage : Page
 	{
 		if (e.AddedItems.Count == 0) return;
 
-		var mod = (ModPluginInfo)e.AddedItems.First();
+		var mod = (ModPluginInfo)e.AddedItems[0];
 
 		mod = await _curseforge.GetDetailedInfoAsync(mod);
 

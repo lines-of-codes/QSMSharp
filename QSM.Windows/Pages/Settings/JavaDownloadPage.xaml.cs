@@ -88,12 +88,12 @@ public sealed partial class JavaDownloadPage : Page
 		downloadPage.SetIsIndeterminate(true);
 
 		string javaFolderName = string.Empty;
-		using (ZipArchive archive = ZipFile.OpenRead(javaZip))
+		using (ZipArchive archive = await ZipFile.OpenReadAsync(javaZip))
 		{
 			// likely the folder containing everything
-			javaFolderName = archive.Entries.First().FullName;
+			javaFolderName = archive.Entries[0].FullName;
 		}
-		ZipFile.ExtractToDirectory(javaZip, ApplicationData.JavaInstallsPath);
+		await ZipFile.ExtractToDirectoryAsync(javaZip, ApplicationData.JavaInstallsPath);
 
 		var extractedFolder = Path.Combine(ApplicationData.JavaInstallsPath, javaFolderName);
 

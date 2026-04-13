@@ -46,12 +46,12 @@ public sealed partial class JavaListPage : Page
 			return;
 
 		string javaFolderName = string.Empty;
-		using (ZipArchive archive = ZipFile.OpenRead(file.Path))
+		using (ZipArchive archive = await ZipFile.OpenReadAsync(file.Path))
 		{
 			// likely the folder containing everything
-			javaFolderName = archive.Entries.First().FullName;
+			javaFolderName = archive.Entries[0].FullName;
 		}
-		ZipFile.ExtractToDirectory(file.Path, ApplicationData.JavaInstallsPath);
+		await ZipFile.ExtractToDirectoryAsync(file.Path, ApplicationData.JavaInstallsPath);
 
 		var extractedFolder = Path.Combine(ApplicationData.JavaInstallsPath, javaFolderName);
 		if (!Directory.Exists(extractedFolder))
