@@ -17,27 +17,27 @@
         SelectionChanged="NavigationView_SelectionChanged"
         x:Name="ConfigurationNavigationView">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="Summary" x:Name="SummaryTab">
+            <NavigationViewItem x:Uid="/Server/SummaryTab" x:Name="SummaryTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xEA37;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Backups" x:Name="BackupsTab">
+            <NavigationViewItem x:Uid="/Server/BackupsTab" x:Name="BackupsTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE81C;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Configuration" x:Name="ConfigurationTab">
+            <NavigationViewItem x:Uid="/Server/ConfigurationTab" x:Name="ConfigurationTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE713;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Mods/Plugins" x:Name="ModsPluginsTab">
+            <NavigationViewItem x:Uid="/Server/ModsPluginsTab" x:Name="ModsPluginsTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF259;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Console" x:Name="ConsoleTab">
+            <NavigationViewItem x:Uid="/Server/ConsoleTab" x:Name="ConsoleTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE8FD;" />
                 </NavigationViewItem.Icon>

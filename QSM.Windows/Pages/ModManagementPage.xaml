@@ -16,12 +16,12 @@
         PaneDisplayMode="Top"
         SelectionChanged="NavigationView_SelectionChanged">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="Manage" x:Name="ManageTab">
+            <NavigationViewItem x:Uid="/Server/ManageTab" x:Name="ManageTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE9D5;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Search" x:Name="SearchTab">
+            <NavigationViewItem x:Uid="/Server/SearchTab" x:Name="SearchTab">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE721;" />
                 </NavigationViewItem.Icon>

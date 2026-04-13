@@ -19,7 +19,7 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 		AvailableFabricVersion[]? response =
 			await client.GetFromJsonAsync<AvailableFabricVersion[]>($"/v2/versions/loader/{minecraftVersion}");
 
-		BuildInfoCache[minecraftVersion] = response!.Select(e => e.Loader!.Version!).ToArray();
+		BuildInfoCache[minecraftVersion] = [.. response!.Select(e => e.Loader!.Version!)];
 
 		return BuildInfoCache[minecraftVersion];
 	}
@@ -33,13 +33,8 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		SupportedMinecraftVersion[]? response =
-			await client.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game");
-
-		if (response == null)
-		{
-			throw new NetworkResourceUnavailableException();
-		}
-
+			await client.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game") 
+				?? throw new NetworkResourceUnavailableException();
 		List<string> versions = [];
 
 		foreach (SupportedMinecraftVersion version in response)
@@ -50,7 +45,7 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 			}
 		}
 
-		MinecraftVersionsCache = versions.ToArray();
+		MinecraftVersionsCache = [.. versions];
 
 		return MinecraftVersionsCache;
 	}

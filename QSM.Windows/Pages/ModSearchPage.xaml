@@ -130,13 +130,13 @@
                     </ComboBox>
                     <ToggleButton 
                         x:Name="SelectButton"
-                        Content="Select mod/plugin for download" 
+                        x:Uid="/Server/SelectButton"
                         Checked="SelectButton_Checked"
                         Unchecked="SelectButton_Unchecked"
                         IsEnabled="False" />
                     <Button 
                         x:Name="ConfirmButton"
-                        Content="Review and confirm"
+                        x:Uid="/Server/ConfirmButton"
                         Click="ConfirmButton_Click"
                         Style="{StaticResource AccentButtonStyle}" 
                         IsEnabled="False" />

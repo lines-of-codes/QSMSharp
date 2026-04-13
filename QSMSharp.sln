@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35219.272
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QSM.Windows", "QSM.Windows\QSM.Windows.csproj", "{034B756F-6758-4593-9F78-2A3E5D150723}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QSM.Core", "QSM.Core\QSM.Core.csproj", "{5F241EDD-0CFA-4BC8-B87E-F0206032D910}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QSM.Web", "QSM.Web\QSM.Web.csproj", "{8C06DD5E-B6CD-4C14-A8B2-5F7114F7FFAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QSM.Core.Tests", "QSM.Core.Tests\QSM.Core.Tests.csproj", "{C3BED246-F62C-4846-ADC7-DB6800DE061C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,22 @@ Global
 		{8C06DD5E-B6CD-4C14-A8B2-5F7114F7FFAE}.Release|x64.Build.0 = Release|Any CPU
 		{8C06DD5E-B6CD-4C14-A8B2-5F7114F7FFAE}.Release|x86.ActiveCfg = Release|Any CPU
 		{8C06DD5E-B6CD-4C14-A8B2-5F7114F7FFAE}.Release|x86.Build.0 = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|x64.Build.0 = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|ARM64.Build.0 = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|x64.ActiveCfg = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|x64.Build.0 = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3BED246-F62C-4846-ADC7-DB6800DE061C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

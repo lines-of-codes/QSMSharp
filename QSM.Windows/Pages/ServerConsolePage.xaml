@@ -27,7 +27,7 @@
         <TextBox 
             Grid.Row="1" 
             x:Name="CommandInput" 
-            PlaceholderText="Type command..." 
+            x:Uid="/Server/CommandInput"
             KeyDown="CommandInput_KeyDown" 
             IsSpellCheckEnabled="False" />
     </Grid>

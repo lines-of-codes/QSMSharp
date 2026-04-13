@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.ApplicationModel.Resources;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
 using Serilog;
@@ -18,6 +19,7 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class ServerSummaryPage : Page
 {
+	ResourceLoader _resourceLoader;
 	int _metadataIndex;
 	ServerMetadata _metadata;
 	bool ProcessExitWatched;
@@ -25,6 +27,8 @@ public sealed partial class ServerSummaryPage : Page
 	public ServerSummaryPage()
 	{
 		this.InitializeComponent();
+		_resourceLoader = new ResourceLoader("QSM.Windows.pri", "Server");
+		ServerActiveStatus.Text = _resourceLoader.GetString("Inactive");
 	}
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -39,7 +43,7 @@ public sealed partial class ServerSummaryPage : Page
 		{
 			StartButton.IsEnabled = process.HasExited;
 			StopButton.IsEnabled = !process.HasExited;
-			ServerActiveStatus.Text = process.HasExited ? "Inactive" : "Active";
+			ServerActiveStatus.Text = process.HasExited ? _resourceLoader.GetString("Inactive") : _resourceLoader.GetString("Active");
 
 			if (!process.HasExited)
 			{
@@ -65,7 +69,7 @@ public sealed partial class ServerSummaryPage : Page
 	{
 		StartButton.IsEnabled = true;
 		StopButton.IsEnabled = false;
-		ServerActiveStatus.Text = "Inactive";
+		ServerActiveStatus.Text = _resourceLoader.GetString("Inactive");
 	}
 
 	// skipcq: CS-R1005
@@ -120,7 +124,7 @@ public sealed partial class ServerSummaryPage : Page
 					}
 				case ServerSoftwares.Quilt:
 					{
-						await new QuiltFetcher(null!).InitializeOnFirstRun(
+						await QuiltFetcher.InitializeOnFirstRun(
 							_metadata, 
 							settings, 
 							(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
@@ -136,7 +140,7 @@ public sealed partial class ServerSummaryPage : Page
 
 		dialog.Hide();
 
-		ServerActiveStatus.Text = "Active";
+		ServerActiveStatus.Text = _resourceLoader.GetString("Active");
 
 		process.Exited += OnServerProcessExited;
 		ProcessExitWatched = true;

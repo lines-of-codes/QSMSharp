@@ -13,13 +13,13 @@
         <CommandBar DefaultLabelPosition="Right">
             <AppBarButton 
                 Icon="Add" 
-                Label="New Backup" 
                 x:Name="NewBackupButton"
+                x:Uid="/Server/NewBackupButton"
                 Click="NewBackupButton_Click" />
             <AppBarButton 
                 Icon="Delete" 
-                Label="Delete Backup" 
                 x:Name="DeleteBackupButton"
+                x:Uid="/Server/DeleteBackupButton"
                 Click="DeleteBackupButton_Click" />
         </CommandBar>
         <ListView 
@@ -36,10 +36,10 @@
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                Text="Id" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="Name"
+                               x:Uid="/Server/NameLabel"
                                Grid.Column="1" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="Date"
+                               x:Uid="/Server/DateLabel"
                                Grid.Column="2" />
                 </Grid>
             </ListView.Header>

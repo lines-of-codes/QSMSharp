@@ -10,6 +10,7 @@ public class ServerMetadata
 	public static readonly ServerSoftwares[] SupportMods =
 	[
 		ServerSoftwares.Fabric,
+		ServerSoftwares.Quilt,
 		ServerSoftwares.NeoForge,
 		ServerSoftwares.Forge
 	];
@@ -18,7 +19,8 @@ public class ServerMetadata
 	[
 		ServerSoftwares.Paper,
 		ServerSoftwares.Purpur,
-		ServerSoftwares.Velocity
+		ServerSoftwares.Velocity,
+		ServerSoftwares.Folia,
 	];
 
 	public ServerMetadata() { }

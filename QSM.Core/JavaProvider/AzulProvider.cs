@@ -53,7 +53,7 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 
 	public async Task<Dictionary<string, int>> GetAvailableReleasesAsync()
 	{
-		Dictionary<int, string> availableMajorReleases = new();
+		Dictionary<int, string> availableMajorReleases = [];
 
 		HttpClient client = factory.CreateClient(HttpClientName);
 		ZuluJvmData[]? response = await client.GetFromJsonAsync<ZuluJvmData[]>(

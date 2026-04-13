@@ -36,7 +36,7 @@ LicenseFile=C:\Users\Satakun Utama\Downloads\gpl-3.0.rtf
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename=QSMWindows-x64-1.2.1
+OutputBaseFilename=QSMWindows-x64-{#MyAppVersion}
 SolidCompression=yes
 WizardStyle=modern dynamic
 

@@ -18,7 +18,7 @@
             <TextBlock x:Name="ServerNameTitle" Style="{StaticResource TitleTextBlockStyle}" />
             <TextBlock x:Name="ServerSoftwareInfo" />
             <TextBlock x:Name="ServerActiveStatus" Text="Inactive" Style="{StaticResource DisplayTextBlockStyle}" />
-            <TextBlock Text="Status" />
+            <TextBlock x:Uid="/Server/StatusLabel" />
         </StackPanel>
 
         <!-- 
@@ -29,26 +29,26 @@
         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
             <Button 
                 x:Name="StartButton"
+                x:Uid="/Server/StartButton"
                 Click="StartButton_Click"
-                Content="Start" 
                 Style="{StaticResource AccentButtonStyle}" />
             <Button 
                 x:Name="StopButton" 
+                x:Uid="/Server/StopButton"
                 Click="StopButton_Click" 
-                IsEnabled="False"
-                Content="Stop" />
+                IsEnabled="False" />
         </StackPanel>
 
-        <Button x:Name="OpenServerFolderButton" Click="OpenServerFolderButton_Click" Content="Open Folder" />
-        <Button x:Name="ChangeVersionButton" Click="ChangeVersionButton_Click" Content="Update/Change Version" />
+		<Button x:Name="OpenServerFolderButton" Click="OpenServerFolderButton_Click" x:Uid="/Server/OpenServerFolderButton" />
+		<Button x:Name="ChangeVersionButton" Click="ChangeVersionButton_Click" x:Uid="/Server/ChangeVersionButton" />
 
         <Expander
-            Header="Dangerous Zone"
+            x:Uid="/Server/DangerousZone"
             HorizontalAlignment="Stretch">
             <Button
                 x:Name="DeleteButton"
+                x:Uid="/Server/DeleteButton"
                 Click="DeleteButton_Click"
-                Content="Delete Server"
                 Background="#F00000">
                 <Button.Resources>
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF0000" />

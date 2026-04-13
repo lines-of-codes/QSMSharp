@@ -18,15 +18,15 @@
         SelectionChanged="ConfigurationNavigationView_SelectionChanged"
         x:Name="ConfigurationNavigationView">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="World Generation" x:Name="WorldGenTab" />
-            <NavigationViewItem Content="Gameplay Settings" x:Name="GameplayTab" />
-            <NavigationViewItem Content="Server Performance" x:Name="PerformanceTab" />
-            <NavigationViewItem Content="Network Settings" x:Name="NetworkTab" />
-            <NavigationViewItem Content="Player Interactions" x:Name="PlayerInteractTab" />
-            <NavigationViewItem Content="Server Security" x:Name="SecurityTab" />
-            <NavigationViewItem Content="Logging and Debugging" x:Name="DebugTab" />
+            <NavigationViewItem x:Uid="/ServerConfig/WorldGenTab" x:Name="WorldGenTab" />
+            <NavigationViewItem x:Uid="/ServerConfig/GameplayTab" x:Name="GameplayTab" />
+            <NavigationViewItem x:Uid="/ServerConfig/PerformanceTab" x:Name="PerformanceTab" />
+			<NavigationViewItem x:Uid="/ServerConfig/NetworkTab" x:Name="NetworkTab" />
+			<NavigationViewItem x:Uid="/ServerConfig/PlayerInteractTab" x:Name="PlayerInteractTab" />
+			<NavigationViewItem x:Uid="/ServerConfig/SecurityTab" x:Name="SecurityTab" />
+			<NavigationViewItem x:Uid="/ServerConfig/DebugTab" x:Name="DebugTab" />
             <NavigationViewItem Content="Java" x:Name="JavaTab" />
-            <NavigationViewItem Content="Miscellaneous" x:Name="MiscTab" />
+			<NavigationViewItem x:Uid="/ServerConfig/MiscTab" x:Name="MiscTab" />
         </NavigationView.MenuItems>
 
         <Frame x:Name="ConfigurationFrame" />
