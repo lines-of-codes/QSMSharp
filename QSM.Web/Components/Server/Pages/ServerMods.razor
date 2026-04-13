@@ -123,7 +123,7 @@
         _objRef?.Dispose();
     }
 
-    private string TrimPath(string path)
+    private static string TrimPath(string path)
     {
         return path.EndsWith(DisabledSuffix) ? path[..^DisabledSuffix.Length] : path;
     }

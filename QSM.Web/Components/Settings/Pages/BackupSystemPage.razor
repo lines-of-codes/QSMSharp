@@ -16,6 +16,7 @@
 @attribute [Authorize(Roles = "Owner")]
 
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <PageTitle>Backup System - QSM Web Console</PageTitle>
 
@@ -39,9 +40,9 @@ else
 {
     <EditForm FormName="InstallForm" Model="InstallFormData" class="d-flex gap-2 mb-2" OnSubmit="Install">
         <InputSelect @bind-Value="InstallFormData" class="form-select">
-            @foreach (var rel in _availableVersions)
+            @foreach (var rel in _availableVersions.Select(rel => rel.TagName))
             {
-                <option value="@rel.TagName">@rel.TagName</option>
+                <option value="@rel">@rel</option>
             }
         </InputSelect>
         <button class="btn btn-primary" disabled="@_installing">Install</button>
@@ -310,7 +311,7 @@ else
             Architecture.Arm => "arm",
             Architecture.Arm64 => "arm64",
             Architecture.X64 => "amd64",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new UnsupportedArchitecture()
         };
         
         string os;
@@ -340,7 +341,7 @@ else
         
         Directory.CreateDirectory(directory);
         
-        using (HttpClient client = new())
+        using (var client = HttpClientFactory.CreateClient())
         {
             await using var stream = await client.GetStreamAsync(asset.BrowserDownloadUrl);
         

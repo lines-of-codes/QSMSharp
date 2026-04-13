@@ -185,7 +185,7 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex.ToString());
+            Logger.LogError(ex, "An error occurred while attempting to start the server");
             _errorMessage = ex.Message;
             _stateSwitching = false;
             

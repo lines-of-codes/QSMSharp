@@ -25,7 +25,6 @@
 
     private bool _installed;
     private ServerInstance _server = new();
-    private ServerProperties _properties = null!;
     
     protected override void OnInitialized()
     {
@@ -39,10 +38,6 @@
         }
 
         _server = server;
-        _properties = new ServerProperties(_server.PropertiesPath);
-        _properties.Load();
-        // Input.Load(_properties);
-
         _installed = File.Exists(ApplicationConfig.BackupSystemPath());
     }
 }

@@ -30,9 +30,9 @@
         <div class="col-md-6">
             <label for="remote" class="fw-bold">Remote</label>
             <InputSelect @bind-Value="Target!.Remote" id="remote" class="form-select">
-                @foreach (var remote in _config.Remotes)
+                @foreach (var remote in _config.Remotes.Select(r => r.Key))
                 {
-                    <option value="@remote.Key">@remote.Key</option>
+                    <option value="@remote">@remote</option>
                 }
             </InputSelect>
         </div>

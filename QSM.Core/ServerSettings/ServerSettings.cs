@@ -56,7 +56,7 @@ public class ServerSettings
 		}
 		catch (Exception e)
 		{
-			Log.Error(e, $"Failed to deserialize JSON for QSM Server Settings: {e.Message}");
+			Log.Error(e, "Failed to deserialize JSON for QSM Server Settings");
 		}
 
 		return true;
