@@ -31,9 +31,9 @@
 </div>
 
 @code {
-    private ApplicationUser _user = default!;
+    private ApplicationUser _user = null!;
 
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {

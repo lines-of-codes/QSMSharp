@@ -115,13 +115,13 @@
         }
     }
 
-    private class InputModel
+    private sealed class InputModel
     {
         [Required] public string? Username { get; set; }
         [Required] public string? Password { get; set; }
     }
 
-    private class PasswordInputModel
+    private sealed class PasswordInputModel
     {
         [Required] public string? Id { get; set; }
         [Required] public string? Password { get; set; }

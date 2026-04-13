@@ -38,7 +38,7 @@ public class VanillaFetcher : InfoFetcher
 
 		Debug.WriteLine(paste.Pasties[0].Content);
 
-		string[][]? response = JsonSerializer.Deserialize<string[][]>(paste.Pasties.First().Content);
+		string[][]? response = JsonSerializer.Deserialize<string[][]>(paste.Pasties[0].Content);
 
 		List<string> versions = [];
 

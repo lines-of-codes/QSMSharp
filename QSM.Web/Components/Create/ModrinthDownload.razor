@@ -36,7 +36,7 @@ else
 }
 
 @code {
-    private static SemaphoreSlim _downloadSemaphore = null!;
+    private SemaphoreSlim _downloadSemaphore = null!;
 
     [Parameter] public ModPluginDownloadInfo? SelectedVersion { get; set; }
     [Parameter] public string? Name { get; set; }
@@ -185,7 +185,7 @@ else
         _currentAction = "Verifying downloaded file...";
         StateHasChanged();
         
-        string fileHash = sha512.GetFileHashAsString(packPath);
+        var fileHash = sha512.GetFileHashAsString(packPath);
 
         if (SelectedVersion.Hash != fileHash)
         {

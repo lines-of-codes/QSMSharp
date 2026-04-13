@@ -34,14 +34,14 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 	{
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		InstallerVersion[]? versions = await client.GetFromJsonAsync<InstallerVersion[]>("versions/installer");
-		return versions?.First().Url ?? string.Empty;
+		return versions?[0].Url ?? string.Empty;
 	}
 
-	public async Task InitializeOnFirstRun(ServerMetadata metadata, ServerSettings.ServerSettings settings,
+	public static async Task InitializeOnFirstRun(ServerMetadata metadata, ServerSettings.ServerSettings settings,
 		DataReceivedEventHandler outputReceived)
 	{
-		string serverJar = Path.Combine(metadata.ServerPath, "server.jar");
-		string installerJar = Path.Combine(metadata.ServerPath, "installer.jar");
+		string serverJar = Path.Join(metadata.ServerPath, "server.jar");
+		string installerJar = Path.Join(metadata.ServerPath, "installer.jar");
 
 		// If installer jar doesn't exist, assume server.jar is the installer jar.
 		if (!File.Exists(installerJar))

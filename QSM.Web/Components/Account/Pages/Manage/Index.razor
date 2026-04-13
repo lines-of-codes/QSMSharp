@@ -20,7 +20,7 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control" autocomplete="username"
+                <InputText @bind-Value="Input!.Username" id="Input.Username" class="form-control" autocomplete="username"
                            aria-required="true" placeholder="Choose your username."/>
                 <label for="Input.Username" class="form-label">Username</label>
                 <ValidationMessage For="() => Input.Username" class="text-danger"/>
@@ -31,25 +31,30 @@
 </div>
 
 @code {
-    private ApplicationUser _user = default!;
+    private ApplicationUser _user = null!;
     private string? _username;
 
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = null!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Input ??= new InputModel();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         _username = await UserManager.GetUserNameAsync(_user);
 
-        Input.Username ??= _username;
+        Input!.Username ??= _username;
     }
 
     private async Task OnValidSubmitAsync()
     {
         Logger.LogInformation("Updating user profile...");
-        Logger.LogInformation(Input.Username);
+        Logger.LogInformation(Input!.Username);
         if (Input.Username != _username)
         {
             var setUsernameResult = await UserManager.SetUserNameAsync(_user, Input.Username);

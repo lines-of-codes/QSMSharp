@@ -23,7 +23,7 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.RecoveryCode" id="Input.RecoveryCode" class="form-control"
+                <InputText @bind-Value="Input!.RecoveryCode" id="Input.RecoveryCode" class="form-control"
                            autocomplete="off" placeholder="RecoveryCode"/>
                 <label for="Input.RecoveryCode" class="form-label">Recovery Code</label>
                 <ValidationMessage For="() => Input.RecoveryCode" class="text-danger"/>
@@ -35,11 +35,16 @@
 
 @code {
     private string? _message;
-    private ApplicationUser _user = default!;
+    private ApplicationUser _user = null!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Input ??= new InputModel();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,7 +55,7 @@
 
     private async Task OnValidSubmitAsync()
     {
-        var recoveryCode = Input.RecoveryCode.Replace(" ", string.Empty);
+        var recoveryCode = Input!.RecoveryCode.Replace(" ", string.Empty);
 
         var result = await SignInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
 

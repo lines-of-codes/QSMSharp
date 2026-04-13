@@ -311,7 +311,7 @@ else
             Architecture.Arm => "arm",
             Architecture.Arm64 => "arm64",
             Architecture.X64 => "amd64",
-            _ => throw new UnsupportedArchitecture()
+            _ => throw new UnsupportedArchitectureException()
         };
         
         string os;

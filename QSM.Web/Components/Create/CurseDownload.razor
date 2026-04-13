@@ -37,7 +37,7 @@ else
 }
 
 @code {
-    private static SemaphoreSlim _downloadSemaphore = null!;
+    private SemaphoreSlim _downloadSemaphore = null!;
 
     [Parameter] public ModPluginDownloadInfo? SelectedVersion { get; set; }
     [Parameter] public string? Name { get; set; }

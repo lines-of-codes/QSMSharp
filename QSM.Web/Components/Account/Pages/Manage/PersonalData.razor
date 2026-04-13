@@ -25,7 +25,7 @@
 </div>
 
 @code {
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {

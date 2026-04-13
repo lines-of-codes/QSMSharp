@@ -25,7 +25,7 @@
             <hr/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-2">
-                <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control" autocomplete="username"
+                <InputText @bind-Value="Input!.Username" id="Input.Username" class="form-control" autocomplete="username"
                            aria-required="true" placeholder="JohnDoe"/>
                 <label for="Input.Username">Username</label>
                 <ValidationMessage For="() => Input.Username" class="text-danger"/>
@@ -60,7 +60,7 @@
 @code {
     private IEnumerable<IdentityError>? _identityErrors;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
@@ -68,6 +68,7 @@
 
     protected override void OnInitialized()
     {
+        Input ??= new InputModel();
         var userCount = UserManager.Users.Count();
 
         if (userCount > 0)
@@ -82,7 +83,7 @@
     {
         var user = CreateUser();
 
-        await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
+        await UserStore.SetUserNameAsync(user, Input!.Username, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
@@ -113,7 +114,7 @@
         }
     }
 
-    private ApplicationUser CreateUser()
+    private static ApplicationUser CreateUser()
     {
         try
         {

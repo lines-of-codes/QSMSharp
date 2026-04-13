@@ -81,8 +81,8 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 	public async Task InitializeOnFirstRun(ServerMetadata metadata, ServerSettings.ServerSettings settings,
 		DataReceivedEventHandler outputReceived)
 	{
-		string serverJar = Path.Combine(metadata.ServerPath, "server.jar");
-		string installerJar = Path.Combine(metadata.ServerPath, "installer.jar");
+		string serverJar = Path.Join(metadata.ServerPath, "server.jar");
+		string installerJar = Path.Join(metadata.ServerPath, "installer.jar");
 
 		// If installer jar doesn't exist, assume server.jar is the installer jar.
 		if (!File.Exists(installerJar))
@@ -114,7 +114,7 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		await process.WaitForExitAsync();
 
-		var newServerFile = Path.Join(metadata.ServerPath, $"minecraft_server.{metadata.MinecraftVersion}.jar");
+		string newServerFile = Path.Join(metadata.ServerPath, $"minecraft_server.{metadata.MinecraftVersion}.jar");
 		if (File.Exists(newServerFile))
 		{
 			File.Move(newServerFile, serverJar);

@@ -59,7 +59,7 @@ else
                         <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post">
                             <DataAnnotationsValidator/>
                             <div class="form-floating mb-3">
-                                <InputText @bind-Value="Input.Code" id="Input.Code" class="form-control"
+                                <InputText @bind-Value="Input!.Code" id="Input.Code" class="form-control"
                                            autocomplete="off" placeholder="Enter the code"/>
                                 <label for="Input.Code" class="control-label form-label">Verification Code</label>
                                 <ValidationMessage For="() => Input.Code" class="text-danger"/>
@@ -78,14 +78,19 @@ else
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
     private string? _message;
-    private ApplicationUser _user = default!;
+    private ApplicationUser _user = null!;
     private string? _sharedKey;
     private string? _svgGraphicsPath;
     private IEnumerable<string>? _recoveryCodes;
 
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = null!;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm] private InputModel? Input { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Input ??= new InputModel();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,7 +102,7 @@ else
     private async Task OnValidSubmitAsync()
     {
         // Strip spaces and hyphens
-        var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
+        var verificationCode = Input!.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
         var is2FaTokenValid = await UserManager.VerifyTwoFactorTokenAsync(
             _user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
@@ -143,7 +148,7 @@ else
         _svgGraphicsPath = qr.ToGraphicsPath();
     }
 
-    private string FormatKey(string unformattedKey)
+    private static string FormatKey(string unformattedKey)
     {
         var result = new StringBuilder();
         var currentPosition = 0;

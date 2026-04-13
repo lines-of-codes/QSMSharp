@@ -53,11 +53,10 @@
     public int Id { get; set; }
 
     private ServerInstance _server = new();
-    private string? _currentUrl;
 
     protected override void OnInitialized()
     {
-        _currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
         
         using var ctx = DbFactory.CreateDbContext();
@@ -75,7 +74,7 @@
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        _currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 

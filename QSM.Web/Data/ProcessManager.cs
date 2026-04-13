@@ -163,7 +163,7 @@ public class ProcessManager
 				await new ForgeFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
 				break;
 			case ServerSoftwares.Quilt:
-				await new QuiltFetcher(null!).InitializeOnFirstRun(server, settings, onDataReceived);
+				await QuiltFetcher.InitializeOnFirstRun(server, settings, onDataReceived);
 				break;
 		}
 		settings.FirstRun = false;

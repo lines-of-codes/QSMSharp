@@ -41,10 +41,10 @@ else
 
 @code {
     private string? _message;
-    private ApplicationUser _user = default!;
+    private ApplicationUser _user = null!;
     private IEnumerable<string>? _recoveryCodes;
 
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
