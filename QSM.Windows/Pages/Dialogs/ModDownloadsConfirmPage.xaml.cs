@@ -11,7 +11,7 @@ namespace QSM.Windows.Pages.Dialogs;
 /// </summary>
 public sealed partial class ModDownloadsConfirmPage : Page
 {
-	public ModPluginDownloadInfo[] DownloadList;
+	public ModPluginDownloadInfo[] DownloadList { get; set; }
 
 	public ModDownloadsConfirmPage(ModPluginDownloadInfo[] downloadList)
 	{

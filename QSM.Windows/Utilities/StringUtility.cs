@@ -5,13 +5,13 @@ using System.Text.RegularExpressions;
 
 namespace QSM.Windows.Utilities;
 
-internal partial class StringUtility
+internal static partial class StringUtility
 {
-	static Regex invalidFileNameCheck = InvalidFileNameCheck();
+	static Regex s_invalidFileNameCheck = InvalidFileNameCheck();
 
 	public static string TurnIntoValidFileName(string original)
 	{
-		string result = invalidFileNameCheck.Replace(original, string.Empty);
+		string result = s_invalidFileNameCheck.Replace(original, string.Empty);
 
 		if (result.Length == 0)
 		{
@@ -29,7 +29,7 @@ internal partial class StringUtility
 		return string.Join(
 			" ",
 			text.Split('-')
-				.Select(word => char.ToUpper(word[0]) + word.Substring(1).ToLowerInvariant()));
+				.Select(word => char.ToUpper(word[0]) + word[1..].ToLowerInvariant()));
 	}
 
 	public static string ToKebabCase(string text)
@@ -41,14 +41,17 @@ internal partial class StringUtility
 		text = text.Replace('_', ' ');
 
 		// Insert spaces before capital letters (handles camelCase and PascalCase)
-		text = Regex.Replace(text, "([a-z])([A-Z])", "$1 $2");
+		//text = Regex.Replace(text, new AddSpacesRegex(), "$1 $2", RegexOptions.None, TimeSpan.FromMilliseconds(100));
 
 		// Convert to lowercase and replace spaces with hyphens
 		return string.Join("-",
-			text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+			text.Split([' '], StringSplitOptions.RemoveEmptyEntries)
 				.Select(word => word.Trim().ToLower()));
 	}
 
 	[GeneratedRegex("[\\\\/<>:|\\\\?\\\\*\\\"\\0]|^(PRN|AUX|NUL|CON)$|^(COM|LPT)[\\d¹²³]{1}$|[ .]$")]
 	private static partial Regex InvalidFileNameCheck();
+
+	[GeneratedRegex("([a-z])([A-Z])")]
+	private static partial Regex AddSpacesRegex();
 }

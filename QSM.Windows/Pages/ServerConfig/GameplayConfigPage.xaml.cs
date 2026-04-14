@@ -13,7 +13,7 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class GameplayConfigPage : Page
 {
-	private class Gameplay : PropertyModificationModel
+	private sealed class Gameplay : PropertyModificationModel
 	{
 		[ServerProperty("gamemode")]
 		public string Gamemode { get; set; } = "survival";

@@ -25,12 +25,11 @@ public sealed partial class ModSearchPage : Page
 {
 	int _metadataIndex;
 	ServerMetadata _metadata;
-	ModPluginInfo SelectedMod;
-	ProviderInfo CurrentProvider;
-	readonly List<ModPluginDownloadInfo> SelectedMods = [];
-	readonly ObservableCollection<ProviderInfo> Providers = [];
-	readonly ExtendedObservableCollection<ModPluginInfo> SearchResults = [];
-	readonly ExtendedObservableCollection<ModPluginDownloadInfo> AvailableVersions = [];
+	ProviderInfo _currentProvider;
+	readonly List<ModPluginDownloadInfo> _selectedMods = [];
+	readonly ObservableCollection<ProviderInfo> _providers = [];
+	readonly ExtendedObservableCollection<ModPluginInfo> _searchResults = [];
+	readonly ExtendedObservableCollection<ModPluginDownloadInfo> _availableVersions = [];
 
 	public ModSearchPage()
 	{
@@ -44,7 +43,7 @@ public sealed partial class ModSearchPage : Page
 
 		if (_metadata.IsPluginSupported)
 		{
-			Providers.Add(new()
+			_providers.Add(new()
 			{
 				Icon = "/Assets/ModPluginProvider/hangar-logo.svg",
 				ProviderName = "PaperMC Hangar",
@@ -52,14 +51,14 @@ public sealed partial class ModSearchPage : Page
 			});
 		}
 
-		Providers.Add(new()
+		_providers.Add(new()
 		{
 			Icon = "/Assets/ModPluginProvider/modrinth-logo.svg",
 			ProviderName = "Modrinth",
 			Provider = Program.Hoster.Services.GetService<ModrinthProvider>()
 		});
 
-		Providers.Add(new()
+		_providers.Add(new()
 		{
 			Icon = "/Assets/ModPluginProvider/curseforge-orange-logo.svg",
 			ProviderName = "CurseForge",
@@ -74,7 +73,7 @@ public sealed partial class ModSearchPage : Page
 	private async void ProviderSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		var provider = (ProviderInfo)e.AddedItems[0];
-		CurrentProvider = provider;
+		_currentProvider = provider;
 
 		ModPluginInfo[] mods;
 		try
@@ -87,8 +86,8 @@ public sealed partial class ModSearchPage : Page
 			return;
 		}
 
-		SearchResults.Clear();
-		SearchResults.AddRange(mods);
+		_searchResults.Clear();
+		_searchResults.AddRange(mods);
 	}
 
 	private async void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -97,9 +96,7 @@ public sealed partial class ModSearchPage : Page
 
 		var mod = (ModPluginInfo)e.AddedItems[0];
 
-		mod = await CurrentProvider.Provider.GetDetailedInfoAsync(mod);
-
-		SelectedMod = mod;
+		mod = await _currentProvider.Provider.GetDetailedInfoAsync(mod);
 
 		ModIcon.Source = new BitmapImage(new Uri(mod.IconUrl));
 		ModName.Text = mod.Name;
@@ -130,10 +127,10 @@ public sealed partial class ModSearchPage : Page
 
 		try
 		{
-			ModPluginDownloadInfo[] versions = await CurrentProvider.Provider.GetVersionsAsync(CurrentProvider.ProviderName == "CurseForge" ? mod.Id.ToString() : mod.Slug, ServerMetadata.Selected);
+			ModPluginDownloadInfo[] versions = await _currentProvider.Provider.GetVersionsAsync(_currentProvider.ProviderName == "CurseForge" ? mod.Id.ToString() : mod.Slug, ServerMetadata.Selected);
 
-			AvailableVersions.Clear();
-			AvailableVersions.AddRange(versions);
+			_availableVersions.Clear();
+			_availableVersions.AddRange(versions);
 			VersionSelector.SelectedIndex = 0;
 
 			if (versions.Length == 0)
@@ -165,13 +162,13 @@ public sealed partial class ModSearchPage : Page
 			return mod;
 		}).ToArray();
 
-		SearchResults.Clear();
-		SearchResults.AddRange(mods);
+		_searchResults.Clear();
+		_searchResults.AddRange(mods);
 	}
 
 	private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
 	{
-		var confirmPage = new ModDownloadsConfirmPage(SelectedMods.ToArray());
+		var confirmPage = new ModDownloadsConfirmPage(_selectedMods.ToArray());
 
 		ContentDialog dialog = new()
 		{
@@ -229,16 +226,16 @@ public sealed partial class ModSearchPage : Page
 	{
 		var selectedVersion = (ModPluginDownloadInfo)VersionSelector.SelectedItem;
 
-		if (SelectedMods.Contains(selectedVersion))
+		if (_selectedMods.Contains(selectedVersion))
 			return;
 
-		SelectedMods.Add(selectedVersion);
+		_selectedMods.Add(selectedVersion);
 	}
 
 	private void SelectButton_Unchecked(object sender, RoutedEventArgs e)
 	{
 		var selectedVersion = (ModPluginDownloadInfo)VersionSelector.SelectedItem;
-		SelectedMods.Remove(selectedVersion);
+		_selectedMods.Remove(selectedVersion);
 	}
 
 	private void VersionSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -246,7 +243,7 @@ public sealed partial class ModSearchPage : Page
 		if (e.AddedItems.Count == 0) return;
 
 		var selectedVersion = (ModPluginDownloadInfo)e.AddedItems[0];
-		SelectButton.IsChecked = SelectedMods.Contains(selectedVersion);
+		SelectButton.IsChecked = _selectedMods.Contains(selectedVersion);
 	}
 
 	private void ModDescription_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)

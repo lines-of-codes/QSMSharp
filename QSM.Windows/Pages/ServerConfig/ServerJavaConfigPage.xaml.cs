@@ -43,7 +43,7 @@ public sealed partial class ServerJavaConfigPage : Page
 
 	[LibraryImport("kernel32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]
-	public static partial bool GetPhysicallyInstalledSystemMemory(out long TotalMemoryInKilobytes);
+	private static partial bool GetPhysicallyInstalledSystemMemory(out long TotalMemoryInKilobytes);
 
 	public ServerJavaConfigPage()
 	{
@@ -116,7 +116,7 @@ public sealed partial class ServerJavaConfigPage : Page
 		if (picker.SelectedInstallation == null)
 			return;
 
-		Log.Information($"Selected {picker.SelectedInstallation.Vendor} {picker.SelectedInstallation.Version}");
+		Log.Information("Selected {Vendor} {Version}", picker.SelectedInstallation.Vendor, picker.SelectedInstallation.Version);
 		JavaLabel.Text = $"{picker.SelectedInstallation.Vendor} {picker.SelectedInstallation.Version}";
 		ServerSettings.Java.JavaHome = picker.SelectedInstallation.Path;
 	}

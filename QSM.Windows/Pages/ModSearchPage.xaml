@@ -22,7 +22,7 @@
             </Grid.ColumnDefinitions>
             
             <ComboBox 
-                ItemsSource="{x:Bind Providers, Mode=OneWay}" 
+                ItemsSource="{x:Bind _providers, Mode=OneWay}" 
                 x:Name="ProviderSelector" 
                 SelectionChanged="ProviderSelector_SelectionChanged">
                 <ComboBox.ItemTemplate>
@@ -48,7 +48,7 @@
                    DisplayMode="Inline"
                    IsPaneOpen="True">
             <SplitView.Pane>
-                <ListView ItemsSource="{x:Bind SearchResults, Mode=OneWay}"
+                <ListView ItemsSource="{x:Bind _searchResults, Mode=OneWay}"
                           SelectionChanged="ModList_SelectionChanged"
                           x:Name="ModList">
                     <ListView.ItemTemplate>
@@ -119,7 +119,7 @@
                 <StackPanel Spacing="8" Grid.Row="4">
                     <ComboBox 
                         x:Name="VersionSelector"
-                        ItemsSource="{x:Bind AvailableVersions, Mode=OneWay}"
+                        ItemsSource="{x:Bind _availableVersions, Mode=OneWay}"
                         SelectionChanged="VersionSelector_SelectionChanged"
                         IsEnabled="False">
                         <ComboBox.ItemTemplate>

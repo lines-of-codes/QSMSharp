@@ -20,10 +20,10 @@ namespace QSM.Windows.Pages.Dialogs;
 
 public struct FileDownloadEntry
 {
-	public string FileName = string.Empty;
-	public double Percentage = 0;
-	public long TotalBytes = 0;
-	public long TotalBytesRead = 0;
+	public string FileName { get; set; } = string.Empty;
+	public double Percentage { get; set; } = 0;
+	public long TotalBytes { get; set; } = 0;
+	public long TotalBytesRead { get; set; } = 0;
 	internal string ProgressText = string.Empty;
 	internal bool IsIndeterminate = true;
 
@@ -104,7 +104,8 @@ public sealed partial class MultipleFileDownloadPage : Page
 						// If the hash of the downloaded file doesn't match the hash provided from file provider(s)...
 						if (localHash != download.Hash)
 						{
-							Log.Error($"File {Path.GetFileName(download.Destination)} hash checking failed. Expected {download.HashAlgorithm} \"{download.Hash}\", Got \"{localHash}\"");
+							Log.Error("File {FileName} hash checking failed. Expected {HashAlgorithm} \"{Hash}\", Got \"{LocalHash}\"", 
+										Path.GetFileName(download.Destination), download.HashAlgorithm, download.Hash, localHash);
 							File.Delete(download.Destination);
 							continue;
 						}

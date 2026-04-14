@@ -38,6 +38,7 @@ public sealed partial class SettingsPage : Page
 		JavaWindow.Activate();
 	}
 
+#pragma warning disable CA1822 // Mark members as static
 	private void MonospaceFontSelector_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
 	{
 		if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
@@ -64,6 +65,7 @@ public sealed partial class SettingsPage : Page
 	}
 
 	private void MonospaceFontSelector_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+#pragma warning restore CA1822 // Mark members as static
 	{
 		ApplicationData.Configuration.MonospaceFont = args.SelectedItem.ToString();
 		ApplicationData.SaveConfiguration();

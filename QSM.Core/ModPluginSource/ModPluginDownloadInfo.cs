@@ -6,15 +6,15 @@ public class ModPluginDownloadInfo(string versionId)
 {
 	public class Dependency
 	{
-		public Uri? DownloadUri { get; init; }
-		public string? ExternalPageUrl { get; init; }
-		public required string Name { get; init; }
-		public bool Required { get; init; }
+		public Uri? DownloadUri { get; set; }
+		public string? ExternalPageUrl { get; set; }
+		public required string Name { get; set; }
+		public bool Required { get; set; }
 
 		/// <summary>
 		///     A unique name/identity to the dependency.
 		/// </summary>
-		public string Slug { get; init; } = string.Empty;
+		public string Slug { get; set; } = string.Empty;
 	}
 
 	public Dependency[] Dependencies { get; set; } = [];

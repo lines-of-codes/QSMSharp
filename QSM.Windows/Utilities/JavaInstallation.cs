@@ -2,7 +2,7 @@
 
 public class JavaInstallation
 {
-	public string Version;
-	public string Vendor;
-	public string Path;
+	public string Version { get; set; }
+	public string Vendor { get; set; }
+	public string Path { get; set; }
 }

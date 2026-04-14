@@ -10,8 +10,8 @@ namespace QSM.Windows.Pages.Dialogs;
 /// </summary>
 public sealed partial class CurseExtraDownloads : Page
 {
-	public CurseMissingMod[] FileList;
-	string _modsFolder;
+	public CurseMissingMod[] FileList { get; set; }
+	readonly string _modsFolder;
 
 	public CurseExtraDownloads(CurseMissingMod[] files, string modsFolder)
 	{
