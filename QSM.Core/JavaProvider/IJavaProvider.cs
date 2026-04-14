@@ -1,4 +1,7 @@
-﻿namespace QSM.Core.JavaProvider;
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("QSM.Core.Tests")]
+namespace QSM.Core.JavaProvider;
 
 public interface IJavaProvider
 {

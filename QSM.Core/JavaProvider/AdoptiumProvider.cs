@@ -1,5 +1,6 @@
 ﻿using QSM.Core.Utilities;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace QSM.Core.JavaProvider;
@@ -20,7 +21,8 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 		_ => throw new NotSupportedException("Invalid CPU architecture")
 	};
 
-	private static string OS
+	// ReSharper disable once InconsistentNaming
+	internal static string OS
 	{
 		get
 		{
@@ -45,23 +47,14 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 		AvailableReleasesRequest? response =
 			await client.GetFromJsonAsync<AvailableReleasesRequest>("info/available_releases");
 
-		Dictionary<string, int> versions = new();
-
-		foreach (int version in response!.available_releases!)
-		{
-			versions.Add(
-				response.available_lts_releases!.Contains(version) ? $"Java {version} (LTS)" : $"Java {version}",
-				version);
-		}
-
-		return versions;
+		return response!.available_releases!.ToDictionary(version => 
+			response.available_lts_releases!.Contains(version) ? $"Java {version} (LTS)" : $"Java {version}");
 	}
 
 	public Task<string> GetDownloadUrlAsync(string releaseName)
 	{
-		HttpClient client = factory.CreateClient(HttpClientName);
 		return Task.FromResult(
-			$"{client.BaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse");
+			$"{HttpBaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse");
 	}
 
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)

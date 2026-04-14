@@ -7,7 +7,7 @@ public class AzulProviderTest : FetcherTestBase<AzulProvider>
 {
 	[Fact]
 	public async Task GetAvailableReleasesAsync() {
-		var mockHttp = new MockHttpMessageHandler();
+		MockHttpMessageHandler mockHttp = new();
 		mockHttp.When("/metadata/v1/zulu/packages").Respond("application/json", @"[
 	{
 		""availability_type"": ""CA"",
@@ -61,7 +61,7 @@ public class AzulProviderTest : FetcherTestBase<AzulProvider>
 	}
 
 	[Fact]
-	public async Task ListJREAsync() {
+	public async Task ListJreAsync() {
 		var mockHttp = new MockHttpMessageHandler();
 		mockHttp.When("/metadata/v1/zulu/packages")
 				.WithQueryString("java_version", "25")
@@ -117,7 +117,7 @@ public class AzulProviderTest : FetcherTestBase<AzulProvider>
 	[Fact]
 	public async Task GetDownloadUrlAsync()
 	{
-		var mockHttp = new MockHttpMessageHandler();
+		MockHttpMessageHandler mockHttp = new();
 		mockHttp.When("/metadata/v1/zulu/packages")
 				.WithQueryString("java_version", "25")
 				.Respond("application/json", @"[
@@ -162,7 +162,7 @@ public class AzulProviderTest : FetcherTestBase<AzulProvider>
 		""openjdk_build_number"": 36,
 		""package_uuid"": ""d51db4cb-ee5b-4cfa-a19a-43767463e2d5"",
 		""product"": ""zulu""
-	}		
+	}
 ]");
 
 		var fetcher = CreateFetcher(mockHttp);
