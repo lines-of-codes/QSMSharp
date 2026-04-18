@@ -8,14 +8,17 @@ public class FetcherTestBase<T> where T : IHttpConsumer
 {
 	protected static T CreateFetcher(MockHttpMessageHandler mockHttp)
 	{
-		var temp = (T)Activator.CreateInstance(typeof(T), (IHttpClientFactory?)null)!;
+		T temp = (T)Activator.CreateInstance(typeof(T), (IHttpClientFactory?)null)!;
 
-		var services = new ServiceCollection();
+		ServiceCollection services = new();
 		services.AddHttpClient(temp.HttpClientName, client => {
-			client.BaseAddress = new Uri(temp.HttpBaseAddress);
+			if (!string.IsNullOrEmpty(temp.HttpBaseAddress))
+			{
+				client.BaseAddress = new Uri(temp.HttpBaseAddress);
+			}
 		}).ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
-		var factory = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
+		IHttpClientFactory factory = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
 		return (T)Activator.CreateInstance(typeof(T), factory)!;
 	}
 }

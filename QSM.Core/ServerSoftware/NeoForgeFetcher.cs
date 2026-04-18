@@ -36,7 +36,12 @@ public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 		foreach (string version in _availableVersionsCache)
 		{
 			string matched = _majorMinorVersionMatch.Match(version).Value;
-			string minecraftVersion = $"1.{matched}";
+			string minecraftVersion = matched;
+
+			if (int.TryParse(matched.Split('.')[0], out int major) && major < 26)
+			{
+				minecraftVersion = "1." + matched;
+			}
 
 			if (!supportedVersions.Contains(minecraftVersion))
 			{
@@ -67,7 +72,7 @@ public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 		return Task.FromResult(BuildInfoCache[minecraftVersion]);
 	}
 
-	[GeneratedRegex("[\\d]+\\.[\\d]")]
+	[GeneratedRegex(@"[\d]+\.[\d]+")]
 	private static partial Regex MajorMinorVersionMatch();
 
 	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
