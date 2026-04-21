@@ -26,6 +26,17 @@ public class ForgeFetcherTest : FetcherTestBase<ForgeFetcher>
 
 		Assert.Equal(["26.1", "1.21.11"], result);
 	}
+	
+	[Fact]
+	public async Task FetchMinecraftVersionsAsync_CacheTest() {
+		MockHttpMessageHandler mockHttp = CreateMock();
+		ForgeFetcher fetcher = CreateFetcher(mockHttp);
+		
+		await fetcher.FetchAvailableMinecraftVersionsAsync();
+		await fetcher.FetchAvailableMinecraftVersionsAsync();
+		
+		mockHttp.VerifyNoOutstandingExpectation();
+	}
 
 	[Fact]
 	public async Task FetchAvailableBuildsAsync()
@@ -33,7 +44,11 @@ public class ForgeFetcherTest : FetcherTestBase<ForgeFetcher>
 		MockHttpMessageHandler mockHttp = CreateMock();
 		ForgeFetcher fetcher = CreateFetcher(mockHttp);
 		await fetcher.FetchAvailableMinecraftVersionsAsync();
-		await fetcher.FetchAvailableBuildsAsync("26.1");
+		string[] result1 = await fetcher.FetchAvailableBuildsAsync("26.1");
+		Assert.Equal(["62.0.9", "62.0.8"], result1);
+		
+		string[] result2 = await fetcher.FetchAvailableBuildsAsync("26.1");
+		Assert.Equal(["62.0.9", "62.0.8"], result2);
 
 		mockHttp.VerifyNoOutstandingExpectation();
 	}

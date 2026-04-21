@@ -23,7 +23,7 @@
     }
 
     <h1>@_server.Name</h1>
-    <p>@_server.Software (Build @_server.ServerVersion for Minecraft @_server.MinecraftVersion)</p>
+    <p>@_server.Software (@(string.IsNullOrWhiteSpace(_server.ServerVersion) ? "" : $"Build {_server.ServerVersion} for ")Minecraft @_server.MinecraftVersion)</p>
     
     
     <div id="eulaConfirmDialog" class="alert alert-primary" hidden="@(!_eulaPrompt)">

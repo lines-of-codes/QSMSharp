@@ -64,33 +64,9 @@ public class ProcessManager
 		
 		if (settings.Java.MaxMemoryPoolSize > 0)
 			args += $"-Xmx{settings.Java.MaxMemoryPoolSize}G ";
-
-		string serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "server.jar")}\"";
-		
-		// Intended to do nothing for software that requires nothing
-		// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-		switch (server.Software)
-		{
-			case ServerSoftwares.NeoForge:
-				{
-					string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
-					serverJar =
-						$"@libraries/net/neoforged/neoforge/{server.ServerVersion}/{argsFile}";
-					break;
-				}
-			case ServerSoftwares.Forge:
-				{
-					string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
-					serverJar = $"@libraries/net/minecraftforge/forge/{server.MinecraftVersion}-{server.ServerVersion}/{argsFile}";
-					break;
-				}
-			case ServerSoftwares.Quilt:
-				serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "quilt-server-launch.jar")}\"";
-				break;
-		}
 		
 		args +=
-			$"{settings.Java.JvmArgs} {serverJar} {settings.Java.ProgramArgs}";
+			$"{settings.Java.JvmArgs} {GetServerJar(server)} {settings.Java.ProgramArgs}";
 
 		ProcessStartInfo startInfo = new()
 		{
@@ -142,6 +118,35 @@ public class ProcessManager
 		process.BeginErrorReadLine();
 
 		_processes[server.Id] = process;
+	}
+
+	private static string GetServerJar(ServerInstance server)
+	{
+		string serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "server.jar")}\"";
+		
+		// Intended to do nothing for software that requires nothing
+		// ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+		switch (server.Software)
+		{
+			case ServerSoftwares.NeoForge:
+				{
+					string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
+					serverJar =
+						$"@libraries/net/neoforged/neoforge/{server.ServerVersion}/{argsFile}";
+					break;
+				}
+			case ServerSoftwares.Forge:
+				{
+					string argsFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_args.txt" : "unix_args.txt";
+					serverJar = $"@libraries/net/minecraftforge/forge/{server.MinecraftVersion}-{server.ServerVersion}/{argsFile}";
+					break;
+				}
+			case ServerSoftwares.Quilt:
+				serverJar = $"-jar \"{Path.Combine(server.ServerPath!, "quilt-server-launch.jar")}\"";
+				break;
+		}
+
+		return serverJar;
 	}
 
 	private async Task FirstRun(ServerInstance server, ServerSettings settings)

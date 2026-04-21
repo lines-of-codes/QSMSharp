@@ -1,25 +1,18 @@
-﻿using PasteMystNet;
-using System.Diagnostics;
-using System.Text.Json;
+﻿using JetBrains.Annotations;
+using System.Net.Http.Json;
 
 namespace QSM.Core.ServerSoftware;
 
-public class VanillaFetcher : InfoFetcher
+public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 {
-	private readonly Dictionary<string, string> _downloadUrls = new();
-	private readonly PasteMystClient _pasteMystClient;
+	public override string HttpClientName => "VanillaFetcher";
+	public override string HttpBaseAddress => "https://piston-meta.mojang.com/mc/game/";
 
-	public override string HttpClientName => throw new NotImplementedException();
-	public override string HttpBaseAddress => throw new NotImplementedException();
-
-	public VanillaFetcher()
-	{
-		_pasteMystClient = new PasteMystClient();
-	}
+	private IEnumerable<VersionEntry> _versionCache = [];
 
 	public override Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
-		return Task.FromResult<string[]>([]);
+		return Task.FromResult<string[]>([""]);
 	}
 
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
@@ -29,33 +22,59 @@ public class VanillaFetcher : InfoFetcher
 			return MinecraftVersionsCache;
 		}
 
-		PasteMystPaste? paste = await _pasteMystClient.GetPasteAsync("1m9xuwik");
+		HttpClient client = factory.CreateClient(HttpClientName);
+		VersionManifest response = await client.GetFromJsonAsync<VersionManifest>("version_manifest_v2.json") 
+		                           ?? throw new NetworkResourceUnavailableException();
 
-		if (paste == null)
-		{
-			throw new NetworkResourceUnavailableException();
-		}
-
-		Debug.WriteLine(paste.Pasties[0].Content);
-
-		string[][]? response = JsonSerializer.Deserialize<string[][]>(paste.Pasties[0].Content);
-
-		List<string> versions = [];
-
-		for (ushort i = 1; i < response!.Length; i++)
-		{
-			string[] entry = response[i];
-			versions.Add(entry[0]);
-			_downloadUrls[entry[0]] = entry[1];
-		}
-
-		MinecraftVersionsCache = versions.ToArray();
+		_versionCache = response.Versions.Where(e => e.Type == "release");
+		MinecraftVersionsCache = _versionCache.Select(e => e.Id).ToArray();
 
 		return MinecraftVersionsCache;
 	}
 
-	public override Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
+	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
-		return Task.FromResult(_downloadUrls[minecraftVersion]);
+		string versionUrl = _versionCache.First(e => e.Id == minecraftVersion).Url;
+		HttpClient client = factory.CreateClient(HttpClientName);
+		VersionInfo response = await client.GetFromJsonAsync<VersionInfo>(versionUrl) 
+		                       ?? throw new NetworkResourceUnavailableException();
+
+		return response.Downloads.Server.Url;
 	}
+
+	/// <summary>
+	/// Latest releases. Included for the sake of completeness
+	/// </summary>
+	/// <param name="Release">Latest stable release</param>
+	/// <param name="Snapshot">Latest snapshot release</param>
+	[UsedImplicitly]
+	private sealed record Latest(string Release, string Snapshot);
+
+	[UsedImplicitly]
+	private sealed record VersionEntry(
+		string Id,
+		string Type,
+		string Url,
+		string Time,
+		string ReleaseTime,
+		string Sha1,
+		byte ComplianceLevel);
+	
+	private sealed record VersionManifest(
+		Latest Latest,
+		VersionEntry[] Versions);
+
+	[UsedImplicitly]
+	private sealed record VersionDownloadEntry(
+		string Sha1,
+		int Size,
+		string Url);
+	
+	[UsedImplicitly]
+	private sealed record VersionDownloads(
+		VersionDownloadEntry Client,
+		VersionDownloadEntry Server);
+	
+	private sealed record VersionInfo(
+		VersionDownloads Downloads);
 }

@@ -32,7 +32,7 @@ public partial class CreateServer : ComponentBase
 		{
 			{ ServerSoftwares.Paper, new PaperMCFetcher("paper", HttpClientFactory) },
 			{ ServerSoftwares.Purpur, new PurpurFetcher(HttpClientFactory) },
-			{ ServerSoftwares.Vanilla, new VanillaFetcher() },
+			{ ServerSoftwares.Vanilla, new VanillaFetcher(HttpClientFactory) },
 			{ ServerSoftwares.Fabric, new FabricFetcher(HttpClientFactory) },
 			{ ServerSoftwares.NeoForge, new NeoForgeFetcher(HttpClientFactory) },
 			{ ServerSoftwares.Velocity, new PaperMCFetcher("velocity", HttpClientFactory) },

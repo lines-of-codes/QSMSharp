@@ -99,7 +99,8 @@ internal static class Program
 			new PaperMCFetcher("paper", null!),
 			new PaperMCFetcher("velocity", null!),
 			new PaperMCFetcher("folia", null!),
-			new PurpurFetcher(null!)
+			new PurpurFetcher(null!),
+			new VanillaFetcher(null!)
 		];
 
 		foreach (InfoFetcher fetcher in fetchers)
