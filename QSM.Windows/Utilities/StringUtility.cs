@@ -41,7 +41,7 @@ internal static partial class StringUtility
 		text = text.Replace('_', ' ');
 
 		// Insert spaces before capital letters (handles camelCase and PascalCase)
-		//text = Regex.Replace(text, new AddSpacesRegex(), "$1 $2", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+		text = Regex.Replace(text, "([a-z])([A-Z])", "$1 $2", RegexOptions.None, TimeSpan.FromMilliseconds(100));
 
 		// Convert to lowercase and replace spaces with hyphens
 		return string.Join("-",
@@ -51,7 +51,4 @@ internal static partial class StringUtility
 
 	[GeneratedRegex("[\\\\/<>:|\\\\?\\\\*\\\"\\0]|^(PRN|AUX|NUL|CON)$|^(COM|LPT)[\\d¹²³]{1}$|[ .]$")]
 	private static partial Regex InvalidFileNameCheck();
-
-	[GeneratedRegex("([a-z])([A-Z])")]
-	private static partial Regex AddSpacesRegex();
 }

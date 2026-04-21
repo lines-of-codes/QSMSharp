@@ -32,6 +32,3 @@
         <Frame x:Name="ContentFrame" />
     </NavigationView>
 </Page>
-
-
-
