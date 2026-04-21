@@ -36,7 +36,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		}
 
 		VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
-		                         ?? throw new NetworkResourceUnavailableException();
+								 ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginDownloadInfo> versions = [];
 
@@ -73,8 +73,8 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		VersionInfo version = await client.GetFromJsonAsync<VersionInfo>("version/" + id)
-		                       ?? throw new NetworkResourceUnavailableException();
-		
+							   ?? throw new NetworkResourceUnavailableException();
+
 		IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = version.dependencies!.Select(dependency =>
 			new ModPluginDownloadInfo.Dependency
 			{
@@ -84,7 +84,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				ExternalPageUrl = dependency.dependency_type,
 				Required = dependency.dependency_type == "required"
 			});
-		
+
 		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0]);
 
 		return new ModPluginDownloadInfo(version.id ?? string.Empty)
@@ -98,13 +98,13 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 			HashAlgorithm = HashAlgorithm.Sha512
 		};
 	}
-	
+
 	public override Task<ModPluginInfo[]> SearchAsync(string query = "", ServerMetadata? serverMetadata = null)
 	{
 		return SearchAsync(serverMetadata, query);
 	}
 
-	public async Task<ModPluginInfo[]> SearchAsync(ServerMetadata? serverMetadata = null, string query = "", 
+	public async Task<ModPluginInfo[]> SearchAsync(ServerMetadata? serverMetadata = null, string query = "",
 		ProjectType projectType = ProjectType.Mod, IEnumerable<string>? categories = null)
 	{
 		string queryString = "search";
@@ -170,7 +170,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
-		                         ?? throw new NetworkResourceUnavailableException();
+								 ?? throw new NetworkResourceUnavailableException();
 
 		return response.Hits!.Select(project => new ModPluginInfo
 		{
@@ -198,7 +198,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				{
 					using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 					VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
-					                       ?? throw new NetworkResourceUnavailableException();
+										   ?? throw new NetworkResourceUnavailableException();
 
 					downloadUri = new Uri(response.files!.First(file => (bool)file.primary!).url!);
 				}

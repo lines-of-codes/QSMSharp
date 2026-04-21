@@ -66,7 +66,7 @@ public sealed partial class CreateServerPage : Page
 			new() {
 				Name = "Vanilla",
 				Icon = "/Assets/ServerSoftware/minecraft_logo.svg",
-				InfoFetcher = new VanillaFetcher()
+				InfoFetcher = new VanillaFetcher(clientFactory)
 			},
 			new() {
 				Name = "Fabric",

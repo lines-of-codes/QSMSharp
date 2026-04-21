@@ -1,4 +1,5 @@
 ﻿namespace QSM.Core.ModPluginSource.CurseForge;
+
 public record CurseCategory(
 		uint Id,
 		uint GameId,

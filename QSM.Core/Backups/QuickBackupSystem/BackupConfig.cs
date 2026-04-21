@@ -1,5 +1,3 @@
-using Tomlyn;
-
 namespace QSM.Core.Backups.QuickBackupSystem;
 
 public class BackupConfig
@@ -12,7 +10,7 @@ public class BackupConfig
 	public BackupList BackupList { get; set; } = new();
 
 	public Dictionary<string, BackupRemote> Remotes { get; set; } = [];
-	
+
 	public Dictionary<string, BackupTarget> Targets { get; set; } = [];
 }
 

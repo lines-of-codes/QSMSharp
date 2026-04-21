@@ -1,6 +1,5 @@
 ﻿using QSM.Core.Utilities;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace QSM.Core.JavaProvider;
@@ -47,14 +46,18 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 		AvailableReleasesRequest? response =
 			await client.GetFromJsonAsync<AvailableReleasesRequest>("info/available_releases");
 
-		return response!.available_releases!.ToDictionary(version => 
+		return response!.available_releases!.Reverse().ToDictionary(version =>
 			response.available_lts_releases!.Contains(version) ? $"Java {version} (LTS)" : $"Java {version}");
 	}
 
-	public Task<string> GetDownloadUrlAsync(string releaseName)
+	public async Task<JavaDownloadInfo> GetDownloadUrlAsync(string releaseName)
 	{
-		return Task.FromResult(
-			$"{HttpBaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse");
+		HttpClient client = factory.CreateClient(HttpClientName);
+		string response = await client.GetStringAsync($"https://api.adoptium.net/v3/checksum/version/{releaseName}/{OS}/{ProcessArchitecture}/jdk/hotspot/normal/eclipse?project=jdk");
+
+		return new JavaDownloadInfo(
+			$"{HttpBaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse",
+			response.Split(' ')[0], HashAlgorithm.Sha256);
 	}
 
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)

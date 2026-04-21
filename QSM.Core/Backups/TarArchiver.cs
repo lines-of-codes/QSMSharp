@@ -58,7 +58,8 @@ public static class TarArchiver
 				CompressionFormat.BZip2 => CompressionType.BZip2,
 				CompressionFormat.LZMA => CompressionType.LZMA,
 				_ => throw new InvalidOperationException()
-			}) { LeaveStreamOpen = false });
+			})
+			{ LeaveStreamOpen = false });
 	}
 
 	public static async Task ZstdCompressTarAsync(string sourceDirectory, string outputFilePath,

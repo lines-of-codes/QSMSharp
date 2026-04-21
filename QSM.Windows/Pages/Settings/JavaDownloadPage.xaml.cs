@@ -3,11 +3,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using QSM.Core.JavaProvider;
+using QSM.Core.Utilities;
+using QSM.Windows.Pages.Dialogs;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -80,12 +82,26 @@ public sealed partial class JavaDownloadPage : Page
 		_ = dialog.ShowAsync();
 
 		var selectedRelease = (string)JreReleaseSelector.SelectedItem;
-		var javaZip = Path.Combine(ApplicationData.ApplicationDataPath, $"{_selectedProviderName}_{selectedRelease}.zip");
+		var javaZip = Path.Combine(ApplicationData.DownloadFolderPath, $"{_selectedProviderName}_{selectedRelease}.zip");
 
-		await downloadPage.DownloadFileAsync(await Providers[_selectedProviderName].GetDownloadUrlAsync(selectedRelease), javaZip);
+		var downloadInfo = await Providers[_selectedProviderName].GetDownloadUrlAsync(selectedRelease);
+		await downloadPage.DownloadFileAsync(downloadInfo.Url, javaZip);
+
+		downloadPage.SetOperation("Verifying file...");
+		downloadPage.SetIsIndeterminate(true);
+
+		var localHash = Hasher.GetFileHash(downloadInfo.HashAlgorithm, javaZip);
+		if (localHash != downloadInfo.Hash)
+		{
+			Log.Warning("Hash \"{LocalHash}\" does not match \"{DownloadHash}\" for file \"{JavaZip}\"", localHash, downloadInfo.Hash, javaZip);
+			File.Delete(javaZip);
+			dialog.Hide();
+			var infoDialog = new InfoDialog("The integrity of the file cannot be verified, The expected hash doesn't match the actual hash.");
+			await infoDialog.CreateDialog("Verification Failed", this).ShowAsync();
+			return;
+		}
 
 		downloadPage.SetOperation("Extracting...");
-		downloadPage.SetIsIndeterminate(true);
 
 		string javaFolderName = string.Empty;
 		using (ZipArchive archive = await ZipFile.OpenReadAsync(javaZip))
@@ -93,9 +109,20 @@ public sealed partial class JavaDownloadPage : Page
 			// likely the folder containing everything
 			javaFolderName = archive.Entries[0].FullName;
 		}
-		await ZipFile.ExtractToDirectoryAsync(javaZip, ApplicationData.JavaInstallsPath);
 
 		var extractedFolder = Path.Combine(ApplicationData.JavaInstallsPath, javaFolderName);
+
+		if (Directory.Exists(extractedFolder))
+		{
+			dialog.Hide();
+			File.Delete(javaZip);
+			Log.Warning("Attempted to install Java, Folder \"{ExtractedFolder}\" already exists.", extractedFolder);
+			var infoDialog = new InfoDialog("The Java installation already exists, Please delete that first. (Or perhaps you meant to import?)");
+			await infoDialog.CreateDialog("Folder already exists", this).ShowAsync();
+			return;
+		}
+
+		await ZipFile.ExtractToDirectoryAsync(javaZip, ApplicationData.JavaInstallsPath);
 
 		if (!Directory.Exists(extractedFolder))
 			throw new FileNotFoundException();

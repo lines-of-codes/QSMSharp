@@ -12,7 +12,7 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 	public override string HttpBaseAddress => "https://meta.quiltmc.org/v3/";
 
 	private readonly SimpleCache<string[]> _versionListCache = new(TimeSpan.FromMinutes(30));
-	
+
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
 		using HttpClient client = factory.CreateClient(HttpClientName);
@@ -23,7 +23,7 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 	public override async Task<string[]> FetchAvailableBuildsAsync(string minecraftVersion)
 	{
 		if (_versionListCache.Value != null) return _versionListCache.Value;
-		
+
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		LoaderVersion[]? versions = await client.GetFromJsonAsync<LoaderVersion[]>("versions/loader");
 		_versionListCache.Value = versions?.Select(v => v.Version).ToArray();

@@ -5,7 +5,6 @@ using QSM.Windows.Utilities;
 using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 

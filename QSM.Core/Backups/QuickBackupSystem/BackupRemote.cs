@@ -6,7 +6,7 @@ public class BackupRemote
 {
 	public string Type { get; set; } = string.Empty;
 	public string Root { get; set; } = string.Empty;
-	
+
 	[DataMember(Name = "destDir")]
 	public string DestDir { get; set; } = string.Empty;
 

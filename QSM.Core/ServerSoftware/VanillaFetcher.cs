@@ -23,8 +23,8 @@ public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 		}
 
 		HttpClient client = factory.CreateClient(HttpClientName);
-		VersionManifest response = await client.GetFromJsonAsync<VersionManifest>("version_manifest_v2.json") 
-		                           ?? throw new NetworkResourceUnavailableException();
+		VersionManifest response = await client.GetFromJsonAsync<VersionManifest>("version_manifest_v2.json")
+								   ?? throw new NetworkResourceUnavailableException();
 
 		_versionCache = response.Versions.Where(e => e.Type == "release");
 		MinecraftVersionsCache = _versionCache.Select(e => e.Id).ToArray();
@@ -36,8 +36,8 @@ public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 	{
 		string versionUrl = _versionCache.First(e => e.Id == minecraftVersion).Url;
 		HttpClient client = factory.CreateClient(HttpClientName);
-		VersionInfo response = await client.GetFromJsonAsync<VersionInfo>(versionUrl) 
-		                       ?? throw new NetworkResourceUnavailableException();
+		VersionInfo response = await client.GetFromJsonAsync<VersionInfo>(versionUrl)
+							   ?? throw new NetworkResourceUnavailableException();
 
 		return response.Downloads.Server.Url;
 	}
@@ -59,7 +59,7 @@ public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 		string ReleaseTime,
 		string Sha1,
 		byte ComplianceLevel);
-	
+
 	private sealed record VersionManifest(
 		Latest Latest,
 		VersionEntry[] Versions);
@@ -69,12 +69,12 @@ public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 		string Sha1,
 		int Size,
 		string Url);
-	
+
 	[UsedImplicitly]
 	private sealed record VersionDownloads(
 		VersionDownloadEntry Client,
 		VersionDownloadEntry Server);
-	
+
 	private sealed record VersionInfo(
 		VersionDownloads Downloads);
 }

@@ -6,5 +6,5 @@ namespace QSM.Core.ModPluginSource.CurseForge;
 [JsonSerializable(typeof(CursePackManifest))]
 public partial class CursePackContext : JsonSerializerContext
 {
-	
+
 }

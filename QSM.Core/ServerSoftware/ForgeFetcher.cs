@@ -43,7 +43,7 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 				supportedVersions.Add(minecraftVersion);
 			}
 		}
-		
+
 		MinecraftVersionsCache = supportedVersions.ToArray();
 		Array.Reverse(MinecraftVersionsCache);
 
@@ -59,9 +59,9 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		string prefix = minecraftVersion + "-";
 		List<string> versions = (from version in _availableVersionsCache
-			where version.StartsWith(prefix)
-			select version[prefix.Length..]).ToList();
-		
+								 where version.StartsWith(prefix)
+								 select version[prefix.Length..]).ToList();
+
 		versions.Reverse();
 
 		BuildInfoCache[minecraftVersion] = versions.ToArray();

@@ -56,6 +56,7 @@ public static class Program
 			new PaperMCFetcher("velocity", null!),
 			new PaperMCFetcher("folia", null!),
 			new PurpurFetcher(null!),
+			new VanillaFetcher(null!),
 			new AdoptiumProvider(null!),
 			new AzulProvider(null!),
 		];

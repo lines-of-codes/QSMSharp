@@ -54,7 +54,7 @@ public class BackupSystem(string path)
 	{
 		Process proc = BackupProcess(targets);
 		proc.Start();
-		
+
 		await proc.WaitForExitAsync();
 		return (proc.ExitCode == 0, await proc.StandardOutput.ReadToEndAsync());
 	}

@@ -3,7 +3,7 @@ namespace QSM.Core.ServerSettings;
 public class ServerProperties(string path)
 {
 	public Dictionary<string, string> Properties { get; } = [];
-	
+
 	/// <summary>
 	/// A block of comments at the top of the file,
 	/// the only comments which will be preserved
@@ -20,7 +20,7 @@ public class ServerProperties(string path)
 		foreach (string line in File.ReadAllLines(path))
 		{
 			var trimmedLine = line.Trim();
-			
+
 			var comment = trimmedLine.IndexOf('#');
 
 			if (comment == 0 && !endOfHeader)
@@ -44,7 +44,7 @@ public class ServerProperties(string path)
 	public void Save()
 	{
 		using var writer = new StreamWriter(path, false);
-		
+
 		_headers.ForEach(writer.WriteLine);
 
 		foreach (var pair in Properties)

@@ -10,5 +10,5 @@ namespace QSM.Core.Backups.QuickBackupSystem;
 public partial class BackupConfigContext : TomlSerializerContext
 #pragma warning restore SYSLIB1224
 {
-	
+
 }

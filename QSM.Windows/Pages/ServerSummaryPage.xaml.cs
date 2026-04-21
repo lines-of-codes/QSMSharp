@@ -37,7 +37,12 @@ public sealed partial class ServerSummaryPage : Page
 		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 
 		ServerNameTitle.Text = _metadata.Name;
-		ServerSoftwareInfo.Text = $"{_metadata.Software} {_metadata.MinecraftVersion} ({_metadata.ServerVersion})";
+		ServerSoftwareInfo.Text = $"{_metadata.Software} {_metadata.MinecraftVersion}";
+
+		if (!string.IsNullOrEmpty(_metadata.ServerVersion))
+		{
+			ServerSoftwareInfo.Text += $" ({_metadata.ServerVersion})";
+		}
 
 		if (ServerProcessManager.Instance.Processes.TryGetValue(_metadata.Guid, out var process))
 		{
@@ -125,8 +130,8 @@ public sealed partial class ServerSummaryPage : Page
 				case ServerSoftwares.Quilt:
 					{
 						await QuiltFetcher.InitializeOnFirstRun(
-							_metadata, 
-							settings, 
+							_metadata,
+							settings,
 							(obj, e) => DispatcherQueue.TryEnqueue(() => loadingPage.SetOperation(e.Data ?? string.Empty)));
 						break;
 					}

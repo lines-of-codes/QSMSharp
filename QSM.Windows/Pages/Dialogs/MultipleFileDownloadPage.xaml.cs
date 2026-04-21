@@ -104,7 +104,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 						// If the hash of the downloaded file doesn't match the hash provided from file provider(s)...
 						if (localHash != download.Hash)
 						{
-							Log.Error("File {FileName} hash checking failed. Expected {HashAlgorithm} \"{Hash}\", Got \"{LocalHash}\"", 
+							Log.Error("File {FileName} hash checking failed. Expected {HashAlgorithm} \"{Hash}\", Got \"{LocalHash}\"",
 										Path.GetFileName(download.Destination), download.HashAlgorithm, download.Hash, localHash);
 							File.Delete(download.Destination);
 							continue;

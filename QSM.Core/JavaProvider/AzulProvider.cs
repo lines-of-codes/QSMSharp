@@ -9,7 +9,7 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 	public string HttpClientName => "AzulFetcher";
 	public string HttpBaseAddress => "https://api.azul.com/metadata/v1/zulu/";
 
-	private readonly Dictionary<int, Dictionary<string, string>> _downloadUrlCache = [];
+	private readonly Dictionary<int, Dictionary<string, JavaDownloadInfo>> _downloadUrlCache = [];
 
 	private static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
@@ -75,7 +75,7 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 		return availableMajorReleases.ToDictionary(x => x.Value, x => x.Key);
 	}
 
-	public Task<string> GetDownloadUrlAsync(string releaseName)
+	public Task<JavaDownloadInfo> GetDownloadUrlAsync(string releaseName)
 	{
 		if (!int.TryParse(releaseName.Split('.')[0], out int major))
 		{
@@ -89,17 +89,17 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 	{
 		HttpClient client = factory.CreateClient(HttpClientName);
 		ZuluJvmData[]? response = await client.GetFromJsonAsync<ZuluJvmData[]>(
-			$"packages?java_version={javaMajorRelease}&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=lib_c_type");
+			$"packages?java_version={javaMajorRelease}&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=lib_c_type&include_fields=sha256_hash");
 
 		List<string> jres = new();
-		Dictionary<string, string> downloadUrlCache = new();
+		Dictionary<string, JavaDownloadInfo> downloadUrlCache = new();
 
 		foreach (ZuluJvmData runtime in response!)
 		{
 			string version =
 				$"{runtime.java_version![0]}.{runtime.java_version[1]}.{runtime.java_version[2]}+{runtime.openjdk_build_number}";
 			jres.Add(version);
-			_ = downloadUrlCache.TryAdd(version, runtime.download_url!);
+			_ = downloadUrlCache.TryAdd(version, new JavaDownloadInfo(runtime.download_url!, runtime.sha256_hash!, HashAlgorithm.Sha256));
 		}
 
 		_downloadUrlCache.TryAdd(javaMajorRelease, downloadUrlCache);
@@ -118,5 +118,6 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 		int? openjdk_build_number = null,
 		string? package_uuid = null,
 		string? product = "zulu",
+		string? sha256_hash = null,
 		string? support_term = null);
 }

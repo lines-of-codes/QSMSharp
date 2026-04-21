@@ -33,7 +33,7 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		SupportedMinecraftVersion[]? response =
-			await client.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game") 
+			await client.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game")
 				?? throw new NetworkResourceUnavailableException();
 		List<string> versions = [];
 

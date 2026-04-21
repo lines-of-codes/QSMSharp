@@ -29,11 +29,11 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	public override async Task<ModPluginInfo> GetDetailedInfoAsync(ModPluginInfo modPlugin)
 	{
 		if (modPlugin.Id is null) throw new ArgumentNullException(nameof(modPlugin));
-		
+
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		StringResponse desc = await client.GetFromJsonAsync<StringResponse>(
-			                      $"mods/{(uint)modPlugin.Id}/description?raw=true")
-		                      ?? throw new NetworkResourceUnavailableException();
+								  $"mods/{(uint)modPlugin.Id}/description?raw=true")
+							  ?? throw new NetworkResourceUnavailableException();
 
 		modPlugin.LongDescription = desc.Data;
 
@@ -49,10 +49,10 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 	public override async Task<ModPluginDownloadInfo[]> GetVersionsAsync(string slug, ServerMetadata? serverMetadata = null)
 	{
 		string path = $"mods/{slug}/files";
-		
+
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		GetModFilesResponse response = await client.GetFromJsonAsync<GetModFilesResponse>(path)
-		                               ?? throw new NetworkResourceUnavailableException();
+									   ?? throw new NetworkResourceUnavailableException();
 
 		return response.Data.Select(file =>
 		{
@@ -61,7 +61,8 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 			if (file.ReleaseType == FileReleaseType.Alpha)
 			{
 				name.Append(" (alpha)");
-			} else if (file.ReleaseType == FileReleaseType.Beta)
+			}
+			else if (file.ReleaseType == FileReleaseType.Beta)
 			{
 				name.Append(" (beta)");
 			}
@@ -85,7 +86,7 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 					});
 
 			var hash = file.Hashes.FirstOrDefault(data => data.Algo == CfHashAlgorithm.Sha1)?.Value;
-			
+
 			return new ModPluginDownloadInfo(file.Id.ToString())
 			{
 				DisplayName = name.ToString(),
@@ -146,23 +147,23 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		}
 
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-		SearchModsResponse response = await client.GetFromJsonAsync<SearchModsResponse>(pathString.ToString()) 
-		                              ?? throw new NetworkResourceUnavailableException();
+		SearchModsResponse response = await client.GetFromJsonAsync<SearchModsResponse>(pathString.ToString())
+									  ?? throw new NetworkResourceUnavailableException();
 
 		IEnumerable<ModPluginInfo> modPlugins = from mod in response.Data
-			where mod.AllowModDistribution is not (null or false)
-			select new ModPluginInfo
-			{
-				Id = mod.Id,
-				Name = mod.Name,
-				Description = mod.Summary,
-				DownloadCount = mod.DownloadCount,
-				License = string.Empty,
-				Owner = string.Join(", ", mod.Authors.Select(author => author.Name)),
-				Slug = mod.Slug,
-				IconUrl = mod.Logo.Url,
-				Url = mod.Links.WebsiteUrl
-			};
+												where mod.AllowModDistribution is not (null or false)
+												select new ModPluginInfo
+												{
+													Id = mod.Id,
+													Name = mod.Name,
+													Description = mod.Summary,
+													DownloadCount = mod.DownloadCount,
+													License = string.Empty,
+													Owner = string.Join(", ", mod.Authors.Select(author => author.Name)),
+													Slug = mod.Slug,
+													IconUrl = mod.Logo.Url,
+													Url = mod.Links.WebsiteUrl
+												};
 
 		return modPlugins.ToArray();
 	}
@@ -172,20 +173,20 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		HttpResponseMessage message = await client.PostAsJsonAsync("mods", new GetModsByIdsListRequestBody([.. modIds]));
 
-		return (await message.Content.ReadFromJsonAsync<GetModsResponse>() 
+		return (await message.Content.ReadFromJsonAsync<GetModsResponse>()
 			?? throw new NetworkResourceUnavailableException()).Data;
 	}
-	
+
 	public async Task<(Queue<FileDownloadRequest> Queue, CurseMissingMod[] Skipped)> GetDownloadQueueFromManifest(CursePackManifest manifest, string dest)
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 
 		HttpResponseMessage message = await client.PostAsJsonAsync(
-			"mods/files", 
+			"mods/files",
 			new GetModFilesRequestBody(
 				[.. manifest.Files.Select(f => f.FileId)]));
 		message.EnsureSuccessStatusCode();
-		
+
 		File[] response = (await message.Content.ReadFromJsonAsync<GetFilesResponse>())?.Data ?? throw new NetworkResourceUnavailableException();
 		string modsFolder = Path.Join(dest, "mods");
 
@@ -204,7 +205,7 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		}
 
 		Directory.CreateDirectory(modsFolder);
-		
+
 		return (new Queue<FileDownloadRequest>(response.Where(f => f.DownloadUrl != null).Select(file => new FileDownloadRequest()
 		{
 			Destination = Path.Join(modsFolder, file.FileName),

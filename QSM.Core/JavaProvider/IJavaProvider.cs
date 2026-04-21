@@ -11,5 +11,5 @@ public interface IJavaProvider
 
 	public Task<string[]> ListJREAsync(int javaMajorRelease);
 
-	public Task<string> GetDownloadUrlAsync(string releaseName);
+	public Task<JavaDownloadInfo> GetDownloadUrlAsync(string releaseName);
 }

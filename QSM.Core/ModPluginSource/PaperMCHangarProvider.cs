@@ -34,8 +34,8 @@ public class PaperMCHangarProvider : ModPluginProvider
 		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
 
 		VersionRequest response = await client.GetFromJsonAsync<VersionRequest>(
-			                          $"projects/{slug}/versions?platform={serverMetadata.Software}&platformVersion={serverMetadata.MinecraftVersion}")
-		                          ?? throw new NetworkResourceUnavailableException();
+									  $"projects/{slug}/versions?platform={serverMetadata.Software}&platformVersion={serverMetadata.MinecraftVersion}")
+								  ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginDownloadInfo> versions = [];
 
@@ -95,7 +95,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 		using HttpClient client = _httpClientFactory.CreateClient(HttpClientName);
 
 		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(route)
-		                         ?? throw new NetworkResourceUnavailableException();
+								 ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginInfo> plugins = [];
 

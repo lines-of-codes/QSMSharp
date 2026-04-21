@@ -21,7 +21,7 @@ public class CursePackManifest
 
 		public ModLoader PrimaryLoader => ModLoaders.First(m => m.Primary);
 	}
-	
+
 	public struct ModLoader
 	{
 		[JsonPropertyName("id")] public string Id { get; set; }

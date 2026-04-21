@@ -9,12 +9,12 @@ public abstract class PropertyModificationModel
 	protected PropertyModificationModel()
 	{
 		PropertyInfo[] props = GetType().GetProperties();
-		
+
 		foreach (PropertyInfo prop in props)
 		{
 			ServerPropertyAttribute? attr = prop.GetCustomAttribute<ServerPropertyAttribute>();
 			if (attr == null) continue;
-			
+
 			_properties[attr.Name] = prop;
 		}
 	}
@@ -29,7 +29,7 @@ public abstract class PropertyModificationModel
 			pair.Value.SetValue(this, Convert.ChangeType(value, pair.Value.PropertyType));
 		}
 	}
-	
+
 	public void Apply(ServerProperties props)
 	{
 		foreach (KeyValuePair<string, PropertyInfo> pair in _properties)
@@ -38,7 +38,7 @@ public abstract class PropertyModificationModel
 			if (obj == null) continue;
 
 			string value = obj.ToString() ?? string.Empty;
-			
+
 			if (obj is bool)
 			{
 				value = value.ToLowerInvariant();
