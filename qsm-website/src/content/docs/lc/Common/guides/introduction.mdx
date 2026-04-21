@@ -1,0 +1,78 @@
+---
+slug: lc/common/guides/introduction
+title: intwo
+description: An intwo about what QSM is.
+---
+
+import { CardGrid, LinkCard, Aside } from '@astrojs/starlight/components';
+
+QSM (Qwik Sewwer Managwer) is a sewwer managemwent software
+for de game Minecwaft. It cuwwently has a native Windows 
+wersion and a web application wersion.
+
+**QSM das not suppwot hostwing a Bedwock Edition Minecwaft
+sewwer.** But meows still can host a Java server with a pwugin
+which will make Bedrock edition pwayers can join.
+
+Ewen if QSM help de pwocess of self-hosting a Minecwaft
+sewwer, it is shtill recommended that meows understwand some baswics
+of hosting a game sewwer.
+
+De Minecwaft Wiki shtates de following (twanshlated fwom [source](https://minecraft.wiki/w/Tutorial:Setting_up_a_Java_Edition_server?oldid=3347971#User_knowledge)):
+
+> In order to run your sewwer correctly, we highly swuggesh that you should at least know abwout de following:
+> - Twechnical game knowledge, such as commwands, chwunk, etc.
+> - Using de commwand-line and editing configuwation fwiles
+> - Networking in genewal (IP, ports, etc.)
+> - Shystem configuwation
+
+To shtart using QSM, Pwease pick between de QSM Windows wersion and de QSM Web 
+wersion. QSM Web can wun on Windows too, but QSM Windows will be more 
+beginner-fwiendly to set up, as it is just like any other Windows progwam.
+
+<CardGrid>
+    <LinkCard
+        title="QSM Windows"
+        href="/QSMSharp/qsmwin/guides/introduction"
+        description="The owiginal and native Windows wersion. Easy to shetup, and designed
+        for beginners."
+    />
+    <LinkCard 
+        title="QSM Web" 
+        href="/QSMSharp/qsmweb/guides/introduction"
+        description="QSM Web bwings the QSM expewience to more platfwoms, and is more 
+        stwong for self-hosted sewwer owners."
+    />
+</CardGrid>
+
+<Aside>
+    QSM is an in-dewelopment software. Bweaking changes and unshtability *may* happen. Pwease backup your data wegulawly.
+</Aside>
+
+## License
+The QSM pwoject is licensed under [GNU GPL v3](https://github.com/lines-of-codes/QSMSharp/blob/master/LICENSE),
+But de licenses for QSM (Windows) dependencies are the
+following (according to NuGet packages refewence):
+
+- CommunityToolkit.WinUI.Controls.SettingsControls: [MIT License](https://licenses.nuget.org/MIT)
+- CommunityToolkit.WinUI.UI.Controls.Markdown: [MIT License](https://licenses.nuget.org/MIT)
+- Microsoft.WindowsAppSDK: [Microsoft Software License Terms for Windows App SDK](https://www.nuget.org/packages/Microsoft.WindowsAppSDK/1.5.240802000/license)
+- Microsoft.Windows.SDK.BuildTools: [Microsoft Software License Terms for Microsoft Windows SDK for Windows 10](https://aka.ms/WinSDKLicenseURL)
+- Microsoft.Graphics.Win2D: [Microsoft Software License Terms for Microsoft Win2D](https://www.microsoft.com/web/webpi/eula/eula_win2d_10012014.htm)
+- Microsoft.Windows.CsWinRT: [MIT License](https://www.nuget.org/packages/Microsoft.Windows.CsWinRT/2.1.6/License)
+- LiveChartsCore.SkiaSharpView.WinUI: [MIT License](https://github.com/beto-rodriguez/LiveCharts2/blob/master/LICENSE)
+- Serilog: [Apache License 2.0](https://github.com/serilog/serilog/blob/dev/LICENSE)
+- Serilog.Sinks.File: [Apache License 2.0](https://github.com/serilog/serilog-sinks-file/blob/dev/LICENSE)
+- System.Net.Http: [MIT License](https://licenses.nuget.org/MIT)
+- System.Text.RegularExpressions: [MIT License](https://licenses.nuget.org/MIT)
+
+The QSM Core dependencies has de following licenses:
+
+- cuid.net: [MIT License](https://licenses.nuget.org/MIT)
+- Microsoft.Extensions.Http: [MIT License](https://licenses.nuget.org/MIT)
+- PasteMystNet: [MIT License](https://github.com/dentolos19/PasteMystNet/blob/main/LICENSE)
+- Serilog: [Apache License 2.0](https://github.com/serilog/serilog/blob/dev/LICENSE)
+- SharpCompress: [MIT License](https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt)
+- ZstdSharp.Port: [MIT License](https://github.com/oleg-st/ZstdSharp/blob/master/LICENSE)
+
+These lists only incwude diwect/top-wevel dependencies.

@@ -25,12 +25,16 @@ export default defineConfig({
                 th: {
                     label: "ไทย",
                 },
+                lc: {
+                    label: "lolcat",
+                },
             },
             sidebar: [
                 {
                     label: "Common Guides",
                     translations: {
                         th: "ไกด์ทั่วไป",
+                        lc: "Commwon Gwuide",
                     },
                     items: [
                         {
@@ -72,6 +76,7 @@ export default defineConfig({
                         {
                             slug: "qsmweb/guides/introduction",
                         },
+                        { slug: "qsmweb/guides/security" },
                     ],
                 },
                 {
