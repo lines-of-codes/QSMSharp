@@ -117,22 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BrowseBtn.Content" xml:space="preserve">
-    <value>Browse...</value>
+  <data name="DeleteFileCheckbox.Content" xml:space="preserve">
+    <value>ลบไฟล์</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
+  <data name="DownloadingFile" xml:space="preserve">
+    <value>กำลังดาวน์โหลดไฟล์...</value>
   </data>
-  <data name="Download.Content" xml:space="preserve">
-    <value>Download</value>
+  <data name="Extracting" xml:space="preserve">
+    <value>กำลังแตกไฟล์...</value>
   </data>
-  <data name="ImportLabel.Label" xml:space="preserve">
-    <value>Import</value>
+  <data name="FileDeletion.Text" xml:space="preserve">
+    <value>คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์ การกระทำนี้ไม่สามารถย้อนกลับได้</value>
   </data>
-  <data name="Okay" xml:space="preserve">
-    <value>Okay</value>
+  <data name="FolderExists" xml:space="preserve">
+    <value>มีโฟลเดอร์อยู่แล้ว</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
+  <data name="JavaFolderExistsDescription" xml:space="preserve">
+    <value>มีการติดตั้ง Java อยู่แล้ว โปรดลบการติดตั้งเก่าก่อน (หรือคุณอาจต้องการนำเข้าการติดตั้งนั้น)</value>
+  </data>
+  <data name="RemovalConfirmTitle" xml:space="preserve">
+    <value>แน่ใจหรือ</value>
+  </data>
+  <data name="RemovalDescription.Text" xml:space="preserve">
+    <value>คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้</value>
+  </data>
+  <data name="RemovalExtDescription" xml:space="preserve">
+    <value> หากช่องทำเครื่องหมายด้านล่างไม่ถูกติ๊ก เพียงแค่รายการที่ถูกลงทะเบียนไว้จะถูกลบและไฟล์จะถูกเก็บไว้บนระบบของคุณ</value>
+  </data>
+  <data name="VerificationFailed" xml:space="preserve">
+    <value>การตรวจสอบล้มเหลว</value>
+  </data>
+  <data name="VerificationFailedDescription" xml:space="preserve">
+    <value>ไม่สามารถตรวจสอบความถูกต้องของไฟล์ได้ ค่าแฮชที่คาดหวังไม่ตรงกับค่าแฮชจริง</value>
+  </data>
+  <data name="VerifyingFile" xml:space="preserve">
+    <value>กำลังตรวจสอบไฟล์...</value>
   </data>
 </root>

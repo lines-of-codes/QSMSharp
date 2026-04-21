@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <StackPanel>
-        <TextBlock x:Name="Description" TextWrapping="WrapWholeWords" Text="Are you sure you want to remove this entry?" />
-        <CheckBox x:Name="DeleteFileCheckbox" Content="Delete files" />
+        <TextBlock x:Name="Description" TextWrapping="WrapWholeWords" x:Uid="/Dialogs/RemovalDescription" />
+        <CheckBox x:Name="DeleteFileCheckbox" x:Uid="/Dialogs/DeleteFileCheckbox" />
     </StackPanel>
 </Page>

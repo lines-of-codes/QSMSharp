@@ -36,6 +36,9 @@ public sealed partial class ModListPage : Page
 		if (metadata.IsPluginSupported)
 			_modsFolderPath = Path.Combine(metadata.ServerPath, "plugins");
 
+		if (string.IsNullOrEmpty(_modsFolderPath))
+			return;
+
 		Directory.CreateDirectory(_modsFolderPath);
 
 		var fsEntries = Directory.EnumerateFiles(_modsFolderPath);

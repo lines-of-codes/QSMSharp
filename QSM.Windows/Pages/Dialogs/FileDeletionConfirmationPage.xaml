@@ -8,5 +8,5 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <TextBlock Text="Are you sure that you want to delete the file(s)? This action is likely irreversible." />
+    <TextBlock x:Uid="/Dialogs/FileDeletion" />
 </Page>

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
+using Microsoft.Windows.ApplicationModel.Resources;
 using QSM.Core.JavaProvider;
 using QSM.Core.Utilities;
 using QSM.Windows.Pages.Dialogs;
@@ -87,7 +88,8 @@ public sealed partial class JavaDownloadPage : Page
 		var downloadInfo = await Providers[_selectedProviderName].GetDownloadUrlAsync(selectedRelease);
 		await downloadPage.DownloadFileAsync(downloadInfo.Url, javaZip);
 
-		downloadPage.SetOperation("Verifying file...");
+		var loader = new ResourceLoader("QSM.Windows.pri", "Dialogs");
+		downloadPage.SetOperation(loader.GetString("/VerifyingFile"));
 		downloadPage.SetIsIndeterminate(true);
 
 		var localHash = Hasher.GetFileHash(downloadInfo.HashAlgorithm, javaZip);
@@ -96,12 +98,13 @@ public sealed partial class JavaDownloadPage : Page
 			Log.Warning("Hash \"{LocalHash}\" does not match \"{DownloadHash}\" for file \"{JavaZip}\"", localHash, downloadInfo.Hash, javaZip);
 			File.Delete(javaZip);
 			dialog.Hide();
-			var infoDialog = new InfoDialog("The integrity of the file cannot be verified, The expected hash doesn't match the actual hash.");
-			await infoDialog.CreateDialog("Verification Failed", this).ShowAsync();
+
+			var infoDialog = new InfoDialog(loader.GetString("/VerificationFailedDescription"));
+			await infoDialog.CreateDialog(loader.GetString("/VerificationFailed"), this).ShowAsync();
 			return;
 		}
 
-		downloadPage.SetOperation("Extracting...");
+		downloadPage.SetOperation(loader.GetString("/Extracting"));
 
 		string javaFolderName = string.Empty;
 		using (ZipArchive archive = await ZipFile.OpenReadAsync(javaZip))
@@ -117,8 +120,8 @@ public sealed partial class JavaDownloadPage : Page
 			dialog.Hide();
 			File.Delete(javaZip);
 			Log.Warning("Attempted to install Java, Folder \"{ExtractedFolder}\" already exists.", extractedFolder);
-			var infoDialog = new InfoDialog("The Java installation already exists, Please delete that first. (Or perhaps you meant to import?)");
-			await infoDialog.CreateDialog("Folder already exists", this).ShowAsync();
+			var infoDialog = new InfoDialog(loader.GetString("/JavaFolderExistsDescription"));
+			await infoDialog.CreateDialog(loader.GetString("/FolderExists"), this).ShowAsync();
 			return;
 		}
 

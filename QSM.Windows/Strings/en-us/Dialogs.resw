@@ -117,22 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BrowseBtn.Content" xml:space="preserve">
-    <value>Browse...</value>
+  <data name="DeleteFileCheckbox.Content" xml:space="preserve">
+    <value>Delete files</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
+  <data name="DownloadingFile" xml:space="preserve">
+    <value>Downloading a file...</value>
   </data>
-  <data name="Download.Content" xml:space="preserve">
-    <value>Download</value>
+  <data name="Extracting" xml:space="preserve">
+    <value>Extracting...</value>
   </data>
-  <data name="ImportLabel.Label" xml:space="preserve">
-    <value>Import</value>
+  <data name="FileDeletion.Text" xml:space="preserve">
+    <value>Are you sure that you want to delete the file(s)? This action is likely irreversible.</value>
   </data>
-  <data name="Okay" xml:space="preserve">
-    <value>Okay</value>
+  <data name="FolderExists" xml:space="preserve">
+    <value>Folder already exists</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
+  <data name="JavaFolderExistsDescription" xml:space="preserve">
+    <value>The Java installation already exists, Please delete that first. (Or perhaps you meant to import?)</value>
+  </data>
+  <data name="RemovalConfirmTitle" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="RemovalDescription.Text" xml:space="preserve">
+    <value>Are you sure you want to remove this entry?</value>
+  </data>
+  <data name="RemovalExtDescription" xml:space="preserve">
+    <value> If the checkbox below is left unchecked, Only the registered entry will be removed and the files on your system will be kept.</value>
+  </data>
+  <data name="VerificationFailed" xml:space="preserve">
+    <value>Verification Failed</value>
+  </data>
+  <data name="VerificationFailedDescription" xml:space="preserve">
+    <value>The integrity of the file cannot be verified, The expected hash doesn't match the actual hash.</value>
+  </data>
+  <data name="VerifyingFile" xml:space="preserve">
+    <value>Verifying file...</value>
   </data>
 </root>

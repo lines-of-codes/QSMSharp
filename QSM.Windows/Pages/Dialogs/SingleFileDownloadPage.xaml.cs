@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using QSM.Windows.Utilities;
 using System;
 using System.IO;
@@ -84,7 +85,14 @@ public sealed partial class SingleFileDownloadPage : Page
 		DownloadComplete();
 	}
 
-	public ContentDialog CreateDialog(Page page, string title = "Downloading a file...")
+	public ContentDialog CreateDialog(Page page)
+	{
+		var loader = new ResourceLoader("QSM.Windows.pri", "Dialogs");
+
+		return CreateDialog(page, loader.GetString("/DownloadingFile"));
+	}
+
+	public ContentDialog CreateDialog(Page page, string title)
 	{
 		ContentDialog dialog = new()
 		{

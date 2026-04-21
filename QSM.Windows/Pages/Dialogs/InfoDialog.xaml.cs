@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -19,12 +20,14 @@ public sealed partial class InfoDialog : Page
 
 	public ContentDialog CreateDialog(string title, Page page)
 	{
+		var loader = new ResourceLoader("QSM.Windows.pri", "Common");
+
 		ContentDialog dialog = new()
 		{
 			XamlRoot = page.XamlRoot,
 			Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
 			Title = title,
-			PrimaryButtonText = "OK",
+			PrimaryButtonText = loader.GetString("/Okay"),
 			IsSecondaryButtonEnabled = false,
 			DefaultButton = ContentDialogButton.Primary,
 			Content = this

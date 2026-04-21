@@ -2,7 +2,7 @@
 
 public static class SizeUnitConversion
 {
-	const int s_unitDistance = 1000;
+	const int UnitDistance = 1000;
 
 	public static string bytesToAppropriateUnit(long bytes, string digitFormatting = "0.00")
 	{
@@ -12,16 +12,16 @@ public static class SizeUnitConversion
 		}
 		if (bytes >= 1000)
 		{
-			return $"{bytesToKilobyte(bytes).ToString(digitFormatting)}KB";
+			return $"{bytesToKilobyte(bytes).ToString(digitFormatting)}kB";
 		}
 
 		return $"{bytes}B";
 	}
 
-	public static double bytesToMegabytes(long bytes) => bytes / (s_unitDistance * s_unitDistance);
-	public static double kilobytesToGigabytes(long kb) => kb / (s_unitDistance * s_unitDistance);
+	public static float bytesToMegabytes(float bytes) => bytes / (UnitDistance * UnitDistance);
+	public static float kilobytesToGigabytes(float kb) => kb / (UnitDistance * UnitDistance);
 
-	public static float bytesToKilobyte(long bytes) => bytes / s_unitDistance;
-	public static float kilobytesToMegabytes(long kb) => kb / s_unitDistance;
-	public static float megabytesToGigabytes(long mb) => mb / s_unitDistance;
+	public static float bytesToKilobyte(float bytes) => bytes / UnitDistance;
+	public static float kilobytesToMegabytes(float kb) => kb / UnitDistance;
+	public static float megabytesToGigabytes(float mb) => mb / UnitDistance;
 }

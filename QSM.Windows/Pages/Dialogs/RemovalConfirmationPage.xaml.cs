@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace QSM.Windows.Pages.Dialogs;
 
@@ -15,23 +16,28 @@ public sealed partial class RemovalConfirmationPage : Page
 		this.InitializeComponent();
 		if (!displayDeleteFileCheckbox)
 		{
-			DeleteFileCheckbox.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+			DeleteFileCheckbox.Visibility = Visibility.Collapsed;
 		}
 		else
 		{
-			Description.Text += " If the checkbox below is left unchecked, Only the registered entry will be removed and the files on your system will be kept.";
+			var loader = new ResourceLoader("QSM.Windows.pri", "Dialogs");
+			
+			Description.Text += loader.GetString("/RemovalExtDescription");
 		}
 	}
 
 	public ContentDialog CreateDialog(Page page)
 	{
+		var common = new ResourceLoader("QSM.Windows.pri", "Common");
+		var loader = new ResourceLoader("QSM.Windows.pri", "Dialogs");
+
 		return new ContentDialog()
 		{
 			XamlRoot = page.XamlRoot,
 			Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
-			Title = "Are you sure?",
-			PrimaryButtonText = "Remove",
-			CloseButtonText = "Cancel",
+			Title = loader.GetString("/RemovalConfirmTitle"),
+			PrimaryButtonText = common.GetString("/Remove"),
+			CloseButtonText = common.GetString("/Cancel"),
 			IsSecondaryButtonEnabled = false,
 			DefaultButton = ContentDialogButton.Close,
 			Content = this

@@ -120,6 +120,9 @@
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>เรียกดู...</value>
   </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>ยกเลิก</value>
+  </data>
   <data name="Download.Content" xml:space="preserve">
     <value>ดาวน์โหลด</value>
   </data>
@@ -128,5 +131,8 @@
   </data>
   <data name="Okay" xml:space="preserve">
     <value>ตกลง</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>ลบ</value>
   </data>
 </root>
