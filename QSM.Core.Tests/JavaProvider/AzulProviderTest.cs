@@ -140,7 +140,8 @@ public class AzulProviderTest : FetcherTestBase<AzulProvider>
 		""name"": ""zulu25.32.21-ca-jre25.0.2-win_x64.zip"",
 		""openjdk_build_number"": 10,
 		""package_uuid"": ""9f7fbe1e-4ff9-4d8e-b506-6710b7a0e682"",
-		""product"": ""zulu""
+		""product"": ""zulu"",
+		""sha256_hash"": ""bd18d033a45fee4f1cce83ca2d9c72108837be1bbeb6426247b0a09d96f3d5db""
 	},
 	{
 		""availability_type"": ""CA"",
@@ -161,12 +162,15 @@ public class AzulProviderTest : FetcherTestBase<AzulProvider>
 		""name"": ""zulu25.28.85-ca-jre25.0.0-win_x64.zip"",
 		""openjdk_build_number"": 36,
 		""package_uuid"": ""d51db4cb-ee5b-4cfa-a19a-43767463e2d5"",
-		""product"": ""zulu""
+		""product"": ""zulu"",
+		""sha256_hash"": ""442e8d98af176c1f3ec4d120d01350f70bd2d3b7d65b179bd7804942f049a874""
 	}
 ]");
 
-		var fetcher = CreateFetcher(mockHttp);
+		AzulProvider fetcher = CreateFetcher(mockHttp);
 		await fetcher.ListJREAsync(25);
-		Assert.Equal("https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-jre25.0.2-win_x64.zip", await fetcher.GetDownloadUrlAsync("25.0.2+10"));
+		JavaDownloadInfo result = await fetcher.GetDownloadUrlAsync("25.0.2+10");
+		Assert.Equal("https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-jre25.0.2-win_x64.zip", result.Url);
+		Assert.Equal("bd18d033a45fee4f1cce83ca2d9c72108837be1bbeb6426247b0a09d96f3d5db", result.Hash);
 	}
 }

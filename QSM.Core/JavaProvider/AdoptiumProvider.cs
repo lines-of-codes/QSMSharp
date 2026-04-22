@@ -9,7 +9,7 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 	public string HttpClientName => "AdoptiumFetcher";
 	public string HttpBaseAddress => "https://api.adoptium.net/v3/";
 
-	private static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
+	internal static string ProcessArchitecture => RuntimeInformation.ProcessArchitecture switch
 	{
 		Architecture.X86 => "x32",
 		Architecture.X64 => "x64",
@@ -53,7 +53,7 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 	public async Task<JavaDownloadInfo> GetDownloadUrlAsync(string releaseName)
 	{
 		HttpClient client = factory.CreateClient(HttpClientName);
-		string response = await client.GetStringAsync($"https://api.adoptium.net/v3/checksum/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse?project=jdk");
+		string response = await client.GetStringAsync($"checksum/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse?project=jdk");
 
 		return new JavaDownloadInfo(
 			$"{HttpBaseAddress}binary/version/{releaseName}/{OS}/{ProcessArchitecture}/jre/hotspot/normal/eclipse",

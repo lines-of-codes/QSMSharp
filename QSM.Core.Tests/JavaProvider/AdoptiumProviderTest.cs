@@ -22,7 +22,7 @@ public class AdoptiumProviderTest : FetcherTestBase<AdoptiumProvider>
     ]
 }");
 
-		var fetcher = CreateFetcher(mockHttp);
+		AdoptiumProvider fetcher = CreateFetcher(mockHttp);
 		Assert.Equal(new Dictionary<string, int>{
 			{ "Java 8 (LTS)", 8 },
 			{ "Java 11 (LTS)", 11 },
@@ -51,7 +51,15 @@ public class AdoptiumProviderTest : FetcherTestBase<AdoptiumProvider>
 	[Fact]
 	public async Task GetDownloadUrlAsync()
 	{
-		AdoptiumProvider fetcher = new(null!);
-		Assert.Equal($"https://api.adoptium.net/v3/binary/version/jdk-25.0.2+10/{AdoptiumProvider.OS}/x64/jre/hotspot/normal/eclipse", await fetcher.GetDownloadUrlAsync("jdk-25.0.2+10"));
+		string os = AdoptiumProvider.OS;
+		string arch = AdoptiumProvider.ProcessArchitecture;
+		
+		MockHttpMessageHandler mockHttp = new();
+		mockHttp.When($"/v3/checksum/version/jdk-25.0.2+10/{os}/{arch}/jre/hotspot/normal/eclipse")
+				.Respond("text/plain", "test_hash  OpenJDK25U.tar.gz");
+		AdoptiumProvider fetcher = CreateFetcher(mockHttp);
+		JavaDownloadInfo result = await fetcher.GetDownloadUrlAsync("jdk-25.0.2+10");
+		Assert.Equal($"https://api.adoptium.net/v3/binary/version/jdk-25.0.2+10/{os}/{arch}/jre/hotspot/normal/eclipse", result.Url);
+		Assert.Equal("test_hash", result.Hash);
 	}
 }
