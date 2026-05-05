@@ -21,7 +21,7 @@ public sealed partial class RemovalConfirmationPage : Page
 		else
 		{
 			var loader = new ResourceLoader("QSM.Windows.pri", "Dialogs");
-			
+
 			Description.Text += loader.GetString("/RemovalExtDescription");
 		}
 	}

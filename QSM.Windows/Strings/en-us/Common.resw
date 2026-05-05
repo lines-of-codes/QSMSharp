@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AgreeTerms" xml:space="preserve">
+    <value>Agree</value>
+  </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Browse...</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
+  </data>
+  <data name="DisagreeTerms" xml:space="preserve">
+    <value>Disagree</value>
   </data>
   <data name="Download.Content" xml:space="preserve">
     <value>Download</value>

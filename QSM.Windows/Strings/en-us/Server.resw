@@ -195,4 +195,13 @@
   <data name="ConfirmButton.Content" xml:space="preserve">
     <value>Review and confirm</value>
   </data>
+  <data name="EulaNoticeFirst.Text" xml:space="preserve">
+    <value>Do you agree to the </value>
+  </data>
+  <data name="EulaNoticeSecond.Text" xml:space="preserve">
+    <value>? If you do not agree, The server will be stopped.</value>
+  </data>
+  <data name="EulaNoticeTitle" xml:space="preserve">
+    <value>EULA Notice</value>
+  </data>
 </root>

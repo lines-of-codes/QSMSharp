@@ -34,7 +34,7 @@
 
     <NavigationView x:Name="serverListView"
             MenuItemTemplateSelector="{StaticResource selector}"
-            MenuItemsSource="{x:Bind ServerList, Mode=OneWay}"
+            MenuItemsSource="{x:Bind _serverList, Mode=OneWay}"
             SelectionChanged="serverListView_SelectionChanged"
             IsBackEnabled="False"
             IsBackButtonVisible="Collapsed"

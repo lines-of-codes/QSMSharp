@@ -33,6 +33,8 @@ public class ServerProcessManager
 	public Dictionary<Guid, Process> Processes { get; private set; } = [];
 	public Dictionary<Guid, List<OutputCache>> ProcessOutputs { get; private set; } = [];
 
+	public static event Action<ServerMetadata> EulaPrompt;
+
 	public Process StartServer(int metadataIndex, Guid serverGuid)
 	{
 		if (Processes.TryGetValue(serverGuid, out var process) && !process.HasExited)
@@ -83,7 +85,14 @@ public class ServerProcessManager
 
 		ProcessOutputs[serverGuid].Add(new(OutputType.Normal, $"Starting server with arguments: {args}"));
 
-		process.OutputDataReceived += (sender, e) => ProcessOutputs[serverGuid].Add(new(OutputType.Normal, e.Data));
+		process.OutputDataReceived += (sender, e) =>
+		{
+			ProcessOutputs[serverGuid].Add(new(OutputType.Normal, e.Data));
+			if (e.Data?.Contains("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.") ?? false)
+			{
+				EulaPrompt?.Invoke(metadata);
+			}
+		};
 		process.ErrorDataReceived += (sender, e) => ProcessOutputs[serverGuid].Add(new(OutputType.Error, e.Data));
 
 		process.Start();

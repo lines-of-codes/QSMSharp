@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Windows.ApplicationModel.Resources;
 using QSM.Core.ServerSoftware;
+using QSM.Windows.Pages;
 using QSM.Windows.Pages.Dialogs;
 using Serilog;
 using System;
@@ -26,7 +27,7 @@ public sealed partial class ServerSummaryPage : Page
 
 	public ServerSummaryPage()
 	{
-		this.InitializeComponent();
+		InitializeComponent();
 		_resourceLoader = new ResourceLoader("QSM.Windows.pri", "Server");
 		ServerActiveStatus.Text = _resourceLoader.GetString("Inactive");
 	}
@@ -57,7 +58,25 @@ public sealed partial class ServerSummaryPage : Page
 			}
 		}
 
+		ServerListPage.EulaAccept += ServerListPage_EulaAccept;
+
 		base.OnNavigatedTo(e);
+	}
+
+	private void ServerListPage_EulaAccept(int obj)
+	{
+		if (ServerProcessManager.Instance.Processes.TryGetValue(_metadata.Guid, out var process))
+		{
+			StartButton.IsEnabled = process.HasExited;
+			StopButton.IsEnabled = !process.HasExited;
+			ServerActiveStatus.Text = process.HasExited ? _resourceLoader.GetString("Inactive") : _resourceLoader.GetString("Active");
+
+			if (!process.HasExited)
+			{
+				process.Exited += OnServerProcessExited;
+				ProcessExitWatched = true;
+			}
+		}
 	}
 
 	protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -66,6 +85,8 @@ public sealed partial class ServerSummaryPage : Page
 		{
 			ServerProcessManager.Instance.Processes[_metadata.Guid].Exited -= OnServerProcessExited;
 		}
+
+		ServerListPage.EulaAccept -= ServerListPage_EulaAccept;
 
 		base.OnNavigatedFrom(e);
 	}
@@ -77,7 +98,6 @@ public sealed partial class ServerSummaryPage : Page
 		ServerActiveStatus.Text = _resourceLoader.GetString("Inactive");
 	}
 
-	// skipcq: CS-R1005
 	private async void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		var settings = ApplicationData.ServerSettings[_metadata.Guid];
@@ -151,7 +171,6 @@ public sealed partial class ServerSummaryPage : Page
 		ProcessExitWatched = true;
 	}
 
-	// skipcq: CS-R1005
 	private async void DeleteButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		var deletePage = new RemovalConfirmationPage(true);

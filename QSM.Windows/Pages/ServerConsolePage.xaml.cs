@@ -22,7 +22,7 @@ public sealed partial class ServerConsolePage : Page
 
 	public ServerConsolePage()
 	{
-		this.InitializeComponent();
+		InitializeComponent();
 
 		// Configured font + some fallback fonts
 		var monospaceFont = new FontFamily($"{ApplicationData.Configuration.MonospaceFont},Cascadia Code,Consolas");
@@ -93,7 +93,6 @@ public sealed partial class ServerConsolePage : Page
 		OutputScrollView.ScrollToVerticalOffset(OutputScrollView.ScrollableHeight);
 	}
 
-	// skipcq: CS-R1005
 	private async void CommandInput_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
 	{
 		if (e.Key == VirtualKey.Enter)

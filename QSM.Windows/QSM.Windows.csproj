@@ -38,6 +38,7 @@
         <None Remove="NetworkConfigPage.xaml" />
         <None Remove="Pages\Dialogs\BackupCreationPage.xaml" />
         <None Remove="Pages\Dialogs\CurseExtraDownloads.xaml" />
+        <None Remove="Pages\Dialogs\EulaPromptPage.xaml" />
         <None Remove="Pages\Dialogs\FileDeletionConfirmationPage.xaml" />
         <None Remove="Pages\Dialogs\InfoDialog.xaml" />
         <None Remove="Pages\Dialogs\JavaPickerPage.xaml" />
@@ -160,6 +161,9 @@
             <Generator>MSBuild:Compile</Generator>
         </Page>
         <Page Update="Pages\Dialogs\CurseExtraDownloads.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Pages\Dialogs\EulaPromptPage.xaml">
           <Generator>MSBuild:Compile</Generator>
         </Page>
         <None Update="Utilities\JavaCheck.jar">

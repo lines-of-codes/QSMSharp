@@ -1,23 +1,23 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
+using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
+using QSM.Windows.Pages.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace QSM.Windows.Pages;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class ServerListPage : Page
 {
-	private readonly ObservableCollection<WinServerInfo> ServerList = new();
-	private static readonly Dictionary<ServerSoftwares, string> SoftwareIconPaths = new()
+	public static event Action<int> EulaAccept;
+
+	private readonly ObservableCollection<WinServerInfo> _serverList = [];
+	private static readonly Dictionary<ServerSoftwares, string> s_softwareIconPaths = new()
 	{
 		{ ServerSoftwares.Paper, "ms-appx:///Assets/ServerSoftware/papermc-logomark.png" },
 		{ ServerSoftwares.Folia, "ms-appx:///Assets/ServerSoftware/folia.png" },
@@ -34,31 +34,56 @@ public sealed partial class ServerListPage : Page
 	{
 		foreach (ServerMetadata metadata in ApplicationData.Configuration.Servers)
 		{
-			ServerList.Add(new WinServerInfo(new(SoftwareIconPaths[metadata.Software]), metadata));
+			_serverList.Add(new WinServerInfo(new(s_softwareIconPaths[metadata.Software]), metadata));
 		}
 
-		this.InitializeComponent();
+		InitializeComponent();
 
 		AppEvents.NewServerAdded += AppEvents_NewServerAdded;
 		AppEvents.ServerRemoved += AppEvents_ServerRemoved;
+		ServerProcessManager.EulaPrompt += ServerProcessManager_EulaPrompt;
+	}
+
+	private void ServerProcessManager_EulaPrompt(ServerMetadata meta)
+	{
+		DispatcherQueue.TryEnqueue(async () =>
+		{
+			EulaPromptPage promptPage = new();
+			ContentDialog dialog = promptPage.CreateDialog(this, meta.Name);
+			var result = await dialog.ShowAsync();
+
+			if (result != ContentDialogResult.Primary)
+			{
+				return;
+			}
+
+			ServerProperties props = new(Path.Join(meta.ServerPath, "eula.txt"));
+			props.Load();
+			props.Properties["eula"] = "true";
+			props.Save();
+
+			var metaIndex = ApplicationData.Configuration.Servers.FindIndex(item => item.Guid == meta.Guid);
+			ServerProcessManager.Instance.StartServer(metaIndex, meta.Guid);
+			EulaAccept?.Invoke(metaIndex);
+		});
 	}
 
 	private void AppEvents_ServerRemoved(ServerMetadata obj)
 	{
-		WinServerInfo serverEntry = ServerList.First(entry => entry.Metadata == obj);
+		WinServerInfo serverEntry = _serverList.First(entry => entry.Metadata == obj);
 
 		if (serverListView.SelectedItem == serverEntry)
 		{
 			serverListView.SelectedItem = CreateNewServer;
 		}
 
-		ServerList.Remove(serverEntry);
+		_serverList.Remove(serverEntry);
 	}
 
 	private void AppEvents_NewServerAdded(ServerMetadata obj)
 	{
-		WinServerInfo serverEntry = new(new(SoftwareIconPaths[obj.Software]), obj);
-		ServerList.Add(serverEntry);
+		WinServerInfo serverEntry = new(new(s_softwareIconPaths[obj.Software]), obj);
+		_serverList.Add(serverEntry);
 		serverListView.SelectedItem = serverEntry;
 	}
 
