@@ -5,7 +5,7 @@ namespace QSM.Core.Tests.ServerSoftware;
 
 public class VanillaFetcherTest : FetcherTestBase<VanillaFetcher>
 {
-	private MockHttpMessageHandler CreateMock()
+	private static MockHttpMessageHandler CreateMock()
 	{
 		MockHttpMessageHandler mockHttp = new();
 		mockHttp.When("/mc/game/version_manifest_v2.json").Respond("application/json", @"{

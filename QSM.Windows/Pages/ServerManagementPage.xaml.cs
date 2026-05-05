@@ -34,6 +34,9 @@ public sealed partial class ServerManagementPage : Page
 
 		ConfigurationNavigationView.SelectedItem = SummaryTab;
 
+		if (_metadata.Software == ServerSoftwares.Vanilla)
+			ModsPluginsTab.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+
 		base.OnNavigatedTo(e);
 	}
 

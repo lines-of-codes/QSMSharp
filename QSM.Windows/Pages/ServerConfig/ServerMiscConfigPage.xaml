@@ -9,13 +9,13 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16" Margin="30,20">
-        <TextBox Header="MOTD:" Text="{x:Bind _settings.MOTD, Mode=TwoWay}" />
-        <NumberBox Header="Player Idle Timeout (Minutes):" 
+        <TextBox x:Uid="/ServerConfig/MOTD" Text="{x:Bind _settings.MOTD, Mode=TwoWay}" />
+        <NumberBox x:Uid="/ServerConfig/PlayerIdleTimeout" 
                    Value="{x:Bind _settings.PlayerIdleTimeout, Mode=TwoWay}" />
-        <NumberBox Header="Rate Limit:" Value="{x:Bind _settings.RateLimit, Mode=TwoWay}" />
-        <TextBox Header="Resource Pack:" Text="{x:Bind _settings.ResourcePack, Mode=TwoWay}" />
-        <TextBox Header="Resource Pack SHA1:" Text="{x:Bind _settings.ResourcePackSha1, Mode=TwoWay}" />
-        <CheckBox Content="Require Resource Pack" 
+        <NumberBox x:Uid="/ServerConfig/RateLimit" Value="{x:Bind _settings.RateLimit, Mode=TwoWay}" />
+        <TextBox x:Uid="/ServerConfig/ResourcePack" Text="{x:Bind _settings.ResourcePack, Mode=TwoWay}" />
+        <TextBox x:Uid="/ServerConfig/ResourcePackSha1" Text="{x:Bind _settings.ResourcePackSha1, Mode=TwoWay}" />
+        <CheckBox x:Uid="/ServerConfig/RequireResourcePack" 
                   IsChecked="{x:Bind _settings.RequireResourcePack, Mode=TwoWay}" />
     </StackPanel>
 </Page>

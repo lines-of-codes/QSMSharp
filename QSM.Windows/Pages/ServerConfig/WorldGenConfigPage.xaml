@@ -9,20 +9,23 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16" Margin="30,20">
-        <TextBox Header="Level Name:" x:Name="LevelNameInput" Text="{x:Bind _worldSettings.LevelName, Mode=TwoWay}" />
+        <TextBox x:Uid="/ServerConfig/LevelName" x:Name="LevelNameInput" 
+                 Text="{x:Bind _worldSettings.LevelName, Mode=TwoWay}" />
 
-        <TextBox Header="Level Seed:" x:Name="LevelSeedInput" Text="{x:Bind _worldSettings.LevelSeed, Mode=TwoWay}" />
+        <TextBox x:Uid="/ServerConfig/LevelSeed" x:Name="LevelSeedInput" 
+                 Text="{x:Bind _worldSettings.LevelSeed, Mode=TwoWay}" />
         
-        <TextBox Header="Generator Settings:" x:Name="GeneratorSettingsInput"
-                 Text="{x:Bind _worldSettings.GeneratorSettings, Mode=TwoWay}" />
+        <TextBox x:Uid="/ServerConfig/GeneratorSettings" 
+                 Text="{x:Bind _worldSettings.GeneratorSettings, Mode=TwoWay}"
+                 x:Name="GeneratorSettingsInput" />
 
-        <NumberBox Header="Max World Size:" Maximum="29999984" Minimum="1" x:Name="MaxWorldSizeInput"
+        <NumberBox x:Uid="/ServerConfig/MaxWorldSize" Maximum="29999984" Minimum="1" x:Name="MaxWorldSizeInput"
                    Value="{x:Bind _worldSettings.MaxWorldSize, Mode=TwoWay}"/>
 
-        <ComboBox Header="Level Type:" ItemsSource="{x:Bind _levelTypes, Mode=OneWay}"
+        <ComboBox x:Uid="/ServerConfig/LevelType" ItemsSource="{x:Bind _levelTypes, Mode=OneWay}"
                   SelectedItem="{x:Bind _worldSettings.LevelType, Mode=TwoWay}" x:Name="LevelTypeComboBox" />
 
-        <CheckBox Content="Generate Structures" x:Name="GenerateStructuresCheckbox"
+        <CheckBox x:Uid="/ServerConfig/GenerateStructures" x:Name="GenerateStructuresCheckbox"
                   IsChecked="{x:Bind _worldSettings.GenerateStructures, Mode=TwoWay}" />
     </StackPanel>
 </Page>

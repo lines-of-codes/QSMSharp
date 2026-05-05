@@ -9,8 +9,8 @@
     mc:Ignorable="d">
 
     <StackPanel Margin="30,20">
-        <CheckBox Content="Debug" IsChecked="{x:Bind _settings.Debug, Mode=TwoWay}" />
-        <CheckBox Content="Enable JMX Monitoring" 
+        <CheckBox x:Uid="/ServerConfig/Debug" IsChecked="{x:Bind _settings.Debug, Mode=TwoWay}" />
+        <CheckBox x:Uid="/ServerConfig/EnableJmxMonitoring" 
                   IsChecked="{x:Bind _settings.EnableJmxMonitoring, Mode=TwoWay}" />
     </StackPanel>
 </Page>

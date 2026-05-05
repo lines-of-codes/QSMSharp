@@ -54,6 +54,8 @@ public sealed partial class WorldGenConfigPage : Page
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
+		ServerConfigurationPage.ConfigNavigatingFrom += ConfigNavigatingFrom;
+
 		int metadataIndex = (int)e.Parameter;
 		_metadata = ApplicationData.Configuration.Servers[metadataIndex];
 		Version minecraftVersion = new(_metadata.MinecraftVersion);
@@ -76,10 +78,17 @@ public sealed partial class WorldGenConfigPage : Page
 		base.OnNavigatedTo(e);
 	}
 
-	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	private void ConfigNavigatingFrom()
 	{
 		_worldSettings.Apply(_serverProps);
 		_serverProps.Save();
+
+		ServerConfigurationPage.ConfigNavigatingFrom -= ConfigNavigatingFrom;
+	}
+
+	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	{
+		ConfigNavigatingFrom();
 
 		base.OnNavigatingFrom(e);
 	}

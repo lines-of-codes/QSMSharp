@@ -83,12 +83,12 @@
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Markdown" Version="7.1.2" />
         <PackageReference Include="cuid.net" Version="7.0.0" />
         <PackageReference Include="HappyCoding.Hosting" Version="1.1.0" />
-        <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.6" />
+        <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
         <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
         <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
         <PackageReference Include="Serilog" Version="4.3.1" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />

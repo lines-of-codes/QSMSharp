@@ -135,4 +135,7 @@
   <data name="Remove" xml:space="preserve">
     <value>ลบ</value>
   </data>
+  <data name="Select.Content" xml:space="preserve">
+    <value>เลือก</value>
+  </data>
 </root>

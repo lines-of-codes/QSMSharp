@@ -13,6 +13,8 @@ namespace QSM.Windows.Pages.ServerConfig;
 /// </summary>
 public sealed partial class ServerConfigurationPage : Page
 {
+	public static event Action ConfigNavigatingFrom;
+
 	int _metadataIndex;
 	ServerMetadata _metadata;
 
@@ -33,6 +35,7 @@ public sealed partial class ServerConfigurationPage : Page
 	protected override void OnNavigatedFrom(NavigationEventArgs e)
 	{
 		ApplicationData.ServerSettings[_metadata.Guid].SaveJson(ApplicationData.Configuration.Servers[_metadataIndex].QsmConfigFile);
+		ConfigNavigatingFrom?.Invoke();
 
 		base.OnNavigatedFrom(e);
 	}

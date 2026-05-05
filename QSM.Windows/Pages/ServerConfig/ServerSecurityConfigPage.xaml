@@ -9,10 +9,10 @@
     mc:Ignorable="d">
 
     <StackPanel Margin="30,20">
-        <CheckBox Content="Online Mode" IsChecked="{x:Bind _settings.OnlineMode, Mode=TwoWay}" />
-        <CheckBox Content="Prevent Proxy Connections" 
+        <CheckBox x:Uid="/ServerConfig/OnlineMode" IsChecked="{x:Bind _settings.OnlineMode, Mode=TwoWay}" />
+        <CheckBox x:Uid="/ServerConfig/PreventProxyConnections" 
                   IsChecked="{x:Bind _settings.PreventProxyConnections, Mode=TwoWay}" />
-        <CheckBox Content="Enable Command Blocks" x:Name="EnableCommandBlocks" 
+        <CheckBox x:Uid="/ServerConfig/EnableCommandBlocks" x:Name="EnableCommandBlocks" 
                   IsChecked="{x:Bind _settings.EnableCommandBlocks, Mode=TwoWay}" />
     </StackPanel>
 </Page>

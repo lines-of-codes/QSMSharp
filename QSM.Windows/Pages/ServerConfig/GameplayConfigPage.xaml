@@ -9,14 +9,14 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16" Margin="30,20">
-        <ComboBox Header="Gamemode:" x:Name="Gamemode" SelectedValue="{x:Bind _settingsData.Gamemode, Mode=TwoWay}">
+        <ComboBox x:Uid="/ServerConfig/Gamemode" x:Name="Gamemode" SelectedValue="{x:Bind _settingsData.Gamemode, Mode=TwoWay}">
             <x:String>survival</x:String>
             <x:String>creative</x:String>
             <x:String>adventure</x:String>
             <x:String>spectator</x:String>
         </ComboBox>
 
-        <ComboBox Header="Difficulty:" x:Name="Difficulty" SelectedValue="{x:Bind _settingsData.Difficulty, Mode=TwoWay}">
+        <ComboBox x:Uid="/ServerConfig/Difficulty" x:Name="Difficulty" SelectedValue="{x:Bind _settingsData.Difficulty, Mode=TwoWay}">
             <x:String>peaceful</x:String>
             <x:String>easy</x:String>
             <x:String>normal</x:String>
@@ -24,11 +24,11 @@
         </ComboBox>
 
         <StackPanel>
-            <CheckBox Content="Force Gamemode" x:Name="ForceGamemode" IsChecked="{x:Bind _settingsData.ForceGameMode, Mode=TwoWay}" />
-            <CheckBox Content="Hardcore" x:Name="Hardcore" IsChecked="{x:Bind _settingsData.Hardcore, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/ForceGamemode" x:Name="ForceGamemode" IsChecked="{x:Bind _settingsData.ForceGameMode, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/Hardcore" x:Name="Hardcore" IsChecked="{x:Bind _settingsData.Hardcore, Mode=TwoWay}" />
             <CheckBox Content="PvP" x:Name="PvP" IsChecked="{x:Bind _settingsData.PvP, Mode=TwoWay}" />
-            <CheckBox Content="Allow Flight" x:Name="AllowFlight" IsChecked="{x:Bind _settingsData.AllowFlight, Mode=TwoWay}" />
-            <CheckBox Content="Allow Nether" x:Name="AllowNether" IsChecked="{x:Bind _settingsData.AllowNether, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/AllowFlight" x:Name="AllowFlight" IsChecked="{x:Bind _settingsData.AllowFlight, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/AllowNether" x:Name="AllowNether" IsChecked="{x:Bind _settingsData.AllowNether, Mode=TwoWay}" />
         </StackPanel>
     </StackPanel>
 </Page>

@@ -25,8 +25,8 @@
 			<NavigationViewItem x:Uid="/ServerConfig/PlayerInteractTab" x:Name="PlayerInteractTab" />
 			<NavigationViewItem x:Uid="/ServerConfig/SecurityTab" x:Name="SecurityTab" />
 			<NavigationViewItem x:Uid="/ServerConfig/DebugTab" x:Name="DebugTab" />
-            <NavigationViewItem Content="Java" x:Name="JavaTab" />
 			<NavigationViewItem x:Uid="/ServerConfig/MiscTab" x:Name="MiscTab" />
+            <NavigationViewItem Content="Java" x:Name="JavaTab" />
         </NavigationView.MenuItems>
 
         <Frame x:Name="ConfigurationFrame" />

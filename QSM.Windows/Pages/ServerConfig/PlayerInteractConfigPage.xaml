@@ -9,13 +9,13 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16" Margin="30,20">
-        <NumberBox Header="Spawn Protection:" Value="{x:Bind _settings.SpawnProtection, Mode=TwoWay}" />
-        <NumberBox Header="OP Permission Level:" Minimum="0" Maximum="4"
+        <NumberBox x:Uid="/ServerConfig/SpawnProtection" Value="{x:Bind _settings.SpawnProtection, Mode=TwoWay}" />
+        <NumberBox x:Uid="/ServerConfig/OpPermissionLevel" Minimum="0" Maximum="4"
                    Value="{x:Bind _settings.OpPermissionLevel, Mode=TwoWay}" />
 
         <StackPanel>
-            <CheckBox Content="Whitelist" IsChecked="{x:Bind _settings.Whitelist, Mode=TwoWay}" />
-            <CheckBox Content="Enforce Whitelist" IsChecked="{x:Bind _settings.EnforceWhitelist, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/Whitelist" IsChecked="{x:Bind _settings.Whitelist, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/EnforceWhitelist" IsChecked="{x:Bind _settings.EnforceWhitelist, Mode=TwoWay}" />
         </StackPanel>
     </StackPanel>
 </Page>

@@ -37,6 +37,8 @@ public sealed partial class ServerSecurityConfigPage : Page
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
+		ServerConfigurationPage.ConfigNavigatingFrom += ConfigNavigatingFrom;
+
 		int metadataIndex = (int)e.Parameter;
 		var _metadata = ApplicationData.Configuration.Servers[metadataIndex];
 		var minecraftVersion = new Version(_metadata.MinecraftVersion);
@@ -53,10 +55,17 @@ public sealed partial class ServerSecurityConfigPage : Page
 		base.OnNavigatedTo(e);
 	}
 
-	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	private void ConfigNavigatingFrom()
 	{
 		_settings.Apply(_serverProps);
 		_serverProps.Save();
+
+		ServerConfigurationPage.ConfigNavigatingFrom -= ConfigNavigatingFrom;
+	}
+
+	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	{
+		ConfigNavigatingFrom();
 
 		base.OnNavigatingFrom(e);
 	}

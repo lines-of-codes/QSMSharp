@@ -11,19 +11,19 @@
     <ScrollViewer>
         <StackPanel Spacing="16" Margin="30,20">
             <StackPanel Spacing="8">
-                <TextBlock Text="Java Executable:" />
+                <TextBlock x:Uid="/ServerConfig/JavaExecutable" />
                 <TextBlock x:Name="JavaLabel" />
                 <Button 
                     x:Name="JavaSelectButton" 
-                    Content="Select" 
+                    x:Uid="/Common/Select" 
                     Style="{StaticResource AccentButtonStyle}" 
                     Click="JavaSelectButton_Click" />
             </StackPanel>
 
             <Slider 
                 x:Name="InitMemorySizeSlider" 
+                x:Uid="/ServerConfig/InitialMemoryAllocation"
                 Minimum="0.5" 
-                Header="Initial Memory Allocation (GiB):" 
                 StepFrequency="0.5"
                 TickFrequency="0.5"
                 TickPlacement="BottomRight"
@@ -31,8 +31,8 @@
 
             <Slider 
                 x:Name="MaxMemorySizeSlider" 
+                x:Uid="/ServerConfig/MaximumMemoryAllocation"
                 Minimum="0.5" 
-                Header="Maximum Memory Allocation (GiB):" 
                 StepFrequency="0.5"
                 TickFrequency="0.5" 
                 TickPlacement="BottomRight"
@@ -48,7 +48,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Custom JVM Arguments" VerticalAlignment="Center" />
+                <TextBlock x:Uid="/ServerConfig/CustomJvmArguments" VerticalAlignment="Center" />
                 <ComboBox 
                     x:Name="JvmArgPresetSelector"
                     SelectionChanged="JvmArgPresetSelector_SelectionChanged"

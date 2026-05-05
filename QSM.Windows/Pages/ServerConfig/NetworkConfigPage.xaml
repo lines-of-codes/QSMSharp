@@ -9,17 +9,17 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16" Margin="30,20">
-        <TextBox Header="Server IP:" Text="{x:Bind _settings.ServerIp, Mode=TwoWay}" />
-        <NumberBox Header="Server Port:" Minimum="1" Maximum="65534"
+        <TextBox x:Uid="/ServerConfig/ServerIP" Text="{x:Bind _settings.ServerIp, Mode=TwoWay}" />
+        <NumberBox x:Uid="/ServerConfig/ServerPort" Minimum="1" Maximum="65534"
                    Value="{x:Bind _settings.ServerPort, Mode=TwoWay}" />
         
         <StackPanel>
-            <CheckBox Content="Enable Status" IsChecked="{x:Bind _settings.EnableStatus, Mode=TwoWay}" />
-            <CheckBox Content="Use Native Transport" IsChecked="{x:Bind _settings.UseNativeTransport, Mode=TwoWay}" />
-            <CheckBox Content="Enable Query" IsChecked="{x:Bind _settings.EnableQuery, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/EnableStatus" IsChecked="{x:Bind _settings.EnableStatus, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/UseNativeTransport" IsChecked="{x:Bind _settings.UseNativeTransport, Mode=TwoWay}" />
+            <CheckBox x:Uid="/ServerConfig/EnableQuery" IsChecked="{x:Bind _settings.EnableQuery, Mode=TwoWay}" />
         </StackPanel>
         
-        <NumberBox Header="Query Port:" Minimum="1" Maximum="65534" Value="{x:Bind _settings.QueryPort, Mode=TwoWay}" />
-        <NumberBox Header="Network Compression Threshold:" Value="{x:Bind _settings.NetworkCompressionThreshold}" />
+        <NumberBox x:Uid="/ServerConfig/QueryPort" Minimum="1" Maximum="65534" Value="{x:Bind _settings.QueryPort, Mode=TwoWay}" />
+        <NumberBox x:Uid="/ServerConfig/NetworkCompressionThreshold" Value="{x:Bind _settings.NetworkCompressionThreshold}" />
     </StackPanel>
 </Page>

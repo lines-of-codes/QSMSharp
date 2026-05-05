@@ -43,10 +43,12 @@ public sealed partial class GameplayConfigPage : Page
 
 	public GameplayConfigPage()
 	{
-		this.InitializeComponent();
+		InitializeComponent();
 	}
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
+		ServerConfigurationPage.ConfigNavigatingFrom += ConfigNavigatingFrom;
+
 		var metadataIndex = (int)e.Parameter;
 		var server = ApplicationData.Configuration.Servers[metadataIndex];
 		_serverProps = new ServerProperties(server.ServerPropertiesFile);
@@ -66,10 +68,17 @@ public sealed partial class GameplayConfigPage : Page
 		base.OnNavigatedTo(e);
 	}
 
-	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	private void ConfigNavigatingFrom()
 	{
 		_settingsData.Apply(_serverProps);
 		_serverProps.Save();
+
+		ServerConfigurationPage.ConfigNavigatingFrom -= ConfigNavigatingFrom;
+	}
+
+	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	{
+		ConfigNavigatingFrom();
 
 		base.OnNavigatingFrom(e);
 	}

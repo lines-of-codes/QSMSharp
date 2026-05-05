@@ -19,15 +19,15 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             
-            <NumberBox Header="Max Players:" Minimum="0" Value="{x:Bind _settings.MaxPlayers, Mode=TwoWay}" />
-            <NumberBox Header="View Distance:" Minimum="3" Maximum="32" Grid.Row="1"
+            <NumberBox x:Uid="/ServerConfig/MaxPlayers" Minimum="0" Value="{x:Bind _settings.MaxPlayers, Mode=TwoWay}" />
+            <NumberBox x:Uid="/ServerConfig/ViewDistance" Minimum="3" Maximum="32" Grid.Row="1"
                        Value="{x:Bind _settings.ViewDistance, Mode=TwoWay}" />
-            <NumberBox Header="Simulation Distance:" Minimum="3" Maximum="32" Grid.Column="1"
+            <NumberBox x:Uid="/ServerConfig/SimulationDistance" Minimum="3" Maximum="32" Grid.Column="1"
                        Value="{x:Bind _settings.SimulationDistance, Mode=TwoWay}" />
-            <NumberBox Header="Max Tick Time:" Minimum="-1" Value="{x:Bind _settings.MaxTickTime, Mode=TwoWay}"
+            <NumberBox x:Uid="/ServerConfig/MaxTickTime" Minimum="-1" Value="{x:Bind _settings.MaxTickTime, Mode=TwoWay}"
                        Grid.Row="1" Grid.Column="1" />
         </Grid>
-        <NumberBox Header="Entity Broadcast Range Percentage:" Minimum="10" Maximum="1000"
+        <NumberBox x:Uid="/ServerConfig/EntityBroadcastRangePercentage" Minimum="10" Maximum="1000"
                    Value="{x:Bind _settings.EntityBroadcastRangePercentage, Mode=TwoWay}" />
     </StackPanel>
 </Page>

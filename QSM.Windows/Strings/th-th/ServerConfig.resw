@@ -117,23 +117,155 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllowFlight.Content" xml:space="preserve">
+    <value>อนุญาตการบิน</value>
+  </data>
+  <data name="AllowNether.Content" xml:space="preserve">
+    <value>อนุญาตเนเธอร์</value>
+  </data>
+  <data name="CustomJvmArguments.Text" xml:space="preserve">
+    <value>อาร์กิวเมนต์ JVM กำหนดเอง</value>
+  </data>
+  <data name="Debug.Content" xml:space="preserve">
+    <value>ดีบัก</value>
+  </data>
   <data name="DebugTab.Content" xml:space="preserve">
     <value>การบันทึกและดีบัก</value>
+  </data>
+  <data name="Difficulty.Header" xml:space="preserve">
+    <value>ความยาก:</value>
+  </data>
+  <data name="EnableCommandBlocks.Content" xml:space="preserve">
+    <value>เปิดใช้ Command Blocks</value>
+  </data>
+  <data name="EnableJmxMonitoring.Content" xml:space="preserve">
+    <value>เปิดใช้งานการตรวจสอบ JMX</value>
+  </data>
+  <data name="EnableQuery.Content" xml:space="preserve">
+    <value>เปิด Query</value>
+  </data>
+  <data name="EnableStatus.Content" xml:space="preserve">
+    <value>เปิดสถานะ</value>
+  </data>
+  <data name="EnforceWhitelist.Content" xml:space="preserve">
+    <value>บังคับใช้รายชื่อผู้เล่นที่อนุญาต</value>
+  </data>
+  <data name="EntityBroadcastRangePercentage.Header" xml:space="preserve">
+    <value>ร้อยละระยะการประกาศเอนทิที:</value>
+  </data>
+  <data name="ForceGamemode.Content" xml:space="preserve">
+    <value>บ้งคับเกมโหมด</value>
+  </data>
+  <data name="Gamemode.Header" xml:space="preserve">
+    <value>เกมโหมด:</value>
   </data>
   <data name="GameplayTab.Content" xml:space="preserve">
     <value>เกมเพลย์</value>
   </data>
+  <data name="GenerateStructures.Content" xml:space="preserve">
+    <value>สร้างสิ่งปลูกสร้าง</value>
+  </data>
+  <data name="GeneratorSettings.Header" xml:space="preserve">
+    <value>ตั้งค่าเจเนอเรเตอร์:</value>
+  </data>
+  <data name="Hardcore.Content" xml:space="preserve">
+    <value>ฮาร์ดคอร์</value>
+  </data>
+  <data name="InitialMemoryAllocation.Header" xml:space="preserve">
+    <value>การจัดสรรหน่วยความจำเริ่มต้น (GiB):</value>
+  </data>
+  <data name="JavaExecutable.Text" xml:space="preserve">
+    <value>ไฟล์ Java:</value>
+  </data>
+  <data name="LevelName.Header" xml:space="preserve">
+    <value>ชื่อโลก:</value>
+  </data>
+  <data name="LevelSeed.Header" xml:space="preserve">
+    <value>ซีดโลก:</value>
+  </data>
+  <data name="LevelType.Header" xml:space="preserve">
+    <value>ประเภทโลก:</value>
+  </data>
+  <data name="MaximumMemoryAllocation.Header" xml:space="preserve">
+    <value>การจัดสรรหน่วยความจำสูงสุด (GiB):</value>
+  </data>
+  <data name="MaxPlayers.Header" xml:space="preserve">
+    <value>ผู้เล่นสูงสุด:</value>
+  </data>
+  <data name="MaxTickTime.Header" xml:space="preserve">
+    <value>เวลาติกสูงสุด:</value>
+  </data>
+  <data name="MaxWorldSize.Header" xml:space="preserve">
+    <value>ขนาดโลกสูงสุด:</value>
+  </data>
+  <data name="MiscTab.Content" xml:space="preserve">
+    <value>ทั่วไป</value>
+  </data>
+  <data name="MOTD.Header" xml:space="preserve">
+    <value>ข้อความประจำวัน (MOTD):</value>
+  </data>
+  <data name="NetworkCompressionThreshold.Header" xml:space="preserve">
+    <value>เกณฑ์การบีบอัดเครือข่าย:</value>
+  </data>
   <data name="NetworkTab.Content" xml:space="preserve">
     <value>เครือข่าย</value>
+  </data>
+  <data name="OnlineMode.Content" xml:space="preserve">
+    <value>โหมดออนไลน์</value>
+  </data>
+  <data name="OpPermissionLevel.Header" xml:space="preserve">
+    <value>ระดับสิทธิ์ OP:</value>
   </data>
   <data name="PerformanceTab.Content" xml:space="preserve">
     <value>ประสิทธิภาพ</value>
   </data>
+  <data name="PlayerIdleTimeout.Header" xml:space="preserve">
+    <value>การหมดเวลาเมื่อผู้เล่นไม่ได้ขยับ (นาที):</value>
+  </data>
   <data name="PlayerInteractTab.Content" xml:space="preserve">
     <value>ปฏิสัมพันธ์ผู้เล่น</value>
   </data>
+  <data name="PreventProxyConnections.Content" xml:space="preserve">
+    <value>ป้องกันการเชื่อมต่อจากพรอกซี</value>
+  </data>
+  <data name="QueryPort.Header" xml:space="preserve">
+    <value>พอร์ท Query:</value>
+  </data>
+  <data name="RateLimit.Header" xml:space="preserve">
+    <value>จำกัดอัตราการใช้งาน:</value>
+  </data>
+  <data name="RequireResourcePack.Content" xml:space="preserve">
+    <value>บังคับใช้แพ็คทรัพยากร</value>
+  </data>
+  <data name="ResourcePack.Header" xml:space="preserve">
+    <value>แพ็คทรัพยากร:</value>
+  </data>
+  <data name="ResourcePackSha1.Header" xml:space="preserve">
+    <value>SHA1 แพ็คทรัพยากร:</value>
+  </data>
   <data name="SecurityTab.Content" xml:space="preserve">
     <value>ความปลอดภัย</value>
+  </data>
+  <data name="ServerIP.Header" xml:space="preserve">
+    <value>IP เซิร์ฟเวอร์:</value>
+  </data>
+  <data name="ServerPort.Header" xml:space="preserve">
+    <value>พอร์ทเซิร์ฟเวอร์:</value>
+  </data>
+  <data name="SimulationDistance.Header" xml:space="preserve">
+    <value>ระยะการจำลอง:</value>
+  </data>
+  <data name="SpawnProtection.Header" xml:space="preserve">
+    <value>การป้องกัน Spawn:</value>
+  </data>
+  <data name="UseNativeTransport.Content" xml:space="preserve">
+    <value>ใช้การขนส่งแบบเนทีฟ</value>
+  </data>
+  <data name="ViewDistance.Header" xml:space="preserve">
+    <value>ระยะการมอง:</value>
+  </data>
+  <data name="Whitelist.Content" xml:space="preserve">
+    <value>รายชื่อผู้เล่นที่อนุญาต</value>
   </data>
   <data name="WorldGenTab.Content" xml:space="preserve">
     <value>การสร้างโลก</value>

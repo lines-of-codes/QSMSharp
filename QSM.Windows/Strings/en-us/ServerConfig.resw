@@ -117,23 +117,155 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllowFlight.Content" xml:space="preserve">
+    <value>Allow Flight</value>
+  </data>
+  <data name="AllowNether.Content" xml:space="preserve">
+    <value>Allow Nether</value>
+  </data>
+  <data name="CustomJvmArguments.Text" xml:space="preserve">
+    <value>Custom JVM Arguments</value>
+  </data>
+  <data name="Debug.Content" xml:space="preserve">
+    <value>Debug</value>
+  </data>
   <data name="DebugTab.Content" xml:space="preserve">
     <value>Logging and Debugging</value>
+  </data>
+  <data name="Difficulty.Header" xml:space="preserve">
+    <value>Difficulty:</value>
+  </data>
+  <data name="EnableCommandBlocks.Content" xml:space="preserve">
+    <value>Enable Command Blocks</value>
+  </data>
+  <data name="EnableJmxMonitoring.Content" xml:space="preserve">
+    <value>Enable JMX Monitoring</value>
+  </data>
+  <data name="EnableQuery.Content" xml:space="preserve">
+    <value>Enable Query</value>
+  </data>
+  <data name="EnableStatus.Content" xml:space="preserve">
+    <value>Enable Status</value>
+  </data>
+  <data name="EnforceWhitelist.Content" xml:space="preserve">
+    <value>Enforce Whitelist</value>
+  </data>
+  <data name="EntityBroadcastRangePercentage.Header" xml:space="preserve">
+    <value>Entity Broadcast Range Percentage:</value>
+  </data>
+  <data name="ForceGamemode.Content" xml:space="preserve">
+    <value>Force Gamemode</value>
+  </data>
+  <data name="Gamemode.Header" xml:space="preserve">
+    <value>Gamemode:</value>
   </data>
   <data name="GameplayTab.Content" xml:space="preserve">
     <value>Gameplay Settings</value>
   </data>
+  <data name="GenerateStructures.Content" xml:space="preserve">
+    <value>Generate Structures</value>
+  </data>
+  <data name="GeneratorSettings.Header" xml:space="preserve">
+    <value>Generator Settings:</value>
+  </data>
+  <data name="Hardcore.Content" xml:space="preserve">
+    <value>Hardcore</value>
+  </data>
+  <data name="InitialMemoryAllocation.Header" xml:space="preserve">
+    <value>Initial Memory Allocation (GiB):</value>
+  </data>
+  <data name="JavaExecutable.Text" xml:space="preserve">
+    <value>Java Executable:</value>
+  </data>
+  <data name="LevelName.Header" xml:space="preserve">
+    <value>Level Name:</value>
+  </data>
+  <data name="LevelSeed.Header" xml:space="preserve">
+    <value>Level Seed:</value>
+  </data>
+  <data name="LevelType.Header" xml:space="preserve">
+    <value>Level Type:</value>
+  </data>
+  <data name="MaximumMemoryAllocation.Header" xml:space="preserve">
+    <value>Maximum Memory Allocation (GiB):</value>
+  </data>
+  <data name="MaxPlayers.Header" xml:space="preserve">
+    <value>Max Players:</value>
+  </data>
+  <data name="MaxTickTime.Header" xml:space="preserve">
+    <value>Max Tick Time:</value>
+  </data>
+  <data name="MaxWorldSize.Header" xml:space="preserve">
+    <value>Max World Size:</value>
+  </data>
+  <data name="MiscTab.Content" xml:space="preserve">
+    <value>Miscellaneous</value>
+  </data>
+  <data name="MOTD.Header" xml:space="preserve">
+    <value>MOTD:</value>
+  </data>
+  <data name="NetworkCompressionThreshold.Header" xml:space="preserve">
+    <value>Network Compression Threshold:</value>
+  </data>
   <data name="NetworkTab.Content" xml:space="preserve">
     <value>Network Settings</value>
+  </data>
+  <data name="OnlineMode.Content" xml:space="preserve">
+    <value>Online Mode</value>
+  </data>
+  <data name="OpPermissionLevel.Header" xml:space="preserve">
+    <value>OP Permission Level:</value>
   </data>
   <data name="PerformanceTab.Content" xml:space="preserve">
     <value>Server Performance</value>
   </data>
+  <data name="PlayerIdleTimeout.Header" xml:space="preserve">
+    <value>Player Idle Timeout (Minutes):</value>
+  </data>
   <data name="PlayerInteractTab.Content" xml:space="preserve">
     <value>Player Interaction</value>
   </data>
+  <data name="PreventProxyConnections.Content" xml:space="preserve">
+    <value>Prevent Proxy Connections</value>
+  </data>
+  <data name="QueryPort.Header" xml:space="preserve">
+    <value>Query Port:</value>
+  </data>
+  <data name="RateLimit.Header" xml:space="preserve">
+    <value>Rate Limit:</value>
+  </data>
+  <data name="RequireResourcePack.Content" xml:space="preserve">
+    <value>Require Resource Pack</value>
+  </data>
+  <data name="ResourcePack.Header" xml:space="preserve">
+    <value>Resource Pack:</value>
+  </data>
+  <data name="ResourcePackSha1.Header" xml:space="preserve">
+    <value>Resource Pack SHA1:</value>
+  </data>
   <data name="SecurityTab.Content" xml:space="preserve">
     <value>Security</value>
+  </data>
+  <data name="ServerIP.Header" xml:space="preserve">
+    <value>Server IP:</value>
+  </data>
+  <data name="ServerPort.Header" xml:space="preserve">
+    <value>Server Port:</value>
+  </data>
+  <data name="SimulationDistance.Header" xml:space="preserve">
+    <value>Simulation Distance:</value>
+  </data>
+  <data name="SpawnProtection.Header" xml:space="preserve">
+    <value>Spawn Protection:</value>
+  </data>
+  <data name="UseNativeTransport.Content" xml:space="preserve">
+    <value>Use Native Transport</value>
+  </data>
+  <data name="ViewDistance.Header" xml:space="preserve">
+    <value>View Distance:</value>
+  </data>
+  <data name="Whitelist.Content" xml:space="preserve">
+    <value>Whitelist</value>
   </data>
   <data name="WorldGenTab.Content" xml:space="preserve">
     <value>World Generation</value>

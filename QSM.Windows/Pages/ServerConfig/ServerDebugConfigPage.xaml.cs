@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ServerSettings;
+using System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -31,6 +32,8 @@ public sealed partial class ServerDebugConfigPage : Page
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
 	{
+		ServerConfigurationPage.ConfigNavigatingFrom += ConfigNavigatingFrom;
+
 		int metadataIndex = (int)e.Parameter;
 		var _metadata = ApplicationData.Configuration.Servers[metadataIndex];
 
@@ -41,10 +44,17 @@ public sealed partial class ServerDebugConfigPage : Page
 		base.OnNavigatedTo(e);
 	}
 
-	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	private void ConfigNavigatingFrom()
 	{
 		_settings.Apply(_serverProps);
 		_serverProps.Save();
+
+		ServerConfigurationPage.ConfigNavigatingFrom -= ConfigNavigatingFrom;
+	}
+
+	protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+	{
+		ConfigNavigatingFrom();
 
 		base.OnNavigatingFrom(e);
 	}
