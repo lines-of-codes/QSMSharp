@@ -5,7 +5,7 @@
 #include "CodeDependencies.iss"
 
 #define MyAppName "QSM.Windows"
-#define MyAppVersion "1.2.2"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "Satakun Utama"
 #define MyAppURL "https://linesofcodes.dailitation.xyz/QSMSharp/"
 #define MyAppExeName "QSM.Windows.exe"
