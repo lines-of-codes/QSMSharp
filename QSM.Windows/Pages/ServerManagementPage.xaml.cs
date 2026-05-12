@@ -37,6 +37,9 @@ public sealed partial class ServerManagementPage : Page
 		if (_metadata.Software == ServerSoftwares.Vanilla)
 			ModsPluginsTab.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
 
+		if (_metadata.Software == ServerSoftwares.Velocity)
+			ConfigurationTab.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+
 		base.OnNavigatedTo(e);
 	}
 
