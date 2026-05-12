@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ModPluginSource;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
+using ReverseMarkdown;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -30,10 +31,14 @@ public sealed partial class ModSearchPage : Page
 	readonly ObservableCollection<ProviderInfo> _providers = [];
 	readonly ExtendedObservableCollection<ModPluginInfo> _searchResults = [];
 	readonly ExtendedObservableCollection<ModPluginDownloadInfo> _availableVersions = [];
+	readonly Converter _htmlConverter = new(new Config
+	{
+		UnknownTags = Config.UnknownTagsOption.Drop,
+	});
 
 	public ModSearchPage()
 	{
-		this.InitializeComponent();
+		InitializeComponent();
 	}
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -97,6 +102,11 @@ public sealed partial class ModSearchPage : Page
 		var mod = (ModPluginInfo)e.AddedItems[0];
 
 		mod = await _currentProvider.Provider.GetDetailedInfoAsync(mod);
+
+		if (_currentProvider.ProviderName == "CurseForge")
+		{
+			mod.LongDescription = _htmlConverter.Convert(mod.LongDescription);
+		}
 
 		ModIcon.Source = new BitmapImage(new Uri(mod.IconUrl));
 		ModName.Text = mod.Name;

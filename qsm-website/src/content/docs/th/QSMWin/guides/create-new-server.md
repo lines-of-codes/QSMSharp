@@ -5,14 +5,16 @@ description: การสร้างเซิร์ฟเวอร์ Minecraft
 
 หลังจากทำการติดตั้ง QSM คุณสามารถสร้างเซิร์ฟเวอร์ใหม่ได้โดยการไปยังแท็บ "สร้างเซิร์ฟเวอร์ใหม่"
 
-![แท็บสร้างเซิร์ฟเวอร์ใหม่](@assets/CreateNewServer.png)
+![แท็บสร้างเซิร์ฟเวอร์ใหม่](@assets/QSMWindows/CreateNewServer.png)
 
 ใส่ชื่อของเซิร์ฟเวอร์คุณ จากนั้น เลือกซอฟต์แวร์เซิร์ฟเวอร์ โดยมีตัวเลือกดังนี้
 
 - Paper (ค่าเริ่มต้นที่แนะนำ)
+- Folia
 - Purpur
 - Vanilla
 - Fabric
+- Quilt
 - NeoForge
 - Forge
 - Velocity

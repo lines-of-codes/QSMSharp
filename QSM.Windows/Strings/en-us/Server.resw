@@ -190,7 +190,7 @@
     <value>Remove</value>
   </data>
   <data name="SelectButton.Content" xml:space="preserve">
-    <value>Select mod/plugin for download</value>
+    <value>Select item for download</value>
   </data>
   <data name="ConfirmButton.Content" xml:space="preserve">
     <value>Review and confirm</value>

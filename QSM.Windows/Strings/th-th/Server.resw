@@ -190,7 +190,7 @@
     <value>ลบ</value>
   </data>
   <data name="SelectButton.Content" xml:space="preserve">
-    <value>เลือกม็อด/ปลั๊กอินสำหรับการดาวน์โหลด</value>
+    <value>เลือกรายการสำหรับการดาวน์โหลด</value>
   </data>
   <data name="ConfirmButton.Content" xml:space="preserve">
     <value>ตรวจสอบและยืนยัน</value>

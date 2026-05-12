@@ -39,6 +39,15 @@ if you don't use plugins, Paper is still a great choice.
 
 You can read Paper's documentation [here](https://docs.papermc.io/paper)
 
+### Folia
+
+From the makers of Paper, [Folia](https://papermc.io/software/folia/) is a new 
+fork of Paper that adds regionized multithreading to the server.
+
+You won't need this for your small multiplayer server with friends, as the 
+performance optimizations are only more apparent when there are lots of 
+players, and the players are spread out.
+
 ### Purpur
 [Purpur](https://purpurmc.org/) is a fork of Paper, Meaning
 that Purpur is based on Paper. Purpur is a drop-in replacement
@@ -63,6 +72,11 @@ When creating a Fabric server in QSM, QSM will always choose
 the latest available installer version.
 
 You can read Fabric's documentation [here](https://docs.fabricmc.net/)
+
+### Quilt
+
+[Quilt](https://quiltmc.org) is a fork of Fabric with more configuration options and APIs for developers.
+Quilt is generally compatible with most Fabric mods.
 
 ### Forge
 

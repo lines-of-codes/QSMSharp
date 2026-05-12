@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Serilog;
 using System;
+using System.Text;
 using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -42,14 +43,17 @@ public sealed partial class ServerConsolePage : Page
 
 		var outputs = ServerProcessManager.Instance.ProcessOutputs[_serverGuid];
 
+		StringBuilder sb = new();
 		foreach (var output in outputs)
 		{
 			switch (output.Type)
 			{
 				case ServerProcessManager.OutputType.Normal:
-					ProcessOutput.Text += output.Message + Environment.NewLine;
+					sb.Append(output.Message + Environment.NewLine);
 					break;
 				case ServerProcessManager.OutputType.Error:
+					ProcessOutput.Text = sb.ToString();
+					sb.Clear();
 					AppendError(output.Message);
 					break;
 				default:
@@ -57,6 +61,7 @@ public sealed partial class ServerConsolePage : Page
 					break;
 			}
 		}
+		ProcessOutput.Text += sb.ToString();
 
 		ScrollToEnd();
 

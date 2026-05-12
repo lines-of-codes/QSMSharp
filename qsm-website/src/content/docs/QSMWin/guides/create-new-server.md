@@ -6,7 +6,7 @@ description: Create a new Minecraft server with QSM.
 After installing QSM, You can create a new server by going
 into the "Create new server" tab.
 
-![Create new server tab](@assets/CreateNewServer.png)
+![Create new server tab](@assets/QSMWindows/CreateNewServer.png)
 
 Then, You can fill out the name for your server.
 
@@ -14,9 +14,11 @@ Next, There are multiple choices for the server software,
 Those choice are:
 
 - Paper (Recommended Default)
+- Folia
 - Purpur
 - Vanilla
 - Fabric
+- Quilt
 - NeoForge
 - Forge
 - Velocity

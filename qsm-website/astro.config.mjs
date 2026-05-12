@@ -65,7 +65,9 @@ export default defineConfig({
                         th: "เอกสารอ้างอิง QSM.Windows",
                     },
                     collapsed: true,
-                    autogenerate: { directory: "QSMWin/reference" },
+                    items: [
+                        { autogenerate: { directory: "QSMWin/reference" } },
+                    ],
                 },
                 {
                     label: "QSM.Web Guides",
@@ -85,7 +87,9 @@ export default defineConfig({
                         th: "เอกสารอ้างอิง QSM.Web",
                     },
                     collapsed: true,
-                    autogenerate: { directory: "QSMWeb/reference" },
+                    items: [
+                        { autogenerate: { directory: "QSMWeb/reference" } },
+                    ],
                 },
             ],
         }),
