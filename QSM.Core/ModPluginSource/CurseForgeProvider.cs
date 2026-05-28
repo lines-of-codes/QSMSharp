@@ -59,13 +59,9 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 			StringBuilder name = new(file.DisplayName);
 
 			if (file.ReleaseType == FileReleaseType.Alpha)
-			{
 				name.Append(" (alpha)");
-			}
 			else if (file.ReleaseType == FileReleaseType.Beta)
-			{
 				name.Append(" (beta)");
-			}
 
 			file.GameVersions.Sort();
 

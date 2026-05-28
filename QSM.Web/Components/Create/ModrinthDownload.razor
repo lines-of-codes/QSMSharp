@@ -224,7 +224,7 @@ else
             ServerSoftwares.Quilt => new QuiltFetcher(HttpClientFactory),
             _ => throw new InvalidOperationException("Unsupported server software")
         };
-        string url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);
+        var url = await api.GetDownloadUrlAsync(extractResult.Index.MinecraftVersion, extractResult.Index.MinecraftSoftwareVersion);
 
         _downloadProgress.Add(new DownloadProgress("server.jar", 0));
         StateHasChanged();

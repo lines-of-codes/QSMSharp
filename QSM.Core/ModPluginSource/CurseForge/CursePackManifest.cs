@@ -36,7 +36,7 @@ public class CursePackManifest
 			_ => throw new ArgumentOutOfRangeException(nameof(Id), Id, "Unsupported server software")
 		};
 
-		public string Version => Id.Split('-').Last();
+		public string Version => Id.Split('-')[^1];
 	}
 
 	public struct File()

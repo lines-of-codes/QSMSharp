@@ -8,8 +8,16 @@
 
 @inject CurseForgeProvider Curse
 @inject MarkdownPipeline MarkPipe
+@inject ILogger<CreateCurseForge> Logger
 
 <PageTitle>Import CurseForge Modpack - QSM Web Console</PageTitle>
+
+@if (_errorMessage != string.Empty)
+{
+    <div class="alert alert-danger" role="alert">
+        @_errorMessage
+    </div>
+}
 
 @if (_askMoreInfo)
 {
@@ -38,7 +46,7 @@ else
 {
     <EditForm Model="SearchForm" class="my-2" OnSubmit="SearchSubmit">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search..." @bind="SearchForm!.Query" />
+            <input type="text" class="form-control" placeholder="Search..." @bind="SearchForm" />
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </EditForm>
@@ -47,7 +55,7 @@ else
         <div class="col">
             @if (_modList.Length == 0)
             {
-                <div class="border text-center py-4">
+                <div class="border rounded text-center py-4">
                     No mods found.
                 </div>
             }
@@ -97,9 +105,9 @@ else
             </div>
             @if (_selectedMod != null && !_loadingContent)
             {
-                <EditForm Model="SelectModpackForm" OnValidSubmit="ModpackSubmit" class="mt-2">
+                <EditForm Model="SelectedModpackVersion" OnValidSubmit="ModpackSubmit" class="mt-2">
                     <div class="input-group">
-                        <InputSelect @bind-Value="SelectModpackForm!.Version" class="form-select">
+                        <InputSelect @bind-Value="SelectedModpackVersion" class="form-select">
                             @if (_downloadInfos == null || _downloadInfos.Length == 0)
                             {
                                 <option disabled>No versions available.</option>
@@ -121,8 +129,8 @@ else
 }
 
 @code {
-    [SupplyParameterFromForm] SearchFormModel? SearchForm { get; set; }
-    [SupplyParameterFromForm] SelectModpackModel? SelectModpackForm { get; set; }
+    [SupplyParameterFromForm] string? SearchForm { get; set; }
+    [SupplyParameterFromForm] string? SelectedModpackVersion { get; set; }
     [SupplyParameterFromForm] CreationDataModel? CreationDataForm { get; set; }
 
     readonly HtmlSanitizer _sanitizer = new();
@@ -132,20 +140,11 @@ else
     ModPluginDownloadInfo? _selectedVersion;
     MarkupString _selectedModDescription;
     string _targetFolderPreview = string.Empty;
+    string _errorMessage = string.Empty;
     bool _loadingContent;
     bool _askMoreInfo;
     bool _downloading;
     uint _modpackClass;
-    
-    class SearchFormModel
-    {
-        public string Query { get; set; } = string.Empty;
-    }
-
-    class SelectModpackModel
-    {
-        [Required] public string Version { get; set; } = string.Empty;
-    }
 
     public class CreationDataModel
     {
@@ -155,20 +154,28 @@ else
 
     protected override void OnInitialized()
     {
-        SearchForm ??= new SearchFormModel();
-        SelectModpackForm ??= new SelectModpackModel();
+        SearchForm ??= string.Empty;
+        SelectedModpackVersion ??= string.Empty;
         CreationDataForm ??= new CreationDataModel();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        _modpackClass = (await Curse.ListCategories()).First(c => c.Name == "Modpacks").Id;
-        _modList = await Curse.SearchAsync(classId: _modpackClass);
+        try
+        {
+            _modpackClass = (await Curse.ListCategories()).First(c => c.Name == "Modpacks").Id;
+            _modList = await Curse.SearchAsync(classId: _modpackClass);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+            Logger.LogError(ex, "An error occurred while searching for modpacks");
+        }
     }
 
     private async Task SearchSubmit()
     {
-        _modList = await Curse.SearchAsync(SearchForm?.Query ?? string.Empty, _modpackClass);
+        _modList = await Curse.SearchAsync(SearchForm ?? string.Empty, _modpackClass);
     }
 
     private async Task ModpackSelected(ushort index)
@@ -178,13 +185,13 @@ else
         _selectedModDescription = (MarkupString)_sanitizer.Sanitize(Markdown.ToHtml(_selectedMod.LongDescription, MarkPipe));
         _loadingContent = false;
         _downloadInfos = await Curse.GetVersionsAsync(((uint)_selectedMod.Id!).ToString());
-        SelectModpackForm?.Version = _downloadInfos[0].VersionId;
+        SelectedModpackVersion = _downloadInfos[0].VersionId;
     }
 
     private void ModpackSubmit()
     {
         _askMoreInfo = true;
-        _selectedVersion = _downloadInfos?.FirstOrDefault(info => info.VersionId == SelectModpackForm?.Version);
+        _selectedVersion = _downloadInfos?.FirstOrDefault(info => info.VersionId == SelectedModpackVersion);
         CreationDataForm!.Name = _selectedMod?.Name ?? string.Empty;
         CreationDataForm.Path = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "servers");
         SetTargetFolderPreview(CreationDataForm.Path, CreationDataForm.Name);
@@ -197,7 +204,7 @@ else
 
     private void NameInputChanged(ChangeEventArgs args)
     {
-        string? newName = (string?)args.Value;
+        var newName = (string?)args.Value;
 
         if (newName == null)
         {
@@ -209,7 +216,7 @@ else
 
     private void PathInputChanged(ChangeEventArgs args)
     {
-        string? newPath = (string?)args.Value;
+        var newPath = (string?)args.Value;
 
         if (newPath == null)
         {

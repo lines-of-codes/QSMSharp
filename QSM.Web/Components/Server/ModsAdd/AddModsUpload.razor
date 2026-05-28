@@ -1,0 +1,14 @@
+@page "/Server/{Id:int:min(0)}/Mods/Add/Upload"
+
+<AddModsNavBar Id="Id"/>
+
+<div class="p-2">
+    <div class="mb-3">
+        <label for="modFile" class="form-label">Select the mod(s) you wish to upload:</label>
+        <InputFile id="modFile" class="form-control" multiple />
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+}

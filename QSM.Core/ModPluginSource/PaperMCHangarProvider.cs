@@ -109,6 +109,7 @@ public class PaperMCHangarProvider : ModPluginProvider
 				LicenseUrl = project.Settings.License.Url!,
 				Owner = project.Namespace!.Owner!,
 				Slug = project.Namespace.Slug!,
+				Id = project.Namespace.Slug,
 				DownloadCount = (uint)project.Stats!.Downloads!,
 				Description = project.Description!
 			});

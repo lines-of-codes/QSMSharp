@@ -1,0 +1,211 @@
+@page "/Server/{Id:int:min(0)}/Mods/Add/{Provider}"
+@using Ganss.Xss
+@using Markdig
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ModPluginSource
+@using QSM.Web.Data
+
+@inject ModrinthProvider Modrinth
+@inject CurseForgeProvider CurseForge
+@inject PaperMCHangarProvider Hangar
+@inject ILogger<AddMods> Logger
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject MarkdownPipeline MarkPipe
+
+<PageTitle>Add Mods - QSM Web Console</PageTitle>
+
+<AddModsNavBar Id="Id"/>
+
+@if (_errorMessage != string.Empty)
+{
+    <div class="alert alert-danger" role="alert">
+        @_errorMessage
+    </div>
+}
+
+<EditForm Model="SearchQuery" class="my-2" OnSubmit="SearchSubmit">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search..." @bind="SearchQuery" />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</EditForm>
+
+<div class="row" style="max-height: 75vh;">
+    <div class="col">
+        @if (_modList.Length == 0)
+        {
+            <div class="border rounded text-center py-4">
+                No mods found.
+            </div>
+        }
+        else
+        {
+            <ul class="overflow-y-auto list-group" style="max-height: 75vh;">
+                @for (ushort i = 0; i < _modList.Length; i++)
+                {
+                    var mod = _modList[i];
+                    
+                    var i1 = i;
+                    <li class="@($"list-group-item list-group-item-action{(_viewingMod?.Slug == mod.Slug ? " active" : string.Empty)}{(_selectedVersion.ContainsKey(mod.Slug) ? " text-decoration-underline" : string.Empty)}")" @onclick="() => ViewMod(i1)">
+                        <div class="fw-bold">@mod.Name</div>
+                        <div class="overflow-hidden" style="-webkit-line-clamp: 2; line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical;">@mod.Description</div>
+                    </li>
+                }
+            </ul>
+            
+        }
+    </div>
+    <div class="col-8 d-flex flex-column" style="max-height: 75vh;">
+        <div class="overflow-auto" id="modDetails" style="max-width: 60vw;">
+            @if (_loadingContent)
+            {
+                <p class="text-secondary">Loading...</p>
+            }
+            else if (_viewingMod != null)
+            {
+                <div class="d-flex gap-3 align-items-center mb-2">
+                    <img src="@_viewingMod.IconUrl" alt="@_viewingMod.Name's Icon" height="64" />
+                    <div>
+                        <h2 class="m-0">@_viewingMod.Name</h2>
+                        <p class="m-0">
+                            <strong>Downloads: </strong> @_viewingMod.DownloadCount.ToString("N0")<br/>
+                            <strong>Creator(s): </strong> @_viewingMod.Owner<br/>
+                            <strong>License: </strong>
+                            <a href="@_viewingMod.LicenseUrl" target="_blank" rel="noreferrer">
+                                @_viewingMod.License
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    @_selectedModDescription
+                </div>
+            }
+            else
+            {
+                <p class="text-secondary">No mod selected.</p>
+            }
+        </div>
+        @if (_viewingMod != null && !_loadingContent)
+        {
+            <EditForm Model="SelectedModVersion" OnValidSubmit="SelectMod" class="mt-2 d-flex gap-2">
+                <div class="input-group flex-grow-1" style="width: unset;">
+                    <InputSelect @bind-Value="SelectedModVersion" class="form-select">
+                        @if (_downloadInfos == null || _downloadInfos.Length == 0)
+                        {
+                            <option disabled>No versions available.</option>
+                        }
+                        else
+                        {
+                            @foreach (var version in _downloadInfos)
+                            {
+                                <option value="@version.VersionId">@version.DisplayName</option>
+                            }
+                        }
+                    </InputSelect>
+                    <button type="submit" class=@("btn " + (_currentModSelected ? "btn-primary" : "btn-secondary"))>Select</button>
+                </div>
+                <button type="button" class="btn btn-primary">Review and confirm</button>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [Parameter] public string? Provider { get; set; }
+    
+    [SupplyParameterFromForm] private string? SearchQuery { get; set; }
+    [SupplyParameterFromForm] private string? SelectedModVersion { get; set; }
+
+    Dictionary<string, ModPluginProvider> _providers = null!;
+    ModPluginProvider CurrentProvider => _providers[Provider ?? "Modrinth"];
+    ServerInstance _server = new();
+    
+    readonly HtmlSanitizer _sanitizer = new();
+    ModPluginInfo[] _modList = [];
+    /// <summary>
+    /// The mod currently being viewed
+    /// </summary>
+    ModPluginInfo? _viewingMod;
+    ModPluginDownloadInfo[]? _downloadInfos;
+    readonly Dictionary<string, ModPluginDownloadInfo> _selectedVersion = [];
+    MarkupString _selectedModDescription;
+    string _errorMessage = string.Empty;
+    bool _currentModSelected;
+    bool _loadingContent;
+
+    protected override void OnInitialized()
+    {
+        _providers = new Dictionary<string, ModPluginProvider>()
+        {
+            { "Modrinth", Modrinth },
+            { "CurseForge", CurseForge },
+            { "PaperMCHangar", Hangar }
+        };
+        SearchQuery ??= string.Empty;
+        SelectedModVersion ??= string.Empty;
+        Logger.LogInformation("OnInitialized called");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var ctx = await DbFactory.CreateDbContextAsync();
+
+        var server = await ctx.Servers.FindAsync(Id);
+        if (server == null) return;
+        
+        _server = server;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await SearchSubmit();
+        _viewingMod = null;
+        _downloadInfos = null;
+    }
+
+    private async Task SearchSubmit()
+    {
+        _modList = await CurrentProvider.SearchAsync(SearchQuery!, _server);
+    }
+
+    private async Task ViewMod(ushort index)
+    {
+        _loadingContent = true;
+        _viewingMod = await CurrentProvider.GetDetailedInfoAsync(_modList[index]);
+        _currentModSelected = _selectedVersion.ContainsKey(_viewingMod.Slug);
+        _selectedModDescription = (MarkupString)_sanitizer.Sanitize(Markdown.ToHtml(_viewingMod.LongDescription, MarkPipe));
+        _loadingContent = false;
+        try
+        {
+            _downloadInfos = await CurrentProvider.GetVersionsAsync(_viewingMod.Id?.ToString() ?? _viewingMod.Slug, _server);
+            SelectedModVersion = _downloadInfos[0].VersionId;
+            _errorMessage = string.Empty;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "An error occurred while fetching mod versions");
+            _errorMessage = exception.Message;
+        }
+    }
+
+    private void SelectMod()
+    {
+        var version = _downloadInfos?.FirstOrDefault(info => info.VersionId == SelectedModVersion);
+
+        if (version is null) return;
+        var slug = _viewingMod!.Slug;
+
+        if (_selectedVersion.Remove(slug))
+        {
+            _currentModSelected = false;
+        }
+        else
+        {
+            _selectedVersion.Add(slug, version);
+            _currentModSelected = true;
+        }
+    }
+
+}

@@ -1,0 +1,80 @@
+@using QSM.Web.Data
+@using Serilog
+@using Visus.Cuid
+@inject IHttpClientFactory HttpClientFactory
+
+<label for="download-@_cuid">@Name</label>
+<progress max="100" value="@Percentage" id="download-@_cuid"></progress>
+
+@code {
+    [Parameter] public string Name { get; set; } = string.Empty;
+    private double? Percentage { get; set; }
+    private Cuid2? _cuid;
+
+    protected override void OnInitialized()
+    {
+        _cuid = new Cuid2();
+    }
+
+    public async Task<bool> DownloadFileAsync(string url, string dest)
+    {
+        using var client = HttpClientFactory.CreateClient(ApplicationConfig.HttpDownloadClient);
+
+        try
+        {
+            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode) return false;
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            await using var fileStream = File.Create(dest);
+
+            var buffer = new byte[8192];
+            long totalBytesRead = 0;
+            int bytesRead;
+
+            if (totalBytes == -1)
+            {
+                Percentage = null;
+            }
+
+            while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+                totalBytesRead += bytesRead;
+
+                if (totalBytes == -1) continue;
+
+                Percentage = (double)totalBytesRead / totalBytes * 100;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            return true;
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Warning("{}", ex.Message);
+            await Task.Delay(1000);
+            return await DownloadFileAsync(url, dest);
+        }
+        catch (IOException ex)
+        {
+            Log.Warning("{}", ex.Message);
+            await Task.Delay(1000);
+            return await DownloadFileAsync(url, dest);
+        }
+    }
+    
+    public async Task DownloadFileAsync(string[] urls, string dest)
+    {
+        foreach (var url in urls)
+        {
+            if (await DownloadFileAsync(url, dest))
+            {
+                break;
+            }
+        }
+    }
+}

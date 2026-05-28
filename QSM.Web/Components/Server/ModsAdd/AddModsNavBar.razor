@@ -1,0 +1,25 @@
+<div class="nav nav-tabs justify-content-between align-items-center">
+    <ul class="nav d-flex">
+        <li class="nav-item">
+            <NavLink class="nav-link" href=@($"/Server/{Id}/Mods/Add/Modrinth")>Modrinth</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/CurseForge")">CurseForge</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/PaperMCHangar")">PaperMC Hangar</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/Upload")">Upload</NavLink>
+        </li>
+    </ul>
+    <div class="fw-bold">
+        Add Mods
+    </div>
+</div>
+
+@code {
+
+    [Parameter] public int Id { get; set; }
+
+}

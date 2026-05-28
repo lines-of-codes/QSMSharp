@@ -68,8 +68,16 @@ public partial class CreateServer : ComponentBase
 
 	protected override async Task OnInitializedAsync()
 	{
-		await FetchMinecraftVersions();
-		await FetchAvailableBuilds(_minecraftVersions[0]);
+		try
+		{
+			await FetchMinecraftVersions();
+			await FetchAvailableBuilds(_minecraftVersions[0]);
+		}
+		catch (Exception ex)
+		{
+			_errorMessage = ex.Message;
+			Logger.LogError(ex, "An error occurred while fetching software information");
+		}
 	}
 
 	private async Task OnValidSubmit()
@@ -132,6 +140,7 @@ public partial class CreateServer : ComponentBase
 	private async Task FetchMinecraftVersions(ServerSoftwares software = ServerSoftwares.Paper)
 	{
 		_minecraftVersions = await _infoFetchers[software].FetchAvailableMinecraftVersionsAsync();
+		_errorMessage = string.Empty;
 	}
 
 	private async Task FetchAvailableBuilds(string minecraftVersion)
@@ -144,6 +153,7 @@ public partial class CreateServer : ComponentBase
 		}
 
 		_availableBuilds = await _infoFetchers[software].FetchAvailableBuildsAsync(minecraftVersion);
+		_errorMessage = string.Empty;
 	}
 
 	private async Task SoftwareSelectionChanged(ChangeEventArgs args)
@@ -155,8 +165,16 @@ public partial class CreateServer : ComponentBase
 			return;
 		}
 
-		await FetchMinecraftVersions((ServerSoftwares)software);
-		await FetchAvailableBuilds(_minecraftVersions[0]);
+		try
+		{
+			await FetchMinecraftVersions((ServerSoftwares)software);
+			await FetchAvailableBuilds(_minecraftVersions[0]);
+		}
+		catch (Exception ex)
+		{
+			_errorMessage = ex.Message;
+			Logger.LogError(ex, "An error occurred while fetching Minecraft software version");
+		}
 	}
 
 	private async Task MinecraftVersionChanged(ChangeEventArgs args)
@@ -168,7 +186,15 @@ public partial class CreateServer : ComponentBase
 			return;
 		}
 
-		await FetchAvailableBuilds(version);
+		try
+		{
+			await FetchAvailableBuilds(version);
+		}
+		catch (Exception ex)
+		{
+			_errorMessage = ex.Message;
+			Logger.LogError(ex, "An error occurred while fetching software build list");
+		}
 	}
 
 	private void SetTargetFolderPreview(string path, string folderName)

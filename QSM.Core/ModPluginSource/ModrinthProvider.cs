@@ -179,6 +179,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 			Name = project.title!,
 			Owner = project.author,
 			Slug = project.slug!,
+			Id = project.project_id,
 			DownloadCount = (uint)project.downloads,
 			LicenseUrl = project.license.StartsWith("LicenseRef")
 				? string.Empty

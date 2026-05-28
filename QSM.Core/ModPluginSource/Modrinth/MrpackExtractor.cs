@@ -6,25 +6,21 @@ using HashAlgorithm = QSM.Core.Utilities.HashAlgorithm;
 
 namespace QSM.Core.ModPluginSource.Modrinth;
 
-public static class MrpackExtractor
+public class MrpackExtractor(IHttpClientFactory factory)
 {
-	public static async IAsyncEnumerable<MrpackOperation> Install(string file, string temp, string dest)
+	public async IAsyncEnumerable<MrpackOperation> Install(string file, string temp, string dest)
 	{
 		(MrpackModrinthIndex Index, string ExtractLocation) extractResult = await ExtractAsync(file, temp);
 
 		IAsyncEnumerable<MrpackOperation> downloader = DownloadMods(extractResult.Index, dest);
 
 		await foreach (MrpackOperation op in downloader)
-		{
 			yield return op;
-		}
 
 		IEnumerable<MrpackOperation> copyOperation = CopyOverrides(extractResult.ExtractLocation, dest);
 
 		foreach (MrpackOperation op in copyOperation)
-		{
 			yield return op;
-		}
 
 		Directory.Delete(extractResult.ExtractLocation, true);
 	}
@@ -53,13 +49,12 @@ public static class MrpackExtractor
 		MrpackModrinthIndex? index =
 			await JsonSerializer.DeserializeAsync(indexStream, MrpackContext.Default.MrpackModrinthIndex);
 
-		if (index is null)
-		{
-			Directory.Delete(dest, true);
-			throw new MrpackException("The .mrpack does not contain a valid modrinth.index.json file.");
-		}
+		if (index is not null)
+			return (index, dest);
 
-		return (index, dest);
+		Directory.Delete(dest, true);
+		throw new MrpackException("The .mrpack does not contain a valid modrinth.index.json file.");
+
 	}
 
 	public static Queue<FileDownloadRequest> GetModList(MrpackModrinthIndex index, string dest)
@@ -95,28 +90,24 @@ public static class MrpackExtractor
 		return downloads;
 	}
 
-	public static async IAsyncEnumerable<MrpackOperation> DownloadMods(MrpackModrinthIndex index, string dest)
+	public async IAsyncEnumerable<MrpackOperation> DownloadMods(MrpackModrinthIndex index, string dest)
 	{
 		foreach (MrpackFile fileInfo in index.Files)
 		{
 			if (fileInfo.Env["server"] == "unsupported")
-			{
 				continue;
-			}
 
 			string fullPath = Path.GetFullPath(fileInfo.Path, dest);
 
 			// Check if the full path escapes out of the Minecraft server instance directory
 			if (!fullPath.StartsWith(dest))
-			{
 				continue;
-			}
 
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 
 			foreach (string download in fileInfo.Downloads)
 			{
-				IAsyncEnumerable<MrpackOperation> enumerable = DownloadFile(download, fullPath);
+				IAsyncEnumerable<MrpackOperation> enumerable = DownloadFile(download, fullPath, fileInfo.Hashes["sha512"]);
 				bool error = false;
 
 				await foreach (MrpackOperation op in enumerable)
@@ -130,20 +121,9 @@ public static class MrpackExtractor
 					yield return op;
 				}
 
+				// Try the next download URL if the file can't be downloaded
 				if (error)
-				{
-					// Try the next download URL if the file can't be downloaded
 					continue;
-				}
-
-				using SHA512 sha512 = SHA512.Create();
-				string hash = sha512.GetFileHashAsString(fullPath);
-
-				if (hash != fileInfo.Hashes["sha512"])
-				{
-					yield return new MrpackOperation("Checksum doesn't match!");
-					continue;
-				}
 
 				// Breaks out of the loop if the file is successfully downloaded
 				break;
@@ -170,9 +150,9 @@ public static class MrpackExtractor
 		}
 	}
 
-	public static async IAsyncEnumerable<MrpackOperation> DownloadFile(string url, string dest)
+	public async IAsyncEnumerable<MrpackOperation> DownloadFile(string url, string dest, string hash)
 	{
-		using HttpClient client = new();
+		using HttpClient client = factory.CreateClient();
 
 		using HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
@@ -202,12 +182,18 @@ public static class MrpackExtractor
 			await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
 			totalBytesRead += bytesRead;
 
-			if (totalBytes != -1)
-			{
-				double percentage = (double)totalBytesRead / totalBytes * 100;
-				yield return new MrpackOperation($"Downloading {fileName}...", percentage);
-			}
+			if (totalBytes == -1)
+				continue;
+
+			double percentage = (double)totalBytesRead / totalBytes * 100;
+			yield return new MrpackOperation($"Downloading {fileName}...", percentage);
 		}
+		
+		using SHA512 sha512 = SHA512.Create();
+		string localHash = sha512.GetFileHashAsString(dest);
+
+		if (localHash != hash)
+			yield return new MrpackOperation("Checksum doesn't match!", true);
 	}
 
 	public static void CopyDirectoryContents(DirectoryInfo source, DirectoryInfo dest)

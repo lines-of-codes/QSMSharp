@@ -1,0 +1,176 @@
+@page "/Server/{Id:int:min(0)}/ChangeVersion"
+@using Microsoft.EntityFrameworkCore
+@using ServerSettingsData = QSM.Core.ServerSettings.ServerSettings
+@using QSM.Core.ServerSoftware
+@using QSM.Web.Components.Shared
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+@inject ProcessManager ProcessManager
+
+<PageTitle>Change Version - QSM Web Console</PageTitle>
+
+<h3>Change Version</h3>
+
+<EditForm Model="Model" OnValidSubmit="FormSubmit">
+    <div class="row">
+        <div class="col-lg-3">
+            <strong>Software</strong>
+            <p>@_server.Software</p>
+        </div>
+        <div class="col-lg-3">
+            <strong>Current Version</strong>
+            <p>Build @_server.ServerVersion (@_server.MinecraftVersion)</p>
+        </div>
+    </div>
+
+    <strong>New Version</strong>
+    <p>While downgrading is possible, it is discouraged as the world data may be incompatible with the older version.</p>
+
+    <div class="row col-lg-6 mb-2">
+        <div class="col">
+            <strong>Minecraft Version</strong>
+            <InputSelect @bind-Value="Model!.MinecraftVersion" class="form-select" @onchange="OnMinecraftVersionChanged">
+                @foreach (var version in _minecraftVersions)
+                {
+                    <option value="@version">@version</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col">
+            <strong>Build</strong>
+            <InputSelect @bind-Value="Model!.Build" class="form-select">
+                @foreach (var build in _availableBuilds)
+                {
+                    <option value="@build">@build</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+    
+    <div class="form-check mb-3">
+        <InputCheckbox @bind-Value="Model.MakeBackup" id="makeBackup" class="form-check-input" />
+        <label for="makeBackup" class="form-check-label">Make a backup before upgrading</label>
+    </div>
+    
+    <p>
+        <strong>Note:</strong> Your server will be stopped.
+    </p>
+    
+    <button class="btn btn-primary" disabled="@_processing">Save</button>
+</EditForm>
+
+@if (_processing)
+{
+    <p>@_statusMessage</p>
+    <DownloadBar Name="server.jar" @ref="_downloadBar" />
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [SupplyParameterFromForm] public ChangeVersionModel? Model { get; set; }
+    private Dictionary<ServerSoftwares, InfoFetcher> _infoFetchers = null!;
+    private ServerInstance _server = new();
+    private DownloadBar _downloadBar = null!;
+    private string[] _minecraftVersions = [];
+    private string[] _availableBuilds = [];
+    private string _statusMessage = string.Empty;
+    private bool _processing;
+    
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+
+        var server = ctx.Servers.Find(Id);
+
+        if (server == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _server = server;
+
+        Model ??= new ChangeVersionModel
+        {
+            MinecraftVersion = _server.MinecraftVersion ?? string.Empty,
+            Build = _server.ServerVersion ?? string.Empty
+        };
+        
+        _infoFetchers = new Dictionary<ServerSoftwares, InfoFetcher>
+        {
+            { ServerSoftwares.Paper, new PaperMCFetcher("paper", HttpClientFactory) },
+            { ServerSoftwares.Purpur, new PurpurFetcher(HttpClientFactory) },
+            { ServerSoftwares.Vanilla, new VanillaFetcher(HttpClientFactory) },
+            { ServerSoftwares.Fabric, new FabricFetcher(HttpClientFactory) },
+            { ServerSoftwares.NeoForge, new NeoForgeFetcher(HttpClientFactory) },
+            { ServerSoftwares.Velocity, new PaperMCFetcher("velocity", HttpClientFactory) },
+            { ServerSoftwares.Folia, new PaperMCFetcher("folia", HttpClientFactory) },
+            { ServerSoftwares.Forge, new ForgeFetcher(HttpClientFactory) },
+            { ServerSoftwares.Quilt, new QuiltFetcher(HttpClientFactory) }
+        };
+
+        if (!server.Running || (ProcessManager.Processes.TryGetValue(server.Id, out var process) && !process.HasExited)) return;
+        server.Running = false;
+        ctx.Servers.Update(server);
+        ctx.SaveChanges();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchMinecraftVersions();
+        await FetchBuilds();
+    }
+
+    private async Task FetchBuilds(string? minecraftVersion = null)
+    {
+        _availableBuilds = await _infoFetchers[_server.Software].FetchAvailableBuildsAsync(minecraftVersion ?? Model!.MinecraftVersion);
+    }
+
+    private async Task FetchMinecraftVersions()
+    {
+        _minecraftVersions = await _infoFetchers[_server.Software].FetchAvailableMinecraftVersionsAsync();
+    }
+
+    public class ChangeVersionModel
+    {
+        public string MinecraftVersion { get; set; } = string.Empty;
+        public string Build { get; set; } = string.Empty;
+        public bool MakeBackup { get; set; } = true;
+    }
+
+    private async Task OnMinecraftVersionChanged(ChangeEventArgs changeEvent)
+    {
+        if (changeEvent.Value is string value)
+        {
+            await FetchBuilds(value);
+        }
+    }
+
+    private async Task FormSubmit()
+    {
+        _processing = true;
+        
+        if (_server.Running)
+        {
+            _statusMessage = "Stopping your server...";
+            StateHasChanged();
+            await ProcessManager.StopAsync(_server.Id);
+        }
+
+        _statusMessage = "";
+        var url = await _infoFetchers[_server.Software].GetDownloadUrlAsync(Model!.MinecraftVersion, Model.Build);
+        await _downloadBar.DownloadFileAsync(url, Path.Join(_server.ServerPath, "server.jar"));
+        
+        if (ServerSettingsData.TryLoadJson(_server.ConfigPath, out var settings))
+        {
+            settings!.FirstRun = true;
+            await settings.SaveJsonAsync(_server.ConfigPath);
+        }
+        
+        NavigationManager.NavigateTo($"Server/{Id}/");
+    }
+
+}

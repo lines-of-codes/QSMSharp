@@ -23,6 +23,7 @@
         <button class=@(_selectionMode ? "btn btn-danger" : "btn btn-primary") @onclick="SelectionModeToggle">
             @(_selectionMode ? "Exit " : "")Selection Mode
         </button>
+        <NavLink href=@($"/Server/{Id}/Mods/Add/Modrinth") class="btn btn-primary">Add</NavLink>
     </div>
 </div>
 

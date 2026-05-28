@@ -1,5 +1,4 @@
 @page "/Create/Modrinth"
-@using System.ComponentModel.DataAnnotations
 @using Ganss.Xss
 @using Markdig
 @using QSM.Core.ModPluginSource
@@ -8,8 +7,16 @@
 
 @inject ModrinthProvider Modrinth
 @inject MarkdownPipeline MarkPipe
+@inject ILogger<CreateModrinth> Logger
 
 <PageTitle>Import Modrinth Modpack - QSM Web Console</PageTitle>
+
+@if (_errorMessage != string.Empty)
+{
+    <div class="alert alert-danger" role="alert">
+        @_errorMessage
+    </div>
+}
 
 @if (_askMoreInfo)
 {
@@ -36,9 +43,9 @@ else if (_downloading)
 }
 else
 {
-    <EditForm Model="SearchForm" class="my-2" OnSubmit="SearchSubmit">
+    <EditForm Model="SearchQuery" class="my-2" OnSubmit="SearchSubmit">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search..." @bind="SearchForm!.Query" />
+            <input type="text" class="form-control" placeholder="Search..." @bind="SearchQuery" />
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </EditForm>
@@ -47,7 +54,7 @@ else
         <div class="col">
             @if (_modList.Length == 0)
             {
-                <div class="border text-center py-4">
+                <div class="border rounded text-center py-4">
                     No mods found.
                 </div>
             }
@@ -101,9 +108,9 @@ else
             </div>
             @if (_selectedMod != null && !_loadingContent)
             {
-                <EditForm Model="SelectModpackForm" OnValidSubmit="ModpackSubmit" class="mt-2">
+                <EditForm Model="SelectedModpackVersion" OnValidSubmit="ModpackSubmit" class="mt-2">
                     <div class="input-group">
-                        <InputSelect @bind-Value="SelectModpackForm!.Version" class="form-select">
+                        <InputSelect @bind-Value="SelectedModpackVersion" class="form-select">
                             @if (_downloadInfos == null || _downloadInfos.Length == 0)
                             {
                                 <option disabled>No versions available.</option>
@@ -125,8 +132,8 @@ else
 }
 
 @code {
-    [SupplyParameterFromForm] SearchFormModel? SearchForm { get; set; }
-    [SupplyParameterFromForm] SelectModpackModel? SelectModpackForm { get; set; }
+    [SupplyParameterFromForm] string? SearchQuery { get; set; }
+    [SupplyParameterFromForm] string? SelectedModpackVersion { get; set; }
     [SupplyParameterFromForm] CreationDataModel? CreationDataForm { get; set; }
 
     readonly HtmlSanitizer _sanitizer = new();
@@ -135,20 +142,11 @@ else
     ModPluginDownloadInfo[]? _downloadInfos;
     ModPluginDownloadInfo? _selectedVersion;
     MarkupString _selectedModDescription;
+    string _errorMessage = string.Empty;
     string _targetFolderPreview = string.Empty;
     bool _loadingContent;
     bool _askMoreInfo;
     bool _downloading;
-    
-    class SearchFormModel
-    {
-        public string Query { get; set; } = string.Empty;
-    }
-
-    class SelectModpackModel
-    {
-        [Required] public string Version { get; set; } = string.Empty;
-    }
 
     public class CreationDataModel
     {
@@ -158,19 +156,28 @@ else
 
     protected override void OnInitialized()
     {
-        SearchForm ??= new SearchFormModel();
-        SelectModpackForm ??= new SelectModpackModel();
+        SearchQuery ??= string.Empty;
+        SelectedModpackVersion ??= string.Empty;
         CreationDataForm ??= new CreationDataModel();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        _modList = await Modrinth.SearchAsync(projectType: ModrinthProvider.ProjectType.Modpack);
+        try
+        {
+            await SearchSubmit();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+            Logger.LogError(ex, "An error occurred while searching for modpacks");
+        }
     }
 
     private async Task SearchSubmit()
     {
-        _modList = await Modrinth.SearchAsync(null, SearchForm?.Query ?? string.Empty, ModrinthProvider.ProjectType.Modpack);
+        _modList = await Modrinth.SearchAsync(null, SearchQuery ?? string.Empty, ModrinthProvider.ProjectType.Modpack);
+        _errorMessage = string.Empty;
     }
 
     private async Task ModpackSelected(ushort index)
@@ -180,13 +187,13 @@ else
         _selectedModDescription = (MarkupString)_sanitizer.Sanitize(Markdown.ToHtml(_selectedMod.LongDescription, MarkPipe));
         _loadingContent = false;
         _downloadInfos = await Modrinth.GetVersionsAsync(_selectedMod.Slug);
-        SelectModpackForm?.Version = _downloadInfos[0].VersionId;
+        SelectedModpackVersion = _downloadInfos[0].VersionId;
     }
 
     private void ModpackSubmit()
     {
         _askMoreInfo = true;
-        _selectedVersion = _downloadInfos?.FirstOrDefault(info => info.VersionId == SelectModpackForm?.Version);
+        _selectedVersion = _downloadInfos?.FirstOrDefault(info => info.VersionId == SelectedModpackVersion);
         CreationDataForm!.Name = _selectedMod?.Name ?? string.Empty;
         CreationDataForm.Path = Path.Join(ApplicationConfig.GetDefaultAppDataFolder(), "servers");
         SetTargetFolderPreview(CreationDataForm.Path, CreationDataForm.Name);
@@ -199,7 +206,7 @@ else
 
     private void NameInputChanged(ChangeEventArgs args)
     {
-        string? newName = (string?)args.Value;
+        var newName = (string?)args.Value;
 
         if (newName == null)
         {
@@ -211,7 +218,7 @@ else
 
     private void PathInputChanged(ChangeEventArgs args)
     {
-        string? newPath = (string?)args.Value;
+        var newPath = (string?)args.Value;
 
         if (newPath == null)
         {
