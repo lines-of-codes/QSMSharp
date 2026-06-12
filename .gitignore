@@ -399,7 +399,7 @@ FodyWeavers.xsd
 
 !/QSM.Core/Backups
 
-/QSM.Web/Data/app.db
+/QSM.Web/Data/app.db*
 /QSM.Web/status/*
 
 # Inno Setup Output

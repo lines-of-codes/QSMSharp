@@ -8,6 +8,10 @@ export default defineConfig({
     integrations: [
         starlight({
             title: "QSM",
+            logo: {
+                src: "./src/assets/QSMSharp_medium_wordmark.svg",
+                replacesTitle: true,
+            },
             customCss: ["./src/styles/custom.css"],
             social: [
                 {
@@ -31,17 +35,16 @@ export default defineConfig({
             },
             sidebar: [
                 {
-                    label: "Common Guides",
-                    translations: {
-                        th: "ไกด์ทั่วไป",
-                        lc: "Commwon Gwuide",
-                    },
+                    label: "QSMSharp",
                     items: [
                         {
                             slug: "common/guides/introduction",
                         },
                         {
                             slug: "common/guides/choosing-a-software",
+                        },
+                        {
+                            slug: "common/guides/logo",
                         },
                     ],
                 },
