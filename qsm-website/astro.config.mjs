@@ -9,7 +9,8 @@ export default defineConfig({
         starlight({
             title: "QSM",
             logo: {
-                src: "./src/assets/QSMSharp_medium_wordmark.svg",
+                light: "./src/assets/QSMSharp_medium_wordmark.svg",
+                dark: "./src/assets/QSMSharp_medium_light_wordmark.svg",
                 replacesTitle: true,
             },
             customCss: ["./src/styles/custom.css"],
