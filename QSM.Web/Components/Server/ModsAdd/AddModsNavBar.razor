@@ -1,3 +1,10 @@
+@using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSoftware
+@using QSM.Web.Data
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavMan
+
 <div class="nav nav-tabs justify-content-between align-items-center">
     <ul class="nav d-flex">
         <li class="nav-item">
@@ -6,9 +13,12 @@
         <li class="nav-item">
             <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/CurseForge")">CurseForge</NavLink>
         </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/PaperMCHangar")">PaperMC Hangar</NavLink>
-        </li>
+        @if (_software is ServerSoftwares.Paper or ServerSoftwares.Velocity)
+        {
+            <li class="nav-item">
+                <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/PaperMCHangar")">PaperMC Hangar</NavLink>
+            </li>
+        }
         <li class="nav-item">
             <NavLink class="nav-link" href="@($"/Server/{Id}/Mods/Add/Upload")">Upload</NavLink>
         </li>
@@ -21,5 +31,22 @@
 @code {
 
     [Parameter] public int Id { get; set; }
+
+    ServerSoftwares _software;
+
+    protected override void OnInitialized()
+    {
+        using var ctx = DbFactory.CreateDbContext();
+
+        var server = ctx.Find<ServerInstance>(Id);
+
+        if (server == null)
+        {
+            NavMan.NavigateTo("/");
+            return;
+        }
+        
+        _software = server.Software;
+    }
 
 }

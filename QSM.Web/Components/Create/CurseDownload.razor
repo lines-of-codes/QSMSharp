@@ -21,7 +21,7 @@
 
 <NavigationLock OnBeforeInternalNavigation="InternalLocationChange" ConfirmExternalNavigation="true" />
 <p id="actionDescription">@_currentAction</p>
-    
+
 @if (_showIndeterminate)
 {
     <progress aria-labelledby="actionDescription"></progress>
@@ -36,6 +36,23 @@ else
     }
 }
 
+@if (_finishedDownloading && _missingMods.Length > 0)
+{
+    <h1>Missing mods</h1>
+    <p>
+        The following mods can't be downloaded due to the author blocking 
+        third-party launchers in CurseForge.
+    </p>
+    <ul>
+        @foreach (var mod in _missingMods)
+        {
+            <li><a href=@mod.Url>@mod.Name</a></li>
+        }
+    </ul>
+    <button class="btn btn-primary" @onclick="OpenMissing">Open Missing <i class="bi bi-box-arrow-up-right" aria-label="External link"></i></button>
+    <a class="btn btn-secondary" href="/">Continue</a>
+}
+
 @code {
     private SemaphoreSlim _downloadSemaphore = null!;
 
@@ -46,6 +63,7 @@ else
     bool _finishedDownloading;
     string _currentAction = string.Empty;
     readonly List<DownloadProgress> _downloadProgress = [];
+    CurseMissingMod[] _missingMods = [];
     /// <summary>
     /// Whether to show an indeterminate progress bar instead
     /// </summary>
@@ -217,6 +235,7 @@ else
         StateHasChanged();
         var downloadList = await Curse.GetDownloadQueueFromManifest(manifest, ServerPath);
         var listLockObj = new object();
+        _missingMods = downloadList.Skipped;
         
         _downloadProgress.Clear();
 
@@ -271,6 +290,18 @@ else
         }
 
         _finishedDownloading = true;
+
+        if (_missingMods.Length > 0) return;
+        
         NavMan.NavigateTo("/");
     }
+
+    private void OpenMissing()
+    {
+        foreach (var mod in _missingMods)
+        {
+            Js.InvokeVoidAsync("open", mod.Url, "_blank", "noreferrer");
+        }
+    }
+
 }

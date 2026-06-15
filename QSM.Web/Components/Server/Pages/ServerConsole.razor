@@ -13,10 +13,13 @@
 
 <div class="overflow-auto" id="outputList">
     <pre>
-    @foreach (var entry in _outputList)
-    {
-        <div class=@(entry.Type == ProcessManager.OutputType.Error ? "text-danger" : "")>@entry.Message</div>
-    }
+        @lock (_outputLock)
+        {
+            foreach (var entry in _outputList)
+            {
+                <div class=@(entry.Type == ProcessManager.OutputType.Error ? "text-danger" : "")>@entry.Message</div>
+            }
+        }
     </pre>
 </div>
 
@@ -34,11 +37,12 @@
 @code {
     [Parameter] public int Id { get; set; }
     [SupplyParameterFromForm] private InputModel? Input { get; set; }
+    
+    private readonly Lock _outputLock = new();
     private List<ProcessManager.OutputCache> _outputList = [];
     private Timer? _updateTimer;
     private bool _outputListModified;
     private bool _outputListened;
-    private bool _outputFirstAdded;
 
     protected override void OnInitialized()
     {
@@ -48,15 +52,19 @@
 
         if (!outputListExist) return;
 
-        _outputList = outputList!;
+        lock (_outputLock)
+        {
+            _outputList = outputList!;
+        }
 
-        _updateTimer = new Timer(UpdatePendingOutput, null, 100, 100);
+        _updateTimer = new Timer(UpdatePendingOutput, null, 300, 300);
     }
 
     private void UpdatePendingOutput(object? state)
     {
         if (!_outputListModified) return;
-        
+
+        Logger.LogInformation("{thing}", _outputList);
         InvokeAsync(async () =>
         {
             StateHasChanged();
@@ -68,12 +76,10 @@
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender) return;
-        
-        if (!_outputListened)
-        {
-            ProcessManager.OutputReceived += OnOutputReceived;
-            _outputListened = true;
-        }
+
+        if (_outputListened) return;
+        ProcessManager.OutputReceived += OnOutputReceived;
+        _outputListened = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -87,16 +93,11 @@
         {
             if (serverId != Id) return;
             
-            // This check has to be added because for an unknown reason, This 
-            // is called twice even though only one event listener is added.
-            if (!_outputFirstAdded)
+            lock (_outputLock)
             {
                 _outputList.Add(newOutput);
-                _outputFirstAdded = true;
-                _outputListModified = true;
             }
-            else
-                _outputFirstAdded = false;
+            _outputListModified = true;
         }
         catch (Exception e)
         {

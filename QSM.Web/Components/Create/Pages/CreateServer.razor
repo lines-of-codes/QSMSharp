@@ -51,7 +51,14 @@
             {
                 <div class="mb-3">
                     <label for="ServerFile">Server File (.jar)</label>
-                    <InputFile class="form-control" id="ServerFile" accept=".jar"></InputFile>
+                    <InputFile class="form-control" id="ServerFile" accept=".jar" OnChange="HandleFileChange" />
+                    <span class="text-secondary">
+                        Up to 100 MiB,
+                        <a href="https://linesofcodes.dailitation.xyz/QSMSharp/qsmweb/reference/custom-software/" target="_blank">
+                            Learn more about limitations 
+                            <i class="bi bi-box-arrow-up-right" aria-label="External link" role="img" style="font-size: 0.8em"></i>
+                        </a>
+                    </span>
                 </div>
             }
             else
