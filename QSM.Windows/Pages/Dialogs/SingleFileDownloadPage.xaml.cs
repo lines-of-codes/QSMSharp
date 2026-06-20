@@ -40,7 +40,7 @@ public sealed partial class SingleFileDownloadPage : Page
 	public void UpdateProgress(double percentage, long totalBytesRead, long totalBytes)
 	{
 		DownloadProgressBar.Value = percentage;
-		DownloadProgressText.Text = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
+		DownloadProgressText.Text = $"Downloaded {SizeUnitConversion.BytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.BytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
 	}
 
 	public void DownloadComplete()

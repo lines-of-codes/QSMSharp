@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using QSM.Core.ModPluginSource;
 using QSM.Core.ModPluginSource.Modrinth;
 using QSM.Core.ServerSettings;
 using QSM.Core.ServerSoftware;
@@ -60,7 +61,7 @@ public sealed partial class ImportLocalPage : Page
 		Directory.CreateDirectory(serverDir);
 
 		var extractResult = await MrpackExtractor.ExtractAsync(selected, tempDir);
-		var downloader = MrpackExtractor.DownloadMods(extractResult.Index, serverDir);
+		var downloader = new MrpackExtractor(Program.Hoster.Services.GetService<IHttpClientFactory>()).DownloadMods(extractResult.Index, serverDir);
 
 		await foreach (var operation in downloader)
 		{

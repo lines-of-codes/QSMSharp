@@ -20,21 +20,21 @@
         
         <TextBox
             x:Name="BackupNameInput"
-            Header="Backup Name:"
+            x:Uid="/Server/BackupNameInput"
             Grid.ColumnSpan="2" />
         
         <ComboBox 
             x:Name="ArchiveFormatSelector" 
+            x:Uid="/Server/ArchiveFormatSelector"
             Grid.Row="1"
-            Header="Archive Format:"
             ItemsSource="{x:Bind _archiveFormats, Mode=OneTime}"
             SelectionChanged="ArchiveFormatSelector_SelectionChanged" />
         
         <ComboBox 
             x:Name="CompressionSelector"
+            x:Uid="/Server/CompressionSelector"
             Grid.Row="1"
             Grid.Column="1"
-            Header="Compression:"
             ItemsSource="{x:Bind _compressionFormats}" />
     </Grid>
 </Page>

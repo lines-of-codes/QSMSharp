@@ -1,12 +1,15 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.ApplicationModel.Resources;
 using QSM.Core.Backups;
 using QSM.Core.ServerSoftware;
 using QSM.Windows.Pages.Dialogs;
 using QSM.Windows.Utilities;
+using Serilog;
 using System;
 using System.IO;
 using Visus.Cuid;
+using WinRT.QSM_WindowsVtableClasses;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,7 +27,7 @@ public sealed partial class ServerBackupsPage : Page
 
 	public ServerBackupsPage()
 	{
-		this.InitializeComponent();
+		InitializeComponent();
 	}
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -33,10 +36,21 @@ public sealed partial class ServerBackupsPage : Page
 		_metadata = ApplicationData.Configuration.Servers[_metadataIndex];
 		_backups.AddRange(ApplicationData.ServerSettings[_metadata.Guid].Backups);
 
+		foreach(var backup in _backups)
+		{
+			if (backup.IsSavedOnline) continue;
+			try
+			{
+				backup.Size = new FileInfo(backup.Uri.LocalPath).Length;
+			} catch(IOException ex)
+			{
+				Log.Warning(ex, "Backup size querying failed");
+			}
+		}
+
 		base.OnNavigatedTo(e);
 	}
 
-	// skipcq: CS-R1005
 	private async void NewBackupButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		var createPage = new BackupCreationPage();
@@ -49,6 +63,12 @@ public sealed partial class ServerBackupsPage : Page
 			return;
 
 		string name = createPage.BackupName;
+
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			name = $"Backup{DateTime.UtcNow:d}";
+		}
+
 		ArchiveFormat archive = createPage.SelectedArchiveFormat;
 		CompressionFormat compression = createPage.SelectedCompression;
 
@@ -62,11 +82,12 @@ public sealed partial class ServerBackupsPage : Page
 
 		var progressPage = new SingleFileDownloadPage();
 
-		dialog = progressPage.CreateDialog(this, "Compressing files...");
+		var loader = new ResourceLoader("QSM.Windows.pri", "Server");
+		dialog = progressPage.CreateDialog(this, loader.GetString("/CompressingFiles"));
 
 		_ = dialog.ShowAsync();
 
-		progressPage.SetOperation("Compressing files...");
+		progressPage.SetOperation(loader.GetString("/CompressingFiles"));
 
 		await Compressor.CompressFolderAsync(
 			_metadata.ServerPath,
@@ -86,7 +107,6 @@ public sealed partial class ServerBackupsPage : Page
 		_backups.Add(backupItem);
 	}
 
-	// skipcq: CS-R1005
 	private async void DeleteBackupButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 	{
 		if (BackupList.SelectedItem == null) return;

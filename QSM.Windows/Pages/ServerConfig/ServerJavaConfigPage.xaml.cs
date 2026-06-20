@@ -50,7 +50,7 @@ public sealed partial class ServerJavaConfigPage : Page
 		this.InitializeComponent();
 
 		GetPhysicallyInstalledSystemMemory(out long totalMem);
-		double maxMemGb = Math.Round(SizeUnitConversion.kilobytesToGigabytes(totalMem) * 2, MidpointRounding.AwayFromZero) / 2 - MaxMemoryOffset;
+		double maxMemGb = Math.Round(SizeUnitConversion.KilobytesToGigabytes(totalMem) * 2, MidpointRounding.AwayFromZero) / 2 - MaxMemoryOffset;
 
 		InitMemorySizeSlider.Maximum = maxMemGb;
 		MaxMemorySizeSlider.Maximum = maxMemGb;

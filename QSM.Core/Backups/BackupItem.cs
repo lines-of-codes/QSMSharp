@@ -1,4 +1,5 @@
-﻿using Visus.Cuid;
+﻿using System.Text.Json.Serialization;
+using Visus.Cuid;
 
 namespace QSM.Core.Backups;
 
@@ -43,4 +44,7 @@ public class BackupItem
 	public Uri Uri { get; set; }
 
 	public bool IsSavedOnline { get; set; }
+
+	[JsonIgnore]
+	public long Size { get; set; }
 }

@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.ApplicationModel.Resources;
 using Serilog;
 using System;
 using System.IO;
@@ -19,6 +20,7 @@ public sealed partial class ModListPage : Page
 {
 	int _metadataIndex;
 	string _modsFolderPath;
+	System.Collections.Generic.List<string> _allMods = [];
 	readonly ExtendedObservableCollection<string> _mods = [];
 
 	public ModListPage()
@@ -30,6 +32,12 @@ public sealed partial class ModListPage : Page
 	{
 		_metadataIndex = (int)e.Parameter;
 		var metadata = ApplicationData.Configuration.Servers[_metadataIndex];
+
+		if (ServerProcessManager.Instance.Processes.TryGetValue(metadata.Guid, out var process) && !process.HasExited)
+		{
+			RemoveButton.IsEnabled = false;
+			TurnOffModWarning.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+		}
 
 		if (metadata.IsModSupported)
 			_modsFolderPath = Path.Combine(metadata.ServerPath, "mods");
@@ -45,8 +53,10 @@ public sealed partial class ModListPage : Page
 
 		foreach (var fsEntry in fsEntries)
 		{
-			_mods.Add(Path.GetFileName(fsEntry));
+			_allMods.Add(Path.GetFileName(fsEntry));
 		}
+
+		_mods.AddRange(_allMods);
 
 		Directory.CreateDirectory(_modsFolderPath);
 
@@ -60,6 +70,7 @@ public sealed partial class ModListPage : Page
 		File.Delete(Path.Combine(_modsFolderPath, selected));
 
 		_mods.Remove(selected);
+		_allMods.Remove(selected);
 	}
 
 	private async void AddButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -82,6 +93,20 @@ public sealed partial class ModListPage : Page
 			Log.Debug("Copying \"{FileName}\"...", file.Name);
 			await file.CopyAsync(targetFolder);
 			_mods.Add(file.Name);
+			_allMods.Add(file.Name);
 		}
+	}
+
+	private void SearchFileBox_TextChanged(object sender, TextChangedEventArgs e)
+	{
+		_mods.Clear();
+
+		if (string.IsNullOrWhiteSpace(SearchFileBox.Text))
+		{
+			_mods.AddRange(_allMods);
+			return;
+		}
+
+		_mods.AddRange(_allMods.FindAll(v => v.Contains(SearchFileBox.Text, StringComparison.OrdinalIgnoreCase)));
 	}
 }

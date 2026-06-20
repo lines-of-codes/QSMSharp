@@ -204,4 +204,34 @@
   <data name="EulaNoticeTitle" xml:space="preserve">
     <value>หมายเหตุ EULA</value>
   </data>
+  <data name="TurnOffModWarning.Text" xml:space="preserve">
+    <value>กรุณาปิดเซิร์ฟเวอร์ก่อนเพิ่มหรือลบม็อด</value>
+  </data>
+  <data name="SearchFileButton.Label" xml:space="preserve">
+    <value>ค้นหา</value>
+  </data>
+  <data name="SearchFileBox.PlaceholderText" xml:space="preserve">
+    <value>ค้นหา...</value>
+  </data>
+  <data name="CompressingFiles" xml:space="preserve">
+    <value>กำลังบีบอัดไฟล์...</value>
+  </data>
+  <data name="SizeLabel.Text" xml:space="preserve">
+    <value>ขนาด</value>
+  </data>
+  <data name="BackupNameInput.Header" xml:space="preserve">
+    <value>ชื่อแบ็คอัพ:</value>
+  </data>
+  <data name="BackupNameInput.PlaceholderText" xml:space="preserve">
+    <value>(ไม่บังคับ)</value>
+  </data>
+  <data name="ArchiveFormatSelector.Header" xml:space="preserve">
+    <value>รูปแบบอาร์ไคฟ์:</value>
+  </data>
+  <data name="CompressionSelector.Header" xml:space="preserve">
+    <value>การบีบอัด:</value>
+  </data>
+  <data name="BackupCreationTitle" xml:space="preserve">
+    <value>สร้างแบ็คอัพ</value>
+  </data>
 </root>

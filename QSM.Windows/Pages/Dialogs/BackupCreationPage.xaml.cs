@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using QSM.Core.Backups;
 using System;
 
@@ -49,13 +50,15 @@ public sealed partial class BackupCreationPage : Page
 
 	public ContentDialog CreateDialog(Page page)
 	{
+		ResourceLoader server = new("QSM.Windows.pri", "Server");
+		ResourceLoader common = new("QSM.Windows.pri", "Common");
 		ContentDialog dialog = new()
 		{
 			XamlRoot = page.XamlRoot,
 			Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
-			Title = "Create backup",
-			PrimaryButtonText = "Create",
-			SecondaryButtonText = "Cancel",
+			Title = server.GetString("/BackupCreationTitle"),
+			PrimaryButtonText = common.GetString("/Create"),
+			SecondaryButtonText = common.GetString("/Cancel"),
 			IsPrimaryButtonEnabled = true,
 			IsSecondaryButtonEnabled = true,
 			DefaultButton = ContentDialogButton.Primary,
