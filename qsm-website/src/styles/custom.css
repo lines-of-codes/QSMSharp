@@ -2,3 +2,12 @@
 starlight-theme-select select {
     --sl-select-width: 6rem;
 }
+
+figure > img {
+    margin: auto;
+}
+
+figcaption {
+    text-align: center;
+    color: gray;
+}

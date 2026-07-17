@@ -14,5 +14,7 @@ public sealed partial class MainWindow : Window
 	{
 		this.InitializeComponent();
 		Title = "QSM";
+
+		AppWindow.SetIcon(@"Assets\QSMSharp_small.ico");
 	}
 }

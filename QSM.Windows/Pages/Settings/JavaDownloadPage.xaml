@@ -9,7 +9,14 @@
     mc:Ignorable="d"
     Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}">
 
-    <StackPanel Spacing="8" Margin="50,16">
+    <Grid RowSpacing="8" Margin="50,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
         <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock x:Uid="/JavaManager/JavaProvider" VerticalAlignment="Center" />
             <ComboBox
@@ -24,7 +31,7 @@
         <SplitView 
             IsPaneOpen="True"
             DisplayMode="Inline"
-            MaxHeight="350">
+            Grid.Row="1">
             <SplitView.Pane>
                 <ListView 
                     x:Name="MajorReleaseSelector" 
@@ -39,13 +46,14 @@
                 ItemsSource="{x:Bind _jreReleases, Mode=OneWay}"></ListView>
         </SplitView>
 
-        <TextBlock x:Uid="/JavaManager/TermsText" x:Name="TermsText" />
+        <TextBlock x:Uid="/JavaManager/TermsText" x:Name="TermsText" Grid.Row="2" />
 
 		<Button 
             x:Name="DownloadButton"
             x:Uid="/Common/Download"
             Click="DownloadButton_Click"
             Style="{StaticResource AccentButtonStyle}" 
+            Grid.Row="3"
             Margin="0,8,0,0" />
-	</StackPanel>
+	</Grid>
 </Page>

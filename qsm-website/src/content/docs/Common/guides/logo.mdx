@@ -1,0 +1,41 @@
+---
+title: Logo
+description: About QSM's logo
+---
+
+import { Image } from 'astro:assets';
+import QSMSmall from "@assets/QSMSharp_small.svg";
+import QSMMedium from "@assets/QSMSharp_medium.svg";
+import QSMMediumMark from "@assets/QSMSharp_medium_wordmark.svg";
+import QSMLarge from "@assets/QSMSharp_large.svg";
+
+While I am not a logo designer, I am trying my best.
+
+There are 3 variants of the logo, small, medium, and large. The large variant
+is rarely used, but it is the first iteration of the logo.
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <Image src={QSMSmall} alt="Small logo" height="200" />
+    <Image src={QSMMedium} alt="Medium logo" height="200" />
+    <Image src={QSMLarge} alt="Large logo" height="200" />
+</div>
+
+The small logo is used on the icon of this site, while the medium is used on 
+the hero of the home page, and the large logo is used... nowhere besides this page.
+
+<figure>
+    <Image src={QSMMediumMark} alt="QSM medium logo with wordmark" height="200" style="background: white;" />
+    <figcaption>The medium logo with a wordmark</figcaption>
+</figure>
+
+The medium logo is the only one with the wordmark variant, specifically used 
+for the navigation bar of this site.
+
+The logo and wordmark makes use of my favorite font, [Inter](https://rsms.me/inter/)
+(specifically version 4.1)
+
+The logos can be downloaded in various variants and formats from 
+https://github.com/lines-of-codes/QSMSharp/tree/master/icon
+
+The logo is created in Inkscape. File names ended with `_inkscape.svg` is an 
+Inkscape SVG file.

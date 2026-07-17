@@ -1,6 +1,7 @@
 @page "/Server/{Id:int:min(0)}"
 @implements IDisposable
 
+@using System.Text
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
@@ -23,7 +24,7 @@
     }
 
     <h1>@_server.Name</h1>
-    <p>@_server.Software (@(string.IsNullOrWhiteSpace(_server.ServerVersion) ? "" : $"Build {_server.ServerVersion} for ")Minecraft @_server.MinecraftVersion)</p>
+    <p>@(GetServerSoftwareText())</p>
     
     
     <div id="eulaConfirmDialog" class="alert alert-primary" hidden="@(!_eulaPrompt)">
@@ -262,6 +263,29 @@
     {
         _eulaPrompt = false;
         await StopButtonClicked();
+    }
+
+    private string GetServerSoftwareText()
+    {
+        StringBuilder sb = new();
+
+        sb.Append(_server.Software.ToString());
+
+        if (!string.IsNullOrEmpty(_server.ServerVersion))
+        {
+            sb.Append(" (Build ");
+            sb.Append(_server.ServerVersion);
+        }
+
+        if (_server.MinecraftVersion == null) return sb.ToString();
+        
+        sb.Append(string.IsNullOrEmpty(_server.ServerVersion) ? " (" : " for ");
+
+        sb.Append("Minecraft ");
+        sb.Append(_server.MinecraftVersion);
+        sb.Append(")");
+
+        return sb.ToString();
     }
 
 }

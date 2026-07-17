@@ -126,6 +126,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>ยกเลิก</value>
   </data>
+  <data name="Create" xml:space="preserve">
+    <value>สร้าง</value>
+  </data>
   <data name="DisagreeTerms" xml:space="preserve">
     <value>ไม่ยอมรับ</value>
   </data>

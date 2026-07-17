@@ -55,13 +55,13 @@
         }
         catch (HttpRequestException ex)
         {
-            Log.Warning("{}", ex.Message);
+            Log.Warning(ex, "An error occurred while fetching a mod, retrying...");
             await Task.Delay(1000);
             return await DownloadFileAsync(url, dest);
         }
         catch (IOException ex)
         {
-            Log.Warning("{}", ex.Message);
+            Log.Warning(ex, "An error occurred while saving a mod, retrying...");
             await Task.Delay(1000);
             return await DownloadFileAsync(url, dest);
         }

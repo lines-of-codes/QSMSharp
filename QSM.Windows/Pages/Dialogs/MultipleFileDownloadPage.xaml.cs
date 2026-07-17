@@ -176,7 +176,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 				entry.Percentage = percentage;
 				entry.TotalBytesRead = totalBytesRead;
 				entry.TotalBytes = totalBytes;
-				entry.ProgressText = $"Downloaded {SizeUnitConversion.bytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.bytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
+				entry.ProgressText = $"Downloaded {SizeUnitConversion.BytesToAppropriateUnit(totalBytesRead)} of {SizeUnitConversion.BytesToAppropriateUnit(totalBytes)} ({percentage:0.00}%)";
 
 				DispatcherQueue.TryEnqueue(() => Files[index] = entry);
 			}

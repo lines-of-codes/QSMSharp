@@ -5,10 +5,11 @@
 #include "CodeDependencies.iss"
 
 #define MyAppName "QSM.Windows"
-#define MyAppVersion "1.3.0"
+#define MyAppVersion "1.3.1"
 #define MyAppPublisher "Satakun Utama"
 #define MyAppURL "https://linesofcodes.dailitation.xyz/QSMSharp/"
 #define MyAppExeName "QSM.Windows.exe"
+#define ProjectRoot "D:\VisualStudio\Projects\lines-of-codes\QSMSharp"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -32,7 +33,7 @@ ArchitecturesAllowed=x64compatible
 ; the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
-LicenseFile=C:\Users\Satakun Utama\Downloads\gpl-3.0.rtf
+LicenseFile="{#GetEnv("USERPROFILE")}\Downloads\gpl-3.0.rtf"
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
@@ -47,8 +48,8 @@ WizardStyle=modern dynamic
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Satakun Utama\QSMSharp\QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Satakun Utama\QSMSharp\QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#ProjectRoot}\QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#ProjectRoot}\QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

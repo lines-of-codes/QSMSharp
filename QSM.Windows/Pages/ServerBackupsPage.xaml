@@ -9,6 +9,10 @@
     xmlns:backups="using:QSM.Core.Backups"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <local:DataUnitConverter x:Key="DataUnitConverter" />
+    </Page.Resources>
+
     <StackPanel>
         <CommandBar DefaultLabelPosition="Right">
             <AppBarButton 
@@ -30,6 +34,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="160" />
                     </Grid.ColumnDefinitions>
 
@@ -39,8 +44,11 @@
                                x:Uid="/Server/NameLabel"
                                Grid.Column="1" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               x:Uid="/Server/DateLabel"
+                               x:Uid="/Server/SizeLabel"
                                Grid.Column="2" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               x:Uid="/Server/DateLabel"
+                               Grid.Column="3" />
                 </Grid>
             </ListView.Header>
             <ListView.ItemTemplate>
@@ -49,12 +57,14 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="80" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="80" />
                             <ColumnDefinition Width="160" />
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Text="{x:Bind Id}" />
                         <TextBlock Text="{x:Bind Name}" Grid.Column="1" />
-                        <TextBlock Text="{x:Bind SavedDate}" Grid.Column="2" />
+                        <TextBlock Text="{x:Bind Size, Converter={StaticResource DataUnitConverter}}" Grid.Column="2" />
+                        <TextBlock Text="{x:Bind SavedDate}" Grid.Column="3" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

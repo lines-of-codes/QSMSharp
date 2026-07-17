@@ -1,0 +1,88 @@
+@page "/Create/Import"
+
+<PageTitle>Import - QSM Web Console</PageTitle>
+
+<h1>Import</h1>
+
+<span>Accepts:</span>
+
+<ul>
+    <li>Modrinth modpacks (.mrpack)</li>
+    <li>CurseForge modpacks (.zip)</li>
+    <li>Minecraft server archive (.zip, .tar.*, .7z, .rar)</li>
+</ul>
+
+<EditForm Model="Type">
+    <fieldset class="border rounded px-3 py-2 mb-4" style="width: fit-content;">
+        <legend class="float-none w-auto mb-0 px-1 fs-6">Source</legend>
+    
+        <InputRadioGroup Name="sourceType" @bind-Value="Type">
+            <div class="d-flex flex-wrap gap-4 px-1 pb-1">
+                <div class="form-check" title="A local file on your computer">
+                    <InputRadio class="form-check-input" Name="sourceType" id="sourceFile" Value="SourceType.File"/>
+                    <label class="form-check-label" for="sourceFile">File</label>
+                </div>
+                <div class="form-check" title="A remote file">
+                    <InputRadio class="form-check-input" Name="sourceType" id="sourceUrl" Value="SourceType.Url"/>
+                    <label class="form-check-label" for="sourceUrl">URL</label>
+                </div>
+                <div class="form-check" title="A file on the server">
+                    <InputRadio class="form-check-input" Name="sourceType" id="sourceHostFile" Value="SourceType.HostFile"/>
+                    <label class="form-check-label" for="sourceHostFile">Host File</label>
+                </div>
+                <div class="form-check" title="A folder on the server">
+                    <InputRadio class="form-check-input" Name="sourceType" id="sourceHostFolder" Value="SourceType.HostFolder"/>
+                    <label class="form-check-label" for="sourceHostFolder">Host Folder</label>
+                </div>
+            </div>
+        </InputRadioGroup>
+    </fieldset>
+</EditForm>
+
+<EditForm class="col-lg-6" Model="SourceData">
+    @switch (Type)
+    {
+        case SourceType.File:
+            <label>File</label>
+            <InputFile class="form-control" accept=".mrpack,.zip,.tar,.tar.gz,.tgz,.tar.bz2,.tb2,.tbz2,.tar.zst,*.tzst,.tar.lz,.tar.lzma,.tlz,.tar.xz,.txz,.7z,.rar" />
+            break;
+        case SourceType.Url:
+            <label>URL</label>
+            <InputText class="form-control" @bind-Value="SourceData"/>
+            break;
+        case SourceType.HostFile:
+            <label>Host File</label>
+            <InputText class="form-control" @bind-Value="SourceData"/>
+            <div class="form-text">Enter a path to a file on the server you wish to import</div>
+            break;
+        case SourceType.HostFolder:
+            <label>Host Folder</label>
+            <InputText class="form-control" @bind-Value="SourceData"/>
+            <div class="form-text">Enter a path to a folder on the server you wish to import</div>
+            break;
+        default:
+            throw new ArgumentOutOfRangeException(nameof(Type));
+    }
+    <button type="submit" class="mt-4 btn btn-primary">Import</button>
+</EditForm>
+
+@code {
+
+    enum SourceType
+    {
+        File,
+        Url,
+        HostFile,
+        HostFolder
+    }
+    
+    [SupplyParameterFromForm] private SourceType? Type { get; set; }
+    [SupplyParameterFromForm] private string? SourceData { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Type ??= SourceType.File;
+        SourceData ??= string.Empty;
+    }
+
+}

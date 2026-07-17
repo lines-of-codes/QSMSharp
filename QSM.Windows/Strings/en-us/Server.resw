@@ -204,4 +204,34 @@
   <data name="EulaNoticeTitle" xml:space="preserve">
     <value>EULA Notice</value>
   </data>
+  <data name="TurnOffModWarning.Text" xml:space="preserve">
+    <value>Please turn off the server before adding/disabling mods.</value>
+  </data>
+  <data name="SearchFileButton.Label" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchFileBox.PlaceholderText" xml:space="preserve">
+    <value>Search...</value>
+  </data>
+  <data name="CompressingFiles" xml:space="preserve">
+    <value>Compressing files...</value>
+  </data>
+  <data name="SizeLabel.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="BackupNameInput.Header" xml:space="preserve">
+    <value>Backup Name:</value>
+  </data>
+  <data name="BackupNameInput.PlaceholderText" xml:space="preserve">
+    <value>(Optional)</value>
+  </data>
+  <data name="ArchiveFormatSelector.Header" xml:space="preserve">
+    <value>Archive Format:</value>
+  </data>
+  <data name="CompressionSelector.Header" xml:space="preserve">
+    <value>Compression:</value>
+  </data>
+  <data name="BackupCreationTitle" xml:space="preserve">
+    <value>Create Backup</value>
+  </data>
 </root>

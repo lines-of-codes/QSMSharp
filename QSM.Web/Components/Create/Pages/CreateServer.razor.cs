@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.JSInterop;
 using QSM.Core.ServerSettings;
@@ -15,14 +16,15 @@ namespace QSM.Web.Components.Create.Pages;
 public partial class CreateServer : ComponentBase
 {
 	private Dictionary<ServerSoftwares, InfoFetcher> _infoFetchers = null!;
+	
+	[SupplyParameterFromForm] private NewServerModel? Model { get; set; }
 
+	private const long _maxFileSize = 100 * 1024 * 1024; // 100 MiB
 	private bool _isProcessing;
 	private string _processingMessage = string.Empty;
 	private string _targetFolderPreview = string.Empty;
 	private string _errorMessage = string.Empty;
-
-	[SupplyParameterFromForm] private NewServerModel? Model { get; set; }
-
+	private IBrowserFile? _selectedFile;
 	private string[] _minecraftVersions = [];
 	private string[] _availableBuilds = [];
 
@@ -101,17 +103,14 @@ public partial class CreateServer : ComponentBase
 
 		Directory.CreateDirectory(_targetFolderPreview);
 
-		_processingMessage = "Downloading server file...";
-		string downloadUrl = await _infoFetchers[Model!.Software]
-			.GetDownloadUrlAsync(Model.MinecraftVersion ?? _minecraftVersions[0],
-				Model.ServerBuild ?? _availableBuilds[0]);
-
-		using (HttpClient client = HttpClientFactory.CreateClient())
+		bool custom = Model!.Software == ServerSoftwares.Custom;
+		if (custom)
 		{
-			await using Stream stream = await client.GetStreamAsync(downloadUrl);
-			await using FileStream fs = new(Path.Join(_targetFolderPreview, "server.jar"), FileMode.OpenOrCreate);
-
-			await stream.CopyToAsync(fs);
+			await GetCustomServerFile();
+		}
+		else
+		{
+			await DownloadServerFile();
 		}
 
 		_processingMessage = "Registering server...";
@@ -119,12 +118,12 @@ public partial class CreateServer : ComponentBase
 		{
 			ServerInstance newServer = new()
 			{
-				MinecraftVersion = Model.MinecraftVersion ?? _minecraftVersions[0],
+				MinecraftVersion = custom ? null : Model.MinecraftVersion ?? _minecraftVersions[0],
 				Software = Model.Software,
 				Name = Model.Name,
 				Running = false,
 				ServerPath = _targetFolderPreview,
-				ServerVersion = Model.ServerBuild ?? _availableBuilds[0]
+				ServerVersion = custom ? null : Model.ServerBuild ?? _availableBuilds[0]
 			};
 			ctx.Servers.Add(newServer);
 			await ctx.SaveChangesAsync();
@@ -135,6 +134,33 @@ public partial class CreateServer : ComponentBase
 
 		_isProcessing = false;
 		NavigationManager.NavigateTo("/");
+	}
+
+	private async Task GetCustomServerFile()
+	{
+		if (_selectedFile == null)
+		{
+			_errorMessage = "No file has been selected.";
+			return;
+		}
+
+		_processingMessage = "Uploading server file...";
+		await using FileStream fs = new(Path.Join(_targetFolderPreview, "server.jar"), FileMode.OpenOrCreate);
+		await _selectedFile.OpenReadStream(_maxFileSize).CopyToAsync(fs);
+	}
+
+	private async Task DownloadServerFile()
+	{
+		_processingMessage = "Downloading server file...";
+		string downloadUrl = await _infoFetchers[Model!.Software]
+			.GetDownloadUrlAsync(Model.MinecraftVersion ?? _minecraftVersions[0],
+				Model.ServerBuild ?? _availableBuilds[0]);
+
+		using HttpClient client = HttpClientFactory.CreateClient();
+		await using Stream stream = await client.GetStreamAsync(downloadUrl);
+		await using FileStream fs = new(Path.Join(_targetFolderPreview, "server.jar"), FileMode.OpenOrCreate);
+
+		await stream.CopyToAsync(fs);
 	}
 
 	private async Task FetchMinecraftVersions(ServerSoftwares software = ServerSoftwares.Paper)
@@ -233,6 +259,11 @@ public partial class CreateServer : ComponentBase
 		bool confirm = await Js.InvokeAsync<bool>("window.confirm", "The installation isn't complete. Are you sure you want to leave this page?");
 
 		if (!confirm) ctx.PreventNavigation();
+	}
+
+	private void HandleFileChange(InputFileChangeEventArgs e)
+	{
+		_selectedFile = e.File;
 	}
 
 	private sealed class NewServerModel

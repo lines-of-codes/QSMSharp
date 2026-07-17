@@ -15,7 +15,7 @@ public class ServerSettings
 
 	public JavaSettings Java { get; set; } = new();
 	
-	public ModpackInfo Modpack { get; set; } = new();
+	public ModpackInfo? Modpack { get; set; }
 
 	public Task SaveJsonAsync(string filePath)
 	{

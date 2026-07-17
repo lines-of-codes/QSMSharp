@@ -13,16 +13,31 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <CommandBar DefaultLabelPosition="Right">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock x:Uid="/Server/TurnOffModWarning" x:Name="TurnOffModWarning" Visibility="Collapsed" Padding="16" />
+        <CommandBar DefaultLabelPosition="Right" Grid.Column="1">
             <!--<AppBarButton Label="Check for updates">
                 <AppBarButton.Icon>
                     <FontIcon Glyph="&#xE777;" />
                 </AppBarButton.Icon>
             </AppBarButton>-->
+            <AppBarButton AllowFocusOnInteraction="True" x:Name="SearchButton" x:Uid="/Server/SearchFileButton">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE721;" />
+                </AppBarButton.Icon>
+                <AppBarButton.Flyout>
+                    <Flyout>
+                        <TextBox MinWidth="240" x:Uid="/Server/SearchFileBox" x:Name="SearchFileBox" TextChanged="SearchFileBox_TextChanged" />
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
             <AppBarButton Icon="Add" x:Uid="/Server/AddFileButton" x:Name="AddButton" Click="AddButton_Click" />
             <AppBarButton Icon="Delete" x:Uid="/Server/RemoveButton" x:Name="RemoveButton" Click="RemoveButton_Click" />
         </CommandBar>
-        <ListView Grid.Row="1" ItemsSource="{x:Bind _mods, Mode=OneWay}" x:Name="ModList" />
+        <ListView Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{x:Bind _mods, Mode=OneWay}" x:Name="ModList" />
     </Grid>
 </Page>

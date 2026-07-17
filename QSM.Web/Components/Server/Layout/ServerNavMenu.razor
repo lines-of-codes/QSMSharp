@@ -1,4 +1,5 @@
 @using Microsoft.EntityFrameworkCore
+@using QSM.Core.ServerSoftware
 @using QSM.Web.Data
 @implements IDisposable
 
@@ -40,11 +41,14 @@
             </NavLink>
         </div>
         
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="@($"/Server/{Id}/Mods")">
-                <span class="bi bi-plugin me-3" aria-hidden="true"></span> Mods/Plugins
-            </NavLink>
-        </div>
+        @if (_server.Software != ServerSoftwares.Vanilla)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="@($"/Server/{Id}/Mods")">
+                    <span class="bi bi-plugin me-3" aria-hidden="true"></span> Mods/Plugins
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
