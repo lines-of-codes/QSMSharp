@@ -61,7 +61,7 @@
             <div class="form-text">Enter a path to a folder on the server you wish to import</div>
             break;
         default:
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException(nameof(Type));
     }
     <button type="submit" class="mt-4 btn btn-primary">Import</button>
 </EditForm>

@@ -64,7 +64,6 @@
     {
         if (!_outputListModified) return;
 
-        Logger.LogInformation("{thing}", _outputList);
         InvokeAsync(async () =>
         {
             StateHasChanged();

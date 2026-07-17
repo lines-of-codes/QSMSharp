@@ -99,7 +99,7 @@ else
     
     private async Task<bool> DownloadFileAsync(int index, string url, string dest)
     {
-        using var client = HttpClientFactory.CreateClient(ApplicationConfig.HttpDownloadClient);
+        using var client = HttpClientFactory.CreateClient(CurseForgeProvider.HttpClientName);
 
         using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
