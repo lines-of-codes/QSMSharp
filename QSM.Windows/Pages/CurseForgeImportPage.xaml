@@ -123,9 +123,8 @@
                 <Grid Margin="15,5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
@@ -137,9 +136,8 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock x:Name="ModLicense" Grid.Row="1" />
-                    <TextBlock x:Name="ModDownloadCount" Grid.Row="2" />
-                    <ScrollView Grid.Row="3">
+                    <TextBlock x:Name="ModDownloadCount" Grid.Row="1" />
+                    <ScrollView Grid.Row="2">
                         <toolkit:MarkdownTextBlock 
                             HorizontalAlignment="Left"
                             x:Name="ModDescription" 
@@ -147,7 +145,7 @@
                             Background="Transparent" />
                     </ScrollView>
 
-                    <StackPanel Spacing="8" Grid.Row="4">
+                    <StackPanel Spacing="8" Grid.Row="3">
                         <ComboBox 
                             x:Name="VersionSelector"
                             ItemsSource="{x:Bind _availableVersions, Mode=OneWay}"

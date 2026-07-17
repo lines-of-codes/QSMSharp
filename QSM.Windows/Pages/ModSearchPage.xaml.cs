@@ -33,7 +33,7 @@ public sealed partial class ModSearchPage : Page
 	readonly ExtendedObservableCollection<ModPluginDownloadInfo> _availableVersions = [];
 	readonly Converter _htmlConverter = new(new Config
 	{
-		UnknownTags = Config.UnknownTagsOption.Drop,
+		Tags = { Unknown = Config.UnknownTagsOption.Drop }
 	});
 
 	public ModSearchPage()

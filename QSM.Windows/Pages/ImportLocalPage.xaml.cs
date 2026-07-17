@@ -59,8 +59,9 @@ public sealed partial class ImportLocalPage : Page
 
 		Directory.CreateDirectory(serverDir);
 
+		var extractor = new MrpackExtractor(Program.Hoster.Services.GetService<IHttpClientFactory>());
 		var extractResult = await MrpackExtractor.ExtractAsync(selected, tempDir);
-		var downloader = MrpackExtractor.DownloadMods(extractResult.Index, serverDir);
+		var downloader = extractor.DownloadMods(extractResult.Index, serverDir);
 
 		await foreach (var operation in downloader)
 		{

@@ -1,7 +1,7 @@
+using Ganss.Xss;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using QSM.Core.ModPluginSource;
@@ -32,6 +32,13 @@ public sealed partial class CurseForgeImportPage : Page
 	readonly ExtendedObservableCollection<ModPluginDownloadInfo> _availableVersions = [];
 	readonly ExtendedObservableCollection<CurseCategory> _categories = [];
 	CurseCategory _modpackCat;
+	ReverseMarkdown.Converter _converter = new(new ReverseMarkdown.Config() {
+		Tags = { Unknown = ReverseMarkdown.Config.UnknownTagsOption.Bypass }
+	});
+	HtmlSanitizer _sanitizer = new(new() {
+		AllowedTags = { "p", "strong", "b", "i", "ins", "del", "h1", "h2", "h3", "h4", "h5", "h6", "a", "span" },
+		AllowedAttributes = { "href" }
+	});
 
 	public CurseForgeImportPage()
 	{
@@ -192,29 +199,11 @@ public sealed partial class CurseForgeImportPage : Page
 		ModName.Text = mod.Name;
 		OwnerLabel.Text = mod.Owner;
 
-		if (string.IsNullOrEmpty(mod.LicenseUrl))
-		{
-			ModLicense.Text = $"License: {mod.License}";
-		}
-		else
-		{
-			ModLicense.Text = "License: ";
-
-			Hyperlink hyperlink = new()
-			{
-				NavigateUri = new Uri(mod.LicenseUrl)
-			};
-
-			Run run = new()
-			{
-				Text = mod.License
-			};
-
-			hyperlink.Inlines.Add(run);
-			ModLicense.Inlines.Add(hyperlink);
-		}
-
 		ModDownloadCount.Text = $"{mod.DownloadCount:n0} Downloads";
+
+		mod.LongDescription = _converter.Convert(_sanitizer.Sanitize(mod.LongDescription)).Replace("!\\[\\]", "![]");
+
+		ModDescription.Text = string.Empty;
 		ModDescription.Text = mod.LongDescription;
 
 		VersionSelector.IsEnabled = true;
