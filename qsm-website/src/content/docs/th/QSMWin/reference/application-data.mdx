@@ -1,21 +1,19 @@
 ---
-title: Application Data
+title: ข้อมูลแอพลิเคชัน
 description: Where QSM stores its data.
 ---
 
 import { FileTree } from "@astrojs/starlight/components";
 
-Normally, QSM (Windows) stores its application data at `C:\Users\[username]\AppData\Local\QSM`
-
-Directory structure:
+โดยปกติแล้ว QSM Windows จะเก็บข้อมูลแอพลิเคชันไว้ที่ `C:\Users\[username]\AppData\Local\QSM` โดยมีโครงสร้างโฟลเดอร์ดังนี้
 
 <FileTree>
     
-- config.json Application Configuration File
-- Servers/ Stores the servers you've created
-- Java/ Stores the Java installations you've installed through QSM
-- Logs/ Store QSM logs
-- Backups/ Store server backups. Only delete the backups stored in this folder directly if it is not registered in the app.
-- Downloads/ Currently it only serves the purpose of storing modpack downloads. You can safely delete the contents of this folder.
+- config.json ไฟล์การตั้งค่าแอพลิเคชัน
+- Servers/ เก็บเซิร์ฟเวอร์ที่คุณสร้างไว้
+- Java/ เก็บการติดตั้ง Java ที่คุณติดตั้งผ่าน QSM
+- Logs/ เก็บไฟล์ล็อก QSM
+- Backups/ เก็บแบ็คอัพเซิร์ฟเวอร์ ลบแบ็คอัพที่อยู่ในโฟลเดอร์นี้ในกรณีที่มันไม่ลงทะเบียนอยู่ในแอพลิเคชันเท่านั้น
+- Downloads/ ปัจจุบันมีหน้าที่เพียงแค่เก็บม็อดแพ็คที่ถูกดาวน์โหลดไว้ คุณสามารถลบเนื้อหาของโฟลเดอร์นี้ได้อย่างปลอดภัย
 
 </FileTree>

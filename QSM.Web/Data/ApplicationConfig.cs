@@ -23,9 +23,8 @@ public class ApplicationConfig
 
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			return @"C:\ProgramData\QSMWeb\";
-		// TODO: Add default path for macOS
 
-		return string.Empty;
+		return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "./" : string.Empty;
 	}
 	
 	public static string BackupSystemPath()

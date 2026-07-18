@@ -1,0 +1,36 @@
+---
+title: โลโก้
+description: เกี่ยวกับโลโก้ของ QSM
+---
+
+import { Image } from 'astro:assets';
+import QSMSmall from "@assets/QSMSharp_small.svg";
+import QSMMedium from "@assets/QSMSharp_medium.svg";
+import QSMMediumMark from "@assets/QSMSharp_medium_wordmark.svg";
+import QSMLarge from "@assets/QSMSharp_large.svg";
+
+ถึงแม้ว่าดิฉันไม่ใช่นักออกแบบโลโก้ ดิฉันก็กำลังพยายามทำให้มันดูดีที่สุด
+
+โลโก้นี้มีสามรูปแบบด้วยกัน เล็ก กลาง และใหญ่ โดยแบบใหญ่นั้นไม่ค่อยถูกใช้ แต่มันก็คือเวอร์ชันแรกของโลโก้นี้
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <Image src={QSMSmall} alt="โลโก้เล็ก" height="200" />
+    <Image src={QSMMedium} alt="โลโก้กลาง" height="200" />
+    <Image src={QSMLarge} alt="โลโก้ใหญ่" height="200" />
+</div>
+
+โลโก้เล็กนั้นถูกใช้เป็นไอคอนของเว็บไซต์นี้ โดยโลโก้กลางถูกใช้ในหน้าแรก และโลโก้ใหญ่ถูกใช้... เพียงแค่ในหน้านี้
+
+<figure>
+    <Image src={QSMMediumMark} alt="โลโก้ QSM กลางพร้อม wordmark" height="200" style="background: white;" />
+    <figcaption>โลโก้กลางพร้อม wordmark</figcaption>
+</figure>
+
+โลโก้กลางเป็นเพียงโลโก้เดียวที่มีเวอร์ชันเวิร์ดมาร์กเป็นพิเศษ โดยถูกใช้ในแถบนำทางของเว็บไซต์นี้
+
+โดยโลโก้และเวิร์ดมาร์กนั้นใช้ฟอนต์โปรดของดิฉัน [Inter](https://rsms.me/inter/) (เวอร์ชัน 4.1)
+
+โลโก้เหล่านี้สามารถถูกดาวน์โหลดในหลากหลายรูปแบบผ่านทางลิงค์  
+https://github.com/lines-of-codes/QSMSharp/tree/master/icon
+
+โลโก้เหล่านี้ถูกสร้างขึ้นใน Inkscape ชื่อไฟล์ที่ลงท้ายด้วย `_inkscape.svg` เป็นไฟล์ SVG ของ Inkscape

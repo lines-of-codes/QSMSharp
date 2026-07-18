@@ -13,6 +13,7 @@ So you should **NEVER**:
 
 ## Planned Features
 
-QSM.Web plans to implement integration with Firejail or other containerized 
-solutions in the future.
+QSM.Web plans to implement integration with Firejail or other containerization 
+solutions in the future. However, you still should be cautious even with these
+measures in place.
 

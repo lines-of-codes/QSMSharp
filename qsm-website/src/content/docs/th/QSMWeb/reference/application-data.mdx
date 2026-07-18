@@ -1,30 +1,30 @@
 ---
-title: Application Data
-description: Where QSM Web stores its data.
+title: ข้อมูลแอพลิเคชัน
+description: สถานที่ที่ QSM Web เก็บข้อมูล
 ---
 
 import { FileTree } from "@astrojs/starlight/components";
 
-QSM Web store its data at the following location on various operating systems:
+QSM Web เก็บข้อมูลไว้ที่สถานที่ต่อไปนี้บนระบบปฏิบัติการต่าง ๆ
 
 - Linux: `/var/lib/qsm-web`
 - FreeBSD: `/usr/local/etc/qsm-web/`
 - Windows: `C:\ProgramData\QSMWeb\`
-- macOS: Does not have a static location. Please help and contribute by adding a proper path to store data [here](https://github.com/lines-of-codes/QSMSharp/blob/c204ea5082e591fcaed1a1ed96cb89d880b7a64e/QSM.Web/Data/ApplicationConfig.cs#L11).
+- macOS: โฟลเดอร์ที่แอพลิเคชันตั้งอยู่
 
-## Directory Structure
+## โครงสร้างโฟลเดอร์
 
-Similar to the nature of QSM Windows, QSM Web has the following filesystem structure:
+คล้ายธรรมชาติของ QSM Windows, QSM Web มีโครงสร้างระบบไฟล์ดังนี้
 
 <FileTree>
     
-    - config.json Application-wide settings
+    - config.json การตั้งค่าแอพลิเคชัน
     - downloads/
     - logs/
-    - qbs/ QBS Installation Location
+    - qbs/ สถานที่ติดตั้ง QBS
     - servers
         - [server_name]
-            - config.qsm.json Server-specific QSM-only configuration
+            - config.qsm.json การตั้งค่าเฉพาะเซิร์ฟเวอร์ของ QSM
             - ...
     
 </FileTree>

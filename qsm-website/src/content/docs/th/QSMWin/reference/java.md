@@ -3,11 +3,9 @@ title: Java
 description: Java installations in QSM
 ---
 
-In QSM, You can import/install Java installations.
+ใน QSM คุณสามารถนำเข้าและติดตั้ง Java ได้ โดยมีผู้แจกจ่ายสองรายการ
 
-Currently, There are two JRE providers in QSM:
+- บิลด์ Azul Zulu OpenJDK
+- Eclipse Temurin โดย Adoptium
 
-- Azul Zulu OpenJDK builds
-- Eclipse Temurin by Adoptium
-
-You can also import other Java installations you have.
+คุณสามารถนำเข้าการติดตั้ง Java อื่น ๆ ที่คุณมีได้เช่นกัน

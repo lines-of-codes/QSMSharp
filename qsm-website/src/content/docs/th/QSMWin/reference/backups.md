@@ -1,39 +1,32 @@
 ---
-title: Backups
-description: All about backups in QSM.
+title: แบ็คอัพ
+description: รวมเรื่องแบ็คอัพใน QSM
 ---
 
-Backups are a copy of data at a certain point in time,
-They are made to make sure if a server fails, it can be
-restored back to its past state.
+แบ็คอัพคือสำเนาของข้อมูล ณ เวลาหนึ่ง โดยมีหน้าที่เป็นข้อมูลสำรองในกรณีที่เซิร์ฟเวอร์ล้มเหลว
+คุณจะสามารถคืนค่าไปยังสถานะก่อนหน้าของเซิร์ฟเวอร์นั้น ๆ ได้
 
-Backups in QSM (Windows) can be compressed to either
-`.zip` or `.tar` files. The default recommended option is
-`.tar.zst` ([tar](https://en.wikipedia.org/wiki/Tar_(computing)) archives with [Zstandard
-compression](https://en.wikipedia.org/wiki/Zstd))
+แบ็คอัพใน QSM Windows สามารถถูกบีบอัดเป็นไฟล์ `.zip` หรือ `.tar` ได้
+โดยตัวเลือกค่าเริ่มต้นที่แนะนำคือ `.tar.zst` (อาร์ไคฟ์ [tar](https://en.wikipedia.org/wiki/Tar_(computing)) ที่มี[การบีบอัด Zstandard](https://en.wikipedia.org/wiki/Zstd))
 
-All available compression methods include:
+โดยตัวเลือกการบีบอัดที่มีให้เลือกทั้งหมดได้แก่
 - None
 - Deflate/GZip
 - BZip2
 - LZMA
-- PPMd (only supported by zip archives)
-- Zstd (only supported by tar archives)
+- PPMd (รองรับในอาร์ไคฟ์ zip เท่านั้น)
+- Zstd (รองรับในอาร์ไคฟ์ tar เท่านั้น)
 
-QSM (try to) help you follow the 3-2-1 backup rule.
+QSM (พยายาม) ที่จะช่วยให้คุณทำตามกฎการแบ็คอัพ 3-2-1 ได้ง่ายขึ้น
 
-QSM plans to offer the option of backing up to these cloud
-storage providers:
+QSM มีแผนที่จะให้คุณสามารถแบ็คอัพไปยังผู้ให้บริการเก็บข้อมูลคลาวด์ต่อไปนี้ได้
 
 - OneDrive
 - Dropbox
 - Google Drive
 
-(The list is sorted according to what will be implemented
-first)
+(รายการถูกเรียงตามลำดับที่จะถูกพัฒนาก่อน)
 
-Obviously, you can also manually upload the backups to another
-cloud provider.
+แน่นอนว่า คุณก็ยังสามารถอัพโหลดแบ็คอัพไปยังผู้ให้บริการเก็บข้อมูลอื่น ๆ ได้ด้วยตนเอง
 
-Automatic backups will be implemented eventually, after all
-the basic features are completed.
+การแบ็คอัพอัตโนมัติจะถูกทำขึ้นเมื่อฟีเจอร์พื้นฐานทั้งหลายถูกทำขึ้นแล้ว

@@ -1,32 +1,38 @@
 ---
-title: Introduction
-description: Introduction to the QSM Web software.
+title: การแนะนำ
+description: การแนะนำซอฟต์แวร์ QSM Web
 ---
 
-QSM.Web is a management console designed for self-hosted servers. Currently, QSM.Web does not have any published version, so you'll have to build the application manually.
+QSM.Web เป็นคอนโซลที่ออกแบบมาเพื่อจัดการเซิร์ฟเวอร์ที่โฮสต์ด้วยตนเอง ในปัจจุบัน QSM.Web ยังไม่มีเวอร์ชันที่ถูกเผยแพร่ออกมา
+ดังนั้นคุณจะต้องทำการบิวด์แอพลิเคชันด้วยตนเอง
 
-## Build Steps
+## ขั้นตอนในการบิวด์
 
-_This guide is very rough and is mainly for the Linux platform, contributions will be appreciated_
+_ไกด์นี้เป็นไกด์คร่าว ๆ และอิงตามแพลตฟอร์ม Linux เป็นหลัก สามารถเพิ่มเติมได้_
 
-1. Download & Install the .NET SDK (https://dotnet.microsoft.com/en-us/download)
-2. Use Git to clone the repository, or download a ZIP archive of the code from https://github.com/lines-of-codes/QSMSharp
-3. `cd` into the `QSM.Web` directory within the cloned/extracted project
-4. Run `dotnet publish -c Release`
-5. The build files should be in the `bin/Release/net10.0/publish` folder. Copy the contents of that folder to somewhere like `/opt/qsm-web/` (for Linux). Make sure the permissions are correct and that it can write into the `Data/app.db` file (Modify the `appsettings.json` file to change the location of the database file)
-6. Refer to [Application Data](/QSMSharp/qsmweb/reference/application-data) and create the folder which QSM will store most of its data to. (For example, on Linux, Create the `/var/lib/qsm-web` folder and change the ownership to the user that will be running QSM Web)
-7. Run the `QSM.Web` executable! You can use `tmux` or write a systemd unit file to help with this.
+1. ดาวน์โหลดและติดตั้ง .NET SDK (https://dotnet.microsoft.com/en-us/download)
+2. ใช้ Git เพื่อโคลนโปรเจกต์ หรือดาวน์โหลดเวอร์ชันอาร์ไคฟ์ Zip จาก https://github.com/lines-of-codes/QSMSharp
+3. `cd` ไปยังโฟลเดอร์ `QSM.Web` ภายในโปรเจกต์ที่ทำ
+4. ใช้คำสั่ง `dotnet publish -c Release`
+5. ไฟล์ทีีผ่านการบิวด์ออกมาควรจะอยู่ในโฟลเดอร์ `bin/Release/net10.0/publish` คัดลอกเนื้อหาของโฟลเดอร์นั้นไปยังโฟลเดอร์เช่น `/opt/qsm-web/`
+   (สำหรับ Linux) โปรดตรวจสอบสิทธิ์ของไฟล์ให้ถูกต้องและให้แน่ใจว่าแอพลิเคชันสามารถเขียนไปที่ไฟล์ `Data/app.db` ได้ (แก้ไขไฟล์ `appsettings.json`
+   เพื่อเปลี่ยนสถานที่ของไฟล์ฐานข้อมูล)
+6. อ้างอิงหน้า [Application Data](/QSMSharp/qsmweb/reference/application-data) และสร้างโฟลเดอร์ที่ QSM จะเก็บข้อมูลส่วนใหญ่ไว้ (ตัวอย่างเช่นบน Linux สร้างโฟลเดอร์ `/var/lib/qsm-web`
+   และเปลี่ยนเจ้าของเป็นผู้ใช้ที่จะรันซอฟต์แวร์ QSM Web)
+7. เรียกใช้ไฟล์ `QSM.Web` ได้เลย โดยคุณสามารถใช้ `tmux` หรือเขียนไฟล์หน่วยบริการ systemd เพื่อช่วยในเรื่องนี้
 
-By default, the web console will be started on port 5222 and will accept connections from anywhere. But do remember that if you want to access the console from other devices, you'll need to configure your firewall if you have one.
+โดยค่าเริ่มต้น เว็บคอนโซลจะถูกเปิดบนพอร์ต 5222 และจะรับการเชื่อมต่อจากทุกที่ แต่โปรดจำไว้ว่า หากคุณต้องการเข้าถึงคอนโซลจากอุปกรณ์อื่น 
+หากคุณมีไฟร์วอล คุณจะต้องตั้งค่าไฟร์วอลของคุณก่อน
 
-## Setting Up
+## การตั้งค่า
 
-Upon first entering http://localhost:5222, You will be prompted to create an account (This page will only appear once when there are no account registered on the server).
+เมื่อเข้าไปยังหน้า http://localhost:5222 เป็นครั้งแรก คุณจะถูกแจ้งให้สร้างบัญชี (หน้านี้จะแสดงเพียงครั้งเดียวเท่านั้นเมื่อไม่มีบัญชีที่ถูกสมัครไว้บนเซิร์ฟเวอร์)
 
-Next, Install Java. You'll have to do it manually, and after that, register your Java installation by going into QSM Settings &rarr; Java, then enter the folder which your Java install is located. (Said folder will contain directories like `bin`, `include`, and `lib`)
+ถัดไป ติดตั้ง Java โดยคุณจะต้องทำกระบวณการนี้เอง และจากนั้น ลงทะเบียนการติดตั้ง Java ของคุณ โดยไปยัง QSM Settings &rarr; Java 
+จากนั้นใส่สถานที่ตั้งของการติดตั้ง Java คุณ (โฟลเดอร์ที่ว่าจะมีโฟลเดอร์ย่อยเช่น `bin` `include` และ `lib`)
 
-For convenience, You can make the newly added Java install the default by clicking the "Make Default" button.
+เพื่อความสะดวกสบาย คุณสามารถทำให้การติดตั้ง Java ใหม่นี้เป็นการเริ่มต้นได้โดยการคลิกปุ่ม "Make Default"
 
-## Technical Details
+## รายละเอียดทางเทคนิค
 
-It relies on ASP.NET, Blazor, Entity Framework, and SQLite.
+ซอฟต์แวร์นี้ใช้ ASP.NET, Blazor, Entity Framework, และ SQLite
