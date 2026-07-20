@@ -38,14 +38,15 @@ public sealed partial class BackupCreationPage : Page
 		{
 			case ArchiveFormat.Tar:
 				_compressionFormats.AddRange(TarArchiver.SupportedCompression);
+				CompressionSelector.SelectedItem = CompressionFormat.Zstd;
 				break;
 			case ArchiveFormat.Zip:
 				_compressionFormats.AddRange(ZipArchiver.SupportedCompression);
+				CompressionSelector.SelectedItem = CompressionFormat.Deflate;
 				break;
 			default:
 				throw new InvalidOperationException();
 		}
-		CompressionSelector.SelectedIndex = 0;
 	}
 
 	public ContentDialog CreateDialog(Page page)

@@ -7,6 +7,8 @@ Backups are a copy of data at a certain point in time,
 They are made to make sure if a server fails, it can be
 restored back to its past state.
 
+![Create Backup Dialog](@assets/QSMWindows/CreateBackupDialog.png)
+
 Backups in QSM (Windows) can be compressed to either
 `.zip` or `.tar` files. The default recommended option is
 `.tar.zst` ([tar](https://en.wikipedia.org/wiki/Tar_(computing)) archives with [Zstandard

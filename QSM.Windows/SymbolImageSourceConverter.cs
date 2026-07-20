@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Serilog;
 using System;
 
 namespace QSM.Windows;
@@ -14,7 +15,11 @@ internal partial class SymbolImageSourceConverter : IValueConverter
 		if (symbolImage.Symbol != null)
 			return new SymbolIconSource() { Symbol = (Symbol)symbolImage.Symbol };
 		if (symbolImage.ImagePath.EndsWith(".svg"))
+		{
+			Log.Information(symbolImage.ImagePath);
 			return new ImageIconSource() { ImageSource = new SvgImageSource(new Uri(symbolImage.ImagePath)) };
+		}
+
 		if (!string.IsNullOrEmpty(symbolImage.ImagePath))
 			return new BitmapIconSource() { UriSource = new Uri(symbolImage.ImagePath), ShowAsMonochrome = false };
 
