@@ -52,13 +52,13 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 					Required = dependency.dependency_type == "required"
 				});
 
-			VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0]);
+			VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0])!;
 
 			versions.Add(new ModPluginDownloadInfo(info.id ?? string.Empty)
 			{
 				DisplayName = $"{info.name} ({info.version_type})",
 				FileName = primaryFile.filename!,
-				Dependencies = dependencies.ToArray(),
+				Dependencies = [.. dependencies],
 				DownloadUri = primaryFile.url,
 				ExternalPageUrl = null,
 				Hash = primaryFile.hashes!.sha512,
@@ -85,13 +85,13 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				Required = dependency.dependency_type == "required"
 			});
 
-		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0]);
+		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0])!;
 
 		return new ModPluginDownloadInfo(version.id ?? string.Empty)
 		{
 			DisplayName = $"{version.name} ({version.version_type})",
 			FileName = primaryFile.filename!,
-			Dependencies = dependencies.ToArray(),
+			Dependencies = [.. dependencies],
 			DownloadUri = primaryFile.url,
 			ExternalPageUrl = null,
 			Hash = primaryFile.hashes!.sha512,
@@ -284,16 +284,6 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		int? size = null,
 		string? file_type = null);
 
-	internal record VersionInfo(
-		string? id = null,
-		string? name = null,
-		string? version_number = null,
-		string? changelog = null,
-		VersionDependency[]? dependencies = null,
-		string? version_type = null,
-		bool? featured = null,
-		VersionFile[]? files = null);
-
 	internal record ProjectResult(
 		string project_id,
 		string project_type,
@@ -307,14 +297,22 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		string? title = null,
 		string? description = null,
 		string[]? categories = null,
-		string? client_side = null,
-		string? server_side = null,
 		string? icon_url = null,
 		string[]? display_categories = null,
 		string[]? versions = null,
 		string? latest_version = null,
 		string[]? gallery = null,
 		string? featured_gallery = null);
+
+	internal record VersionInfo(
+		string? id = null,
+		string? name = null,
+		string? version_number = null,
+		string? changelog = null,
+		VersionDependency[]? dependencies = null,
+		string? version_type = null,
+		bool? featured = null,
+		VersionFile[]? files = null);
 
 	internal record LicenseDetails(
 		string? id = null,

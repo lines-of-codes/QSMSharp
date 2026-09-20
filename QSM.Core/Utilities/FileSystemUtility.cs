@@ -4,14 +4,17 @@ public static class FileSystemUtility
 {
 	public static string GetTemporaryDirectory()
 	{
-		string tempDirectory = Path.Join(Path.GetTempPath(), Path.GetRandomFileName());
-
-		if (Directory.Exists(tempDirectory))
+		while (true)
 		{
-			return GetTemporaryDirectory();
-		}
+			string tempDirectory = Path.Join(Path.GetTempPath(), Path.GetRandomFileName());
 
-		Directory.CreateDirectory(tempDirectory);
-		return tempDirectory;
+			if (Directory.Exists(tempDirectory))
+			{
+				continue;
+			}
+
+			Directory.CreateDirectory(tempDirectory);
+			return tempDirectory;
+		}
 	}
 }

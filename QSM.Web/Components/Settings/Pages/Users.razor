@@ -55,9 +55,7 @@
             <td>@user.UserName</td>
             <td>@(_userRoles[user.Id])</td>
             <td>
-                <button class="btn btn-primary" title="Change Password"
-                        onclick="document.getElementById('changePasswordDialog').showModal();document.getElementById('NewPasswordInput.Id').value = '@user.Id';">
-                    <i class="bi bi-key"></i></button>
+                <a class="btn btn-primary" href=@($"/Settings/Users/{user.Id}") title="Edit"><i class="bi bi-pencil-square"></i></a>
                 <button class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
             </td>
         </tr>
@@ -65,37 +63,8 @@
     </tbody>
 </table>
 
-<dialog id="changePasswordDialog" class="rounded modal">
-    <div class="modal-dialog">
-        <EditForm Model="NewPasswordInput" class="modal-content" OnValidSubmit="NewPassword">
-            <DataAnnotationsValidator/>
-            <div class="modal-header">
-                <h5 class="modal-title">Password Change</h5>
-                <button
-                    class="btn-close"
-                    onclick="document.getElementById('changePasswordDialog').close()"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ValidationSummary class="danger" role="alert"/>
-                <InputText class="form-control mb-2" id="NewPasswordInput.Id" name="NewPasswordInput.Id"
-                           @bind-Value="NewPasswordInput!.Id" aria-required="true" placeholder="User ID"/>
-                <InputText class="form-control" name="NewPasswordInput.Password" @bind-Value="NewPasswordInput.Password"
-                           aria-required="true" placeholder="New Password"/>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary"
-                        onclick="document.getElementById('changePasswordDialog').close()">Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">Change</button>
-            </div>
-        </EditForm>
-    </div>
-</dialog>
-
 @code {
     [SupplyParameterFromForm] private InputModel? Input { get; set; }
-    [SupplyParameterFromForm] private PasswordInputModel? NewPasswordInput { get; set; }
     private List<ApplicationUser> _users = [];
     private readonly Dictionary<string, string> _userRoles = [];
     private IEnumerable<IdentityError>? _identityErrorList;
@@ -103,7 +72,6 @@
     protected override void OnInitialized()
     {
         Input ??= new InputModel();
-        NewPasswordInput ??= new PasswordInputModel();
     }
 
     protected override async Task OnInitializedAsync()
@@ -118,12 +86,6 @@
     private sealed class InputModel
     {
         [Required] public string? Username { get; set; }
-        [Required] public string? Password { get; set; }
-    }
-
-    private sealed class PasswordInputModel
-    {
-        [Required] public string? Id { get; set; }
         [Required] public string? Password { get; set; }
     }
 
@@ -144,11 +106,6 @@
 
         _users.Add(user);
         _userRoles[user.Id] = string.Empty;
-    }
-
-    private void NewPassword()
-    {
-        throw new NotImplementedException();
     }
 
 }

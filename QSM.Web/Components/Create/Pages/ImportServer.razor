@@ -40,6 +40,7 @@
 </EditForm>
 
 <EditForm class="col-lg-6" Model="SourceData">
+    @* ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault *@
     @switch (Type)
     {
         case SourceType.File:
@@ -60,8 +61,6 @@
             <InputText class="form-control" @bind-Value="SourceData"/>
             <div class="form-text">Enter a path to a folder on the server you wish to import</div>
             break;
-        default:
-            throw new ArgumentOutOfRangeException(nameof(Type));
     }
     <button type="submit" class="mt-4 btn btn-primary">Import</button>
 </EditForm>

@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using JetBrains.Annotations;
+using System.Net.Http.Json;
 
 namespace QSM.Core.ServerSoftware;
 
@@ -17,7 +18,7 @@ public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		BuildInfoRequest? response = await client.GetFromJsonAsync<BuildInfoRequest>(minecraftVersion);
 
-		if (response == null)
+		if (response is null)
 		{
 			throw new NetworkResourceUnavailableException();
 		}
@@ -27,12 +28,11 @@ public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 		Array.Sort(builds, (a, b) =>
 		{
 			// Ignore the result, as the output integer will be 0 if it failed anyway.
-			_ = int.TryParse(a, out int aint);
-			_ = int.TryParse(b, out int bint);
+			_ = int.TryParse(a, out int aInt);
+			_ = int.TryParse(b, out int bInt);
 
-			return aint - bint;
+			return bInt - aInt;
 		});
-		Array.Reverse(builds);
 
 		BuildInfoCache[minecraftVersion] = builds;
 
@@ -49,7 +49,7 @@ public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		ProjectInfoRequest? response = await client.GetFromJsonAsync<ProjectInfoRequest>("");
 
-		if (response == null)
+		if (response is null)
 		{
 			throw new NetworkResourceUnavailableException();
 		}
@@ -65,6 +65,7 @@ public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 		return Task.FromResult($"https://api.purpurmc.org/v2/purpur/{minecraftVersion}/{build}/download");
 	}
 
+	[UsedImplicitly]
 	internal sealed record BuildsInfo(
 		string? Latest = null,
 		string[]? All = null);

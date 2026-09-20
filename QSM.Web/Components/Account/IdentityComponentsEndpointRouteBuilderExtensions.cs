@@ -64,8 +64,11 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 				return Results.NotFound($"Unable to load user with ID '{userManager.GetUserId(context.User)}'.");
 			}
 
-			string userId = await userManager.GetUserIdAsync(user);
-			downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
+			if (downloadLogger.IsEnabled(LogLevel.Information))
+			{
+				string userId = await userManager.GetUserIdAsync(user);
+				downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
+			}
 
 			// Only include personal data for download
 			Dictionary<string, string> personalData = new();

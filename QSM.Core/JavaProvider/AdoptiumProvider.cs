@@ -31,10 +31,7 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 				return "linux";
 
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-				return "mac";
-
-			throw new NotSupportedException("Unidentified platform.");
+			return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "mac" : throw new NotSupportedException("Unidentified platform.");
 		}
 	}
 

@@ -92,11 +92,8 @@ public class MrpackExtractor(IHttpClientFactory factory)
 
 	public async IAsyncEnumerable<MrpackOperation> DownloadMods(MrpackModrinthIndex index, string dest)
 	{
-		foreach (MrpackFile fileInfo in index.Files)
+		foreach (MrpackFile fileInfo in index.Files.Where(f => f.Env["server"] != "unsupported"))
 		{
-			if (fileInfo.Env["server"] == "unsupported")
-				continue;
-
 			string fullPath = Path.GetFullPath(fileInfo.Path, dest);
 
 			// Check if the full path escapes out of the Minecraft server instance directory

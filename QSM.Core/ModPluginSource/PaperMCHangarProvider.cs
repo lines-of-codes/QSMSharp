@@ -43,9 +43,7 @@ public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPl
 			dependencies ??= [];
 
 			if (downloadEntry.FileInfo == null)
-			{
 				continue;
-			}
 
 			IEnumerable<ModPluginDownloadInfo.Dependency> genericInfo = dependencies.Select(dependency =>
 				new ModPluginDownloadInfo.Dependency

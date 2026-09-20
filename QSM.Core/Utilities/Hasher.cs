@@ -6,13 +6,19 @@ public static class Hasher
 {
 	public static string GetFileHash(HashAlgorithm algorithm, string path)
 	{
-		return algorithm switch
+		if (algorithm == HashAlgorithm.None) return string.Empty;
+		
+		using FileStream stream = File.OpenRead(path);
+		
+		// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+		byte[] hashBytes = algorithm switch
 		{
-			HashAlgorithm.None => string.Empty,
-			HashAlgorithm.Sha1 => SHA1.Create().GetFileHashAsString(path),
-			HashAlgorithm.Sha256 => SHA256.Create().GetFileHashAsString(path),
-			HashAlgorithm.Sha512 => SHA512.Create().GetFileHashAsString(path),
+			HashAlgorithm.Sha1 => SHA1.HashData(stream),
+			HashAlgorithm.Sha256 => SHA256.HashData(stream),
+			HashAlgorithm.Sha512 => SHA512.HashData(stream),
 			_ => throw new InvalidOperationException("Unsupported hash algorithm used in parameter.")
 		};
+		
+		return Convert.ToHexStringLower(hashBytes);
 	}
 }
