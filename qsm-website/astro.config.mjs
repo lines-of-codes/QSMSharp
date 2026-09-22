@@ -55,12 +55,7 @@ export default defineConfig({
                         th: "ไกด์ QSM.Windows",
                     },
                     items: [
-                        {
-                            slug: "qsmwin/guides/introduction",
-                        },
-                        {
-                            slug: "qsmwin/guides/create-new-server",
-                        },
+                        { autogenerate: { directory: "QSMWin/guides" } },
                     ],
                 },
                 {

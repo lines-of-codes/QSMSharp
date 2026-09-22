@@ -1,0 +1,65 @@
+---
+title: Building from source
+description: Building QSM.Windows from source
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+To build QSM.Windows from source, You will need the following:
+
+- [.NET SDK 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+- [Windows 11 SDK 10.0.26100](https://learn.microsoft.com/en-us/windows/apps/windows-sdk/downloads)
+- [Inno Setup](https://jrsoftware.org/isdl.php) (Optional, For building installers)
+
+The .NET SDK and Windows SDK can be managed with the Visual Studio Installer, 
+which is recommended if you also wish to modify the code with Visual Studio.
+
+You can optionally install .NET and Inno Setup with WinGet:
+
+```ps
+# Installs .NET SDK 10
+winget install --id Microsoft.DotNet.SDK.10
+
+# Interactively install Inno Setup
+winget install --id JRSoftware.InnoSetup.7 -e -s winget -i
+```
+
+The Windows SDK doesn't seem to have its newer versions available on WinGet.
+
+## Building
+
+
+```ps
+# Fetch the source, Either by downloading and extracting it from GitHub
+# or clone with Git using:
+git clone https://github.com/lines-of-codes/QSMSharp.git
+
+cd QSMSharp/QSM.Windows
+
+# Build & Publish a release build
+dotnet build -c Release -a x64 -p:DefineConstants="DISABLE_XAML_GENERATED_MAIN"
+```
+
+The `-p:DefineConstants="DISABLE_XAML_GENERATED_MAIN"` tells the source 
+generator to not create a Program class, as it is already defined by QSM itself.
+
+The constant, defined in `QSM.Windows.csproj`, is normally respected when 
+building in Visual Studio, However it may not be the case for the .NET CLI from
+manual testing.
+
+## Creating the installer
+
+Open the `QSM.Windows/Setup.iss` file in Inno Setup, and modify the following 
+line:
+
+```
+#define ProjectRoot "C:\Users\Satakun Utama\QSMSharp"
+```
+
+Replace the path to point to where the QSMSharp project is placed at.
+
+Visual Studio usually builds to `QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0`
+while the .NET CLI command above builds to `QSM.Windows\bin\Release\net10.0-windows10.0.26100.0\win-x64\`
+
+Please take note of what the build command output says and adjust the path accordingly 
+in the Inno Setup `[Files]` section.

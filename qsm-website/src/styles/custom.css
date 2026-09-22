@@ -1,3 +1,19 @@
+:root[data-theme='dark'] {
+    --slate-700: oklch(37.2% 0.044 257.287);
+    --slate-750: color-mix(in oklch, var(--slate-700), var(--slate-800));
+    --slate-800: oklch(27.9% 0.041 260.031);
+    --slate-850: color-mix(in oklch, var(--slate-800), var(--slate-900));
+    --slate-900: oklch(20.8% 0.042 265.755);
+
+    /*--sl-color-bg-sidebar: var(--slate-850);
+    --sl-color-bg-nav: var(--slate-850);
+    --sl-color-gray-6: var(--slate-800);
+    --sl-color-gray-5: var(--slate-750);
+    --sl-color-hairline: var(--slate-800);
+    --sl-color-bg: var(--slate-900);
+    --sl-color-black: var(--slate-900);*/
+}
+
 /* Increase theme select width to better accommodate menu contents. */
 starlight-theme-select select {
     --sl-select-width: 6rem;
@@ -10,4 +26,20 @@ figure > img {
 figcaption {
     text-align: center;
     color: gray;
+}
+
+[data-has-hero] .page {
+    background: linear-gradient(45deg, var(--slate-900), var(--slate-800));
+}
+
+[data-has-hero] header {
+    border-bottom: 1px solid transparent;
+    background-color: transparent;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+
+[data-has-hero] .card {
+    background-color: var(--slate-800);
+    border-color: var(--slate-700);
 }
