@@ -29,13 +29,30 @@ and if you made code changes, please do the following as a basic courtesy:
 - Remove QSMSharp's API keys
 
 Currently, the only public API key used in QSMSharp is the CurseForge API key, 
-which can be changed in the [appsettings.jsonc](QSM.Web/appsettings.jsonc) 
-file. Note that removing the key will likely cause every method in the class to
-throw an exception due to being unauthorized.
+which can be changed in the [QSM.Web/appsettings.jsonc](QSM.Web/appsettings.jsonc) 
+or [QSM.Windows/appsettings.jsonc](QSM.Windows/appsettings.jsonc) file, depending on 
+which project you are building upon. Note that removing the key will likely cause every 
+method in the class to throw an exception due to being unauthorized.
+
+If you are making use of the QSM.Core project, You will have to configure the HTTP 
+client for CurseForge yourself. The QSM.Web/Windows project does the following:
+
+```cs
+builder.Services.AddHttpClient(CurseForgeProvider.HttpClientName, client =>
+{
+	client.BaseAddress = new Uri(CurseForgeProvider.BaseAddress);
+	client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration.GetValue<string>("QSM:CurseForgeKey"));
+});
+```
+
+You are free to change the source of the CurseForge key to anywhere, hardcoded in code, 
+environment variables, or some other text file.
 
 ## License
 
-The project is licensed under the GNU GPLv3.
+The project is licensed under the GNU GPLv3, in plain text in the [LICENSE](LICENSE) file,
+and available in RTF format for the ease of installer creation in [QSM.Windows/gpl-3.0.rtf](QSM.Windows/gpl-3.0.rtf)
+(sourced from [gnu.org](https://www.gnu.org/licenses/gpl-3.0.html))
 
 QSM.Windows/CodeDependencies.iss is from [InnoDependencyInstaller](https://github.com/DomGries/InnoDependencyInstaller)
-and is licensed under CPOL 1.02.
+and is licensed under the MIT license.

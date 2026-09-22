@@ -83,16 +83,16 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Markdown" Version="7.1.2" />
-        <PackageReference Include="cuid.net" Version="7.0.0" />
+        <PackageReference Include="cuid.net" Version="7.1.0" />
         <PackageReference Include="HappyCoding.Hosting" Version="1.1.0" />
-        <PackageReference Include="HtmlSanitizer" Version="9.1.949-beta" />
+        <PackageReference Include="HtmlSanitizer" Version="9.2.1039" />
         <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
         <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
-        <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
-        <PackageReference Include="ReverseMarkdown" Version="6.1.0" />
+        <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.3.1" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+        <PackageReference Include="ReverseMarkdown" Version="6.2.1" />
         <PackageReference Include="Serilog" Version="4.4.0" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -169,6 +169,9 @@
         <Page Update="Pages\Dialogs\EulaPromptPage.xaml">
           <Generator>MSBuild:Compile</Generator>
         </Page>
+        <None Update="appsettings.jsonc">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
         <None Update="Utilities\JavaCheck.jar">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

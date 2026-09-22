@@ -38,7 +38,7 @@ public sealed partial class MultipleFileDownloadPage : Page
 	const byte ConcurrentDownloads = 5;
 	private static readonly HttpClient _httpClient = new();
 	private readonly ObservableCollection<FileDownloadEntry> Files = [];
-	private readonly Queue<byte> _indexQueue = new([0, 1, 2, 3, 4]);
+	private readonly Queue<byte> _indexQueue = new((byte[])[0, 1, 2, 3, 4]);
 
 	public MultipleFileDownloadPage()
 	{

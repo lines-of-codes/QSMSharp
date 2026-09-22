@@ -1,4 +1,5 @@
 ﻿using HappyCoding.Hosting.Desktop.WinUI;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QSM.Core.JavaProvider;
@@ -29,6 +30,8 @@ public static class Program
 
 		var builder = Host.CreateApplicationBuilder(args);
 
+		builder.Configuration.AddJsonFile("appsettings.jsonc", true, true);
+
 		builder.Services.AddSerilog();
 
 		builder.Services.AddHttpClient(ModrinthProvider.HttpClientName, client =>
@@ -45,7 +48,7 @@ public static class Program
 		builder.Services.AddHttpClient(CurseForgeProvider.HttpClientName, client =>
 		{
 			client.BaseAddress = new Uri(CurseForgeProvider.BaseAddress);
-			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
+			client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration.GetValue<string>("QSM:CurseForgeKey"));
 		});
 
 		IHttpConsumer[] fetchers =

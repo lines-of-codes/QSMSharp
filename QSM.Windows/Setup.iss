@@ -5,11 +5,11 @@
 #include "CodeDependencies.iss"
 
 #define MyAppName "QSM.Windows"
-#define MyAppVersion "1.3.1"
+#define MyAppVersion "1.3.2"
 #define MyAppPublisher "Satakun Utama"
 #define MyAppURL "https://linesofcodes.dailitation.xyz/QSMSharp/"
 #define MyAppExeName "QSM.Windows.exe"
-#define ProjectRoot "D:\VisualStudio\Projects\lines-of-codes\QSMSharp"
+#define ProjectRoot "C:\Users\Satakun Utama\QSMSharp"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -24,16 +24,12 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
-; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
-; on anything but x64 and Windows 11 on Arm.
-ArchitecturesAllowed=x64compatible
-; "ArchitecturesInstallIn64BitMode=x64compatible" requests that the
-; install be done in "64-bit mode" on x64 or Windows 11 on Arm,
-; meaning it should use the native 64-bit Program Files directory and
-; the 64-bit view of the registry.
-ArchitecturesInstallIn64BitMode=x64compatible
+; Uses the new 64-bit installer in Inno Setup 7
+; Will make the installer use the 64-bit Program Files directory and registry view,
+; while also specifying that the setup cannot run on anything but 64-bit systems
+SetupArchitecture=x64
 DisableProgramGroupPage=yes
-LicenseFile="{#GetEnv("USERPROFILE")}\Downloads\gpl-3.0.rtf"
+LicenseFile="{#ProjectRoot}\QSM.Windows\gpl-3.0.rtf"
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog

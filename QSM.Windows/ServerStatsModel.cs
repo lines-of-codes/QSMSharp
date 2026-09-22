@@ -9,13 +9,13 @@ public class ServerStatsModel
 	public ISeries[] Series { get; set; } = [
 		new LineSeries<double>
 		{
-			Values = [ 20, 20, 19, 16, 20, 20, 20 ],
+			Values = (double[])[ 20, 20, 19, 16, 20, 20, 20 ],
 			Fill = null,
 			Name = "TPS"
 		},
 		new LineSeries<double>
 		{
-			Values = [ 5, 7, 10, 30, 5, 5, 5 ],
+			Values = (double[])[ 5, 7, 10, 30, 5, 5, 5 ],
 			Fill = null,
 			Name = "MSPT"
 		}

@@ -20,6 +20,8 @@ namespace QSM.Windows;
 /// </summary>
 public sealed partial class ServerSummaryPage : Page
 {
+	const string INACTIVE = "Inactive";
+
 	ResourceLoader _resourceLoader;
 	int _metadataIndex;
 	ServerMetadata _metadata;
@@ -29,7 +31,7 @@ public sealed partial class ServerSummaryPage : Page
 	{
 		InitializeComponent();
 		_resourceLoader = new ResourceLoader("QSM.Windows.pri", "Server");
-		ServerActiveStatus.Text = _resourceLoader.GetString("Inactive");
+		ServerActiveStatus.Text = _resourceLoader.GetString(INACTIVE);
 	}
 
 	protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -49,7 +51,7 @@ public sealed partial class ServerSummaryPage : Page
 		{
 			StartButton.IsEnabled = process.HasExited;
 			StopButton.IsEnabled = !process.HasExited;
-			ServerActiveStatus.Text = process.HasExited ? _resourceLoader.GetString("Inactive") : _resourceLoader.GetString("Active");
+			ServerActiveStatus.Text = process.HasExited ? _resourceLoader.GetString(INACTIVE) : _resourceLoader.GetString("Active");
 
 			if (!process.HasExited)
 			{
@@ -69,7 +71,7 @@ public sealed partial class ServerSummaryPage : Page
 		{
 			StartButton.IsEnabled = process.HasExited;
 			StopButton.IsEnabled = !process.HasExited;
-			ServerActiveStatus.Text = process.HasExited ? _resourceLoader.GetString("Inactive") : _resourceLoader.GetString("Active");
+			ServerActiveStatus.Text = process.HasExited ? _resourceLoader.GetString(INACTIVE) : _resourceLoader.GetString("Active");
 
 			if (!process.HasExited)
 			{
@@ -95,7 +97,7 @@ public sealed partial class ServerSummaryPage : Page
 	{
 		StartButton.IsEnabled = true;
 		StopButton.IsEnabled = false;
-		ServerActiveStatus.Text = _resourceLoader.GetString("Inactive");
+		ServerActiveStatus.Text = _resourceLoader.GetString(INACTIVE);
 	}
 
 	private async void StartButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

@@ -63,7 +63,7 @@ public sealed partial class WorldGenConfigPage : Page
 		// If Minecraft server version is 1.15 or below
 		if (minecraftVersion.Minor <= 15)
 		{
-			_levelTypes.AddRange(["buffet", "default_1_1", "customized"]);
+			_levelTypes.AddRange((string[])["buffet", "default_1_1", "customized"]);
 		}
 
 		_serverProps = new ServerProperties(_metadata.ServerPropertiesFile);
