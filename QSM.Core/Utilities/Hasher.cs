@@ -13,7 +13,7 @@ public static class Hasher
 		// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
 		byte[] hashBytes = algorithm switch
 		{
-			HashAlgorithm.Sha1 => SHA1.HashData(stream),
+			HashAlgorithm.Sha1 => SHA1.HashData(stream), // NOSONAR
 			HashAlgorithm.Sha256 => SHA256.HashData(stream),
 			HashAlgorithm.Sha512 => SHA512.HashData(stream),
 			_ => throw new InvalidOperationException("Unsupported hash algorithm used in parameter.")

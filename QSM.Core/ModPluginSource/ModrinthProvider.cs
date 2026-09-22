@@ -1,5 +1,6 @@
 ﻿using QSM.Core.ModPluginSource.Modrinth;
 using QSM.Core.ServerSoftware;
+using QSM.Core.Utilities;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -52,21 +53,22 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 					Required = dependency.dependency_type == "required"
 				});
 
-			VersionFile primaryFile = info.files!.FirstOrDefault(file => (bool)file.primary!, info.files![0])!;
+			VersionFile primaryFile = info.files.FirstOrDefault(file => file.primary, info.files[0]);
 
-			versions.Add(new ModPluginDownloadInfo(info.id ?? string.Empty)
+			versions.Add(new ModPluginDownloadInfo(info.id)
 			{
 				DisplayName = $"{info.name} ({info.version_type})",
-				FileName = primaryFile.filename!,
+				FileName = primaryFile.filename,
 				Dependencies = [.. dependencies],
 				DownloadUri = primaryFile.url,
 				ExternalPageUrl = null,
-				Hash = primaryFile.hashes!.sha512,
-				HashAlgorithm = HashAlgorithm.Sha512
+				Hash = primaryFile.hashes.sha512,
+				HashAlgorithm = HashAlgorithm.Sha512,
+				Size = primaryFile.size
 			});
 		}
 
-		return versions.ToArray();
+		return [.. versions];
 	}
 
 	public async Task<ModPluginDownloadInfo> GetVersionAsync(string id)
@@ -85,17 +87,18 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				Required = dependency.dependency_type == "required"
 			});
 
-		VersionFile primaryFile = version.files!.FirstOrDefault(file => (bool)file.primary!, version.files![0])!;
+		VersionFile primaryFile = version.files.FirstOrDefault(file => file.primary, version.files[0]);
 
-		return new ModPluginDownloadInfo(version.id ?? string.Empty)
+		return new ModPluginDownloadInfo(version.id)
 		{
 			DisplayName = $"{version.name} ({version.version_type})",
-			FileName = primaryFile.filename!,
+			FileName = primaryFile.filename,
 			Dependencies = [.. dependencies],
 			DownloadUri = primaryFile.url,
 			ExternalPageUrl = null,
-			Hash = primaryFile.hashes!.sha512,
-			HashAlgorithm = HashAlgorithm.Sha512
+			Hash = primaryFile.hashes.sha512,
+			HashAlgorithm = HashAlgorithm.Sha512,
+			Size = primaryFile.size
 		};
 	}
 
@@ -172,20 +175,23 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
 								 ?? throw new NetworkResourceUnavailableException();
 
-		return response.Hits!.Select(project => new ModPluginInfo
-		{
-			IconUrl = project.icon_url,
-			License = project.license,
-			Name = project.title!,
-			Owner = project.author,
-			Slug = project.slug!,
-			Id = project.project_id,
-			DownloadCount = (uint)project.downloads,
-			LicenseUrl = project.license.StartsWith("LicenseRef")
-				? string.Empty
-				: $"https://spdx.org/licenses/{project.license}",
-			Description = project.description!
-		}).ToArray();
+		return
+		[
+			.. response.Hits!.Select(project => new ModPluginInfo
+			{
+				IconUrl = project.icon_url,
+				License = project.license,
+				Name = project.title!,
+				Owner = project.author,
+				Slug = project.slug!,
+				Id = project.project_id,
+				DownloadCount = (uint)project.downloads,
+				LicenseUrl = project.license.StartsWith("LicenseRef")
+					? string.Empty
+					: $"https://spdx.org/licenses/{project.license}",
+				Description = project.description!
+			})
+		];
 	}
 
 	public override async Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
@@ -201,7 +207,7 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 					VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
 										   ?? throw new NetworkResourceUnavailableException();
 
-					downloadUri = new Uri(response.files!.First(file => (bool)file.primary!).url!);
+					downloadUri = new Uri(response.files.First(file => file.primary).url);
 				}
 
 				return new ModPluginDownloadInfo.Dependency
@@ -235,27 +241,33 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		return modPlugin;
 	}
 
-	// TODO: Finish this thing
-	public override Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
+	public override async Task<ModPluginDownloadInfo[]> CheckForUpdatesAsync(IEnumerable<string> modFiles)
 	{
-		List<string> hashes = [];
+		using SHA512 hasher = SHA512.Create();
+		List<string> hashes = [.. modFiles.Select(hasher.GetFileHashAsString)];
+		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
+		HttpResponseMessage response = await client.PostAsJsonAsync("version_files/update", hashes);
+		Dictionary<string, VersionInfo>? updates = await response.Content.ReadFromJsonAsync<Dictionary<string, VersionInfo>>();
 
-		foreach (string fileName in modFiles)
-		{
-			using FileStream file = File.OpenRead(fileName);
-			using SHA512 hasher = SHA512.Create();
-			byte[] hashed = hasher.ComputeHash(file);
-			StringBuilder sb = new();
+		if (updates is null) return [];
 
-			foreach (byte b in hashed)
+		return
+		[
+			.. updates.Values.Select(version =>
 			{
-				sb.Append(b.ToString("x2"));
-			}
-
-			hashes.Add(sb.ToString());
-		}
-
-		return Task.FromResult(Array.Empty<ModPluginDownloadInfo>());
+				VersionFile primaryFile = version.files.FirstOrDefault(file => file.primary, version.files[0]);
+				
+				return new ModPluginDownloadInfo(version.id)
+				{
+					DownloadUri = primaryFile.url,
+					DisplayName = version.name ?? string.Empty,
+					FileName = primaryFile.filename,
+					Hash = primaryFile.hashes.sha512,
+					HashAlgorithm = HashAlgorithm.Sha512,
+					Size = primaryFile.size
+				};
+			})
+		];
 	}
 
 	public async Task<Category[]> ListCategories()
@@ -277,11 +289,11 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		string? sha1 = null);
 
 	internal record VersionFile(
-		VersionFileHashes? hashes = null,
-		string? url = null,
-		string? filename = null,
-		bool? primary = null,
-		int? size = null,
+		VersionFileHashes hashes,
+		string url,
+		string filename,
+		bool primary,
+		long size,
 		string? file_type = null);
 
 	internal record ProjectResult(
@@ -305,14 +317,14 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		string? featured_gallery = null);
 
 	internal record VersionInfo(
-		string? id = null,
+		string id = "",
 		string? name = null,
 		string? version_number = null,
 		string? changelog = null,
 		VersionDependency[]? dependencies = null,
 		string? version_type = null,
 		bool? featured = null,
-		VersionFile[]? files = null);
+		VersionFile[] files = null!);
 
 	internal record LicenseDetails(
 		string? id = null,

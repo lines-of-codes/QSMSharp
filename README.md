@@ -29,7 +29,7 @@ and if you made code changes, please do the following as a basic courtesy:
 - Remove QSMSharp's API keys
 
 Currently, the only public API key used in QSMSharp is the CurseForge API key, 
-which can be changed in the [CurseForgeProvider.cs](QSM.Core/ModPluginSource/CurseForgeProvider.cs) 
+which can be changed in the [appsettings.jsonc](QSM.Web/appsettings.jsonc) 
 file. Note that removing the key will likely cause every method in the class to
 throw an exception due to being unauthorized.
 

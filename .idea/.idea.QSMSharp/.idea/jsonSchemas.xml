@@ -12,7 +12,7 @@
               <option name="patterns">
                 <list>
                   <Item>
-                    <option name="path" value="QSM.Web/appsettings.json" />
+                    <option name="path" value="QSM.Web/appsettings.jsonc" />
                   </Item>
                   <Item>
                     <option name="path" value="QSM.Web/appsettings.Development.json" />

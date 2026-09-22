@@ -62,7 +62,7 @@
     protected override void OnInitialized()
     {
         Input ??= new InputModel();
-        _installInfo = new List<string>(new string[AppConfig.JavaInstalls.Count]);
+        _installInfo = new List<string>(AppConfig.JavaInstalls.Count);
     }
 
     protected override async Task OnInitializedAsync()

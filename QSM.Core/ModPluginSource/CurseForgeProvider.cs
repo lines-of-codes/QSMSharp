@@ -12,7 +12,6 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 {
 	public const string HttpClientName = "CurseForgeApi";
 	public const string BaseAddress = "https://api.curseforge.com/v1/";
-	public const string CurseKey = "$2a$10$kz4OPSZlWNbJLaJImOgTIOwfx3bnMshplbA1F5L2WiMuL5oq63o.q";
 
 	private const ushort MinecraftId = 432;
 	public async Task<CurseCategory[]> ListCategories()
@@ -54,45 +53,49 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		GetModFilesResponse response = await client.GetFromJsonAsync<GetModFilesResponse>(path)
 									   ?? throw new NetworkResourceUnavailableException();
 
-		return response.Data.Select(file =>
-		{
-			StringBuilder name = new(file.DisplayName);
-
-			if (file.ReleaseType == FileReleaseType.Alpha)
-				name.Append(" (alpha)");
-			else if (file.ReleaseType == FileReleaseType.Beta)
-				name.Append(" (beta)");
-
-			file.GameVersions.Sort();
-
-			name.Append(" (");
-			name.Append(string.Join(' ', file.GameVersions.Reverse()));
-			name.Append(')');
-
-			IEnumerable<ModPluginDownloadInfo.Dependency> dependencies =
-				file.Dependencies
-					.Where(dep =>
-						dep.RelationType is FileRelationType.RequiredDependency
-							or FileRelationType.OptionalDependency)
-					.Select(dep => new ModPluginDownloadInfo.Dependency
-					{
-						Name = string.Empty,
-						Required = dep.RelationType == FileRelationType.RequiredDependency,
-						Slug = dep.ModId.ToString()
-					});
-
-			var hash = file.Hashes.FirstOrDefault(data => data.Algo == CfHashAlgorithm.Sha1)?.Value;
-
-			return new ModPluginDownloadInfo(file.Id.ToString())
+		return
+		[
+			.. response.Data.Select(file =>
 			{
-				DisplayName = name.ToString(),
-				DownloadUri = file.DownloadUrl,
-				FileName = file.FileName,
-				Hash = hash,
-				HashAlgorithm = hash == null ? HashAlgorithm.None : HashAlgorithm.Sha1,
-				Dependencies = dependencies.ToArray()
-			};
-		}).ToArray();
+				StringBuilder name = new(file.DisplayName);
+
+				if (file.ReleaseType == FileReleaseType.Alpha)
+					name.Append(" (alpha)");
+				else if (file.ReleaseType == FileReleaseType.Beta)
+					name.Append(" (beta)");
+
+				file.GameVersions.Sort();
+
+				name.Append(" (");
+				name.Append(string.Join(' ', file.GameVersions.Reverse()));
+				name.Append(')');
+
+				IEnumerable<ModPluginDownloadInfo.Dependency> dependencies =
+					file.Dependencies
+						.Where(dep =>
+							dep.RelationType is FileRelationType.RequiredDependency
+								or FileRelationType.OptionalDependency)
+						.Select(dep => new ModPluginDownloadInfo.Dependency
+						{
+							Name = string.Empty,
+							Required = dep.RelationType == FileRelationType.RequiredDependency,
+							Slug = dep.ModId.ToString()
+						});
+
+				string? hash = file.Hashes.FirstOrDefault(data => data.Algo == CfHashAlgorithm.Sha1)?.Value;
+
+				return new ModPluginDownloadInfo(file.Id.ToString())
+				{
+					DisplayName = name.ToString(),
+					DownloadUri = file.DownloadUrl,
+					FileName = file.FileName,
+					Hash = hash,
+					HashAlgorithm = hash == null ? HashAlgorithm.None : HashAlgorithm.Sha1,
+					Dependencies = [.. dependencies],
+					Size = file.FileLength
+				};
+			})
+		];
 	}
 
 	public override Task<ModPluginDownloadInfo> ResolveDependenciesAsync(ModPluginDownloadInfo mod)
@@ -186,13 +189,12 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		File[] response = (await message.Content.ReadFromJsonAsync<GetFilesResponse>())?.Data ?? throw new NetworkResourceUnavailableException();
 		string modsFolder = Path.Join(dest, "mods");
 
-		var rawSkipped = response.Where(f => f.DownloadUrl == null).ToArray();
+		File[] rawSkipped = response.Where(f => f.DownloadUrl == null).ToArray();
 		CurseMissingMod[] skipped = new CurseMissingMod[rawSkipped.Length];
 
 		if (rawSkipped.Length > 0)
 		{
-			var skippedMods = await GetMods(rawSkipped.Select(f => f.ModId));
-
+			Mod[] skippedMods = await GetMods(rawSkipped.Select(f => f.ModId));
 
 			for (ushort i = 0; i < rawSkipped.Length; i++)
 			{
@@ -309,6 +311,7 @@ public class CurseForgeProvider(IHttpClientFactory httpClientFactory) : ModPlugi
 		string FileName,
 		FileReleaseType ReleaseType,
 		FileHash[] Hashes,
+		long FileLength,
 		string? DownloadUrl,
 		string[] GameVersions,
 		FileDependency[] Dependencies);

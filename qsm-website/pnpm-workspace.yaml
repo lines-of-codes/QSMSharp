@@ -3,6 +3,7 @@ allowBuilds:
   sharp: true
 minimumReleaseAgeExclude:
   - astro@6.4.6 || 7.1.1
+  - '@astrojs/starlight@0.42.0'
 onlyBuiltDependencies:
   - esbuild
   - sharp

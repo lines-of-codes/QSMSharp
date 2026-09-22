@@ -24,6 +24,8 @@ internal static class Program
 			.CreateBootstrapLogger();
 		
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+		builder.Configuration.AddJsonFile("appsettings.jsonc", true, true);
 		
 		ApplicationConfig.EnsureFolderExists(builder.Configuration.GetValue<string>("QSM:DataFolder"));
 
@@ -89,7 +91,7 @@ internal static class Program
 		builder.Services.AddHttpClient(CurseForgeProvider.HttpClientName, client =>
 		{
 			client.BaseAddress = new Uri(CurseForgeProvider.BaseAddress);
-			client.DefaultRequestHeaders.Add("x-api-key", CurseForgeProvider.CurseKey);
+			client.DefaultRequestHeaders.Add("x-api-key", builder.Configuration.GetValue<string>("QSM:CurseForgeKey"));
 		});
 		
 		InfoFetcher[] fetchers =

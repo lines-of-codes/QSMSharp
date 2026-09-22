@@ -1,4 +1,7 @@
 {
+  "QSM": {
+    "CurseForgeKey": "$2a$10$kz4OPSZlWNbJLaJImOgTIOwfx3bnMshplbA1F5L2WiMuL5oq63o.q"
+  },
   "ConnectionStrings": {
     "DefaultConnection": "DataSource=/var/lib/qsm-web/app.db;Cache=Shared"
   },
