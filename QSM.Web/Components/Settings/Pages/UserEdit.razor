@@ -1,0 +1,220 @@
+@page "/Settings/Users/{Id:guid}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using QSM.Web.Data
+
+@attribute [Authorize(Roles = "Owner")]
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager NavMan
+@inject ILogger<UserEdit> Logger
+
+<PageTitle>@_user.UserName - Edit User</PageTitle>
+
+<a href="/Settings/Users" class="text-decoration-none"><i class="bi bi-arrow-left"></i> Back</a>
+
+<h2>@_user.UserName</h2>
+
+<div class="row">
+    <div class="col-md-6">
+            <strong>ID</strong>
+            <p>@_user.Id</p>
+            
+            <strong>Role(s)</strong>
+            <p>
+                @if (string.IsNullOrEmpty(_rolesDisplay))
+                {
+                    <i class="text-secondary">None</i>
+                }
+                else
+                {
+                    @_rolesDisplay
+                }
+            </p>
+    </div>
+    <div class="col-md-6">
+        <strong>Predefined Roles</strong>
+        <ul class="ps-3">
+            <li>
+                <strong>Owner:</strong> You can do everything. There must be at least one owner.
+            </li>
+            <li>
+                <strong>Editor:</strong> Can edit server settings, but not access this QSM Settings page.
+            </li>
+            <li><strong>None:</strong> Can only view server settings.</li>
+        </ul>
+    </div>
+</div>
+
+<EditForm Model="Model" class="row" OnValidSubmit="Submit">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <InputText type="password" class="form-control" id="Model.NewPassword" @bind-Value="Model!.NewPassword" 
+                       placeholder="Enter new password..." autocomplete="new-password" />
+            <label for="Model.NewPassword">New Password</label>
+        </div>
+        <div class="form-floating mb-2">
+            <InputText type="password" class="form-control" id="Model.ConfirmNewPassword" autocomplete="new-password"
+                       @bind-Value="Model.ConfirmNewPassword" placeholder="Confirm new password..." />
+            <label for="Model.ConfirmNewPassword">Confirm New Password</label>
+        </div>
+    </div>
+    <div class="col-md-6">
+        @if (!_onlyOneOwner)
+        {
+            <div class="form-floating mb-2">
+                <InputSelect @bind-Value="Model.PredefinedRole" class="form-select">
+                    <option>Owner</option>
+                    <option>Editor</option>
+                    <option>None</option>
+                </InputSelect>
+                <label>Predefined Roles</label>
+            </div>
+        }
+        <div class="form-floating show-placeholder mb-2">
+            <InputText @bind-Value="Model.CustomRoles" class="form-control" placeholder="A comma separated list of custom roles" />
+            <label>Custom Roles</label>
+        </div>
+    </div>
+    <div class="mt-2">
+        <button class="btn btn-primary">Submit</button>
+    </div>
+</EditForm>
+
+@code {
+    class UserEditModel
+    {
+        public string NewPassword { get; set; } = string.Empty;
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+        public string PredefinedRole { get; set; } = "None";
+        public string CustomRoles { get; set; } = string.Empty;
+    }
+    
+    static readonly HashSet<string> PredefinedRoles = ["Owner", "Editor"];
+    
+    [Parameter] public Guid Id { get; set; }
+    UserEditModel? Model { get; set; }
+    ApplicationUser _user = null!;
+    HashSet<string> _roles = [];
+    string _rolesDisplay = string.Empty;
+    bool _onlyOneOwner;
+
+    protected override void OnInitialized()
+    {
+        Model ??= new UserEditModel();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await UserManager.FindByIdAsync(Id.ToString());
+
+        if (result == null)
+        {
+            NavMan.NavigateTo("/Settings/Users");
+            return;
+        }
+
+        _user = result;
+        _roles = [.. await UserManager.GetRolesAsync(_user)];
+
+        if (_roles.Contains("Owner") && (await UserManager.GetUsersInRoleAsync("Owner")).Count < 2)
+        {
+            _onlyOneOwner = true;
+        }
+        
+        _rolesDisplay = string.Join(", ", _roles);
+        Model!.PredefinedRole = GetMasterRole() ?? "None";
+        var customRoleSet = new HashSet<string>(_roles);
+        customRoleSet.ExceptWith(PredefinedRoles);
+        Model!.CustomRoles = string.Join(',', customRoleSet);
+    }
+
+    private string? GetMasterRole()
+    {
+        var masterRoleSet = new HashSet<string>(_roles);
+        masterRoleSet.IntersectWith(PredefinedRoles);
+        return masterRoleSet.FirstOrDefault();
+    }
+
+    private void LogIdentityErrors(string operation, IdentityResult result)
+    {
+        if (result.Succeeded) return;
+        
+        var errors = result.Errors;
+        foreach (var error in errors)
+        {
+            Logger.LogError("{Operation}: {Error}", operation, error);
+        }
+    }
+
+    private async Task CleanUpRoles(HashSet<string> roles)
+    {
+        if (roles.Count == 0) return;
+
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var normalized = roles.Select(RoleManager.NormalizeKey).ToHashSet();
+        var userRoles = context.UserRoles;
+        
+        await (from role in context.Roles
+            where normalized.Contains(role.NormalizedName)
+            where !userRoles.Any(userRole => userRole.RoleId == role.Id)
+            select role).ExecuteDeleteAsync();
+    }
+
+    private async Task Submit()
+    {
+        var removedRoles = new HashSet<string>(_roles);
+        var addedRoles = new HashSet<string>(
+            Model!.CustomRoles.Split(
+                ',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        
+        addedRoles.ExceptWith(PredefinedRoles);
+        removedRoles.ExceptWith(addedRoles);
+        removedRoles.ExceptWith(PredefinedRoles);
+        addedRoles.ExceptWith(_roles);
+        
+        var masterRole = GetMasterRole();
+        var newMasterRole = Model!.PredefinedRole == "None" ? string.Empty : Model.PredefinedRole;
+
+        if (masterRole != newMasterRole)
+        {
+            if (masterRole is not null)
+                await UserManager.RemoveFromRoleAsync(_user, masterRole);
+
+            addedRoles.Add(newMasterRole);
+        }
+
+        IdentityResult result;
+        foreach (var roleName in addedRoles)
+        {
+            var roleExists  = await RoleManager.RoleExistsAsync(roleName);
+            if (roleExists) continue;
+            
+            result = await RoleManager.CreateAsync(new IdentityRole(roleName));
+            LogIdentityErrors($"Failed creating role \"{roleName}\"", result);
+        }
+        result = await UserManager.AddToRolesAsync(_user, addedRoles);
+        LogIdentityErrors("Failed adding user to roles", result);
+
+        result = await UserManager.RemoveFromRolesAsync(_user, removedRoles);
+        LogIdentityErrors("Failed removing user from roles", result);
+
+        await CleanUpRoles(removedRoles);
+
+        await PasswordReset();
+        NavMan.NavigateTo("/Settings/Users");
+    }
+
+    private async Task PasswordReset()
+    {
+        if (string.IsNullOrEmpty(Model?.NewPassword)) return;
+        await UserManager.ResetPasswordAsync(
+            _user, 
+            await UserManager.GeneratePasswordResetTokenAsync(_user), 
+            Model.NewPassword);
+    }
+
+}

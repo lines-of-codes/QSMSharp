@@ -35,7 +35,7 @@
     </tr>
     </thead>
     <tbody>
-    @for (var i = 0; i < AppConfig.JavaInstalls.Count; i++)
+    @for (var i = 0; i < _installInfo.Count; i++)
     {
         var install = AppConfig.JavaInstalls[i];
         <tr>
@@ -67,11 +67,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        for (var i = 0; i < AppConfig.JavaInstalls.Count; i++)
+        foreach (var install in AppConfig.JavaInstalls)
         {
-            var install = AppConfig.JavaInstalls[i];
             var installInfo = await JavaCheck.CheckJavaInstallationAsync(install);
-            _installInfo[i] = $"{installInfo.Vendor} {installInfo.Version}";
+            _installInfo.Add($"{installInfo.Vendor} {installInfo.Version}");
         }
     }
 
