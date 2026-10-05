@@ -3,11 +3,18 @@ using QSM.Core.Utilities;
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace QSM.Core.ServerSoftware;
 
-public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
+public partial class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 {
+	[JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+	[JsonSerializable(typeof(GameVersion[]))]
+	[JsonSerializable(typeof(LoaderVersion[]))]
+	[JsonSerializable(typeof(InstallerVersion[]))]
+	private sealed partial class QuiltContext : JsonSerializerContext { }
+
 	public override string HttpClientName => "QuiltFetcher";
 	public override string HttpBaseAddress => "https://meta.quiltmc.org/v3/";
 
@@ -16,7 +23,7 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
 		using HttpClient client = factory.CreateClient(HttpClientName);
-		GameVersion[]? versions = await client.GetFromJsonAsync<GameVersion[]>("versions/game");
+		GameVersion[]? versions = await client.GetFromJsonAsync("versions/game", QuiltContext.Default.GameVersionArray);
 		return versions?.Where(v => v.Stable).Select(v => v.Version).ToArray() ?? [];
 	}
 
@@ -25,7 +32,7 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 		if (_versionListCache.Value != null) return _versionListCache.Value;
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
-		LoaderVersion[]? versions = await client.GetFromJsonAsync<LoaderVersion[]>("versions/loader");
+		LoaderVersion[]? versions = await client.GetFromJsonAsync("versions/loader", QuiltContext.Default.LoaderVersionArray);
 		_versionListCache.Value = versions?.Select(v => v.Version).ToArray();
 		return _versionListCache.Value ?? [];
 	}
@@ -33,7 +40,7 @@ public class QuiltFetcher(IHttpClientFactory factory) : InfoFetcher
 	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
 		using HttpClient client = factory.CreateClient(HttpClientName);
-		InstallerVersion[]? versions = await client.GetFromJsonAsync<InstallerVersion[]>("versions/installer");
+		InstallerVersion[]? versions = await client.GetFromJsonAsync("versions/installer", QuiltContext.Default.InstallerVersionArray);
 		return versions?[0].Url ?? string.Empty;
 	}
 

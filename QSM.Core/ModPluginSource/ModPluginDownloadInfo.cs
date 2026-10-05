@@ -31,7 +31,7 @@ public class ModPluginDownloadInfo(string versionId)
 	public string FileName { get; set; } = string.Empty;
 	public string? Hash { get; set; }
 	public HashAlgorithm HashAlgorithm { get; set; } = HashAlgorithm.None;
-	
+
 	/// <summary>
 	/// Size in bytes
 	/// </summary>

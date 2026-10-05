@@ -1,12 +1,17 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace QSM.Core.ServerSoftware;
 
 public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 {
+	[JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+	[JsonSerializable(typeof(NeoForgeVersions))]
+	private sealed partial class NeoForgeContext : JsonSerializerContext { }
+
 	private readonly Regex _majorMinorVersionMatch = MajorMinorVersionMatch();
 
 	private string[] _availableVersionsCache = [];
@@ -17,6 +22,8 @@ public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 
 	public override string HttpBaseAddress => "";
 
+	private static string NeoForgeReleasesUrl => "https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge";
+
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
 		if (MinecraftVersionsCache.Length != 0)
@@ -26,8 +33,7 @@ public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		HttpClient client = factory.CreateClient(HttpClientName);
 		NeoForgeVersions? response =
-			await client.GetFromJsonAsync<NeoForgeVersions>(
-				"https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge");
+			await client.GetFromJsonAsync(NeoForgeReleasesUrl, NeoForgeContext.Default.NeoForgeVersions);
 
 		_availableVersionsCache = response!.Versions!;
 
@@ -62,12 +68,15 @@ public partial class NeoForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 			return Task.FromResult(buildInfo);
 		}
 
-		string majorMinorVersion = minecraftVersion[2..] + ".";
-		List<string> versions = _availableVersionsCache.Where(version => version.StartsWith(majorMinorVersion)).ToList();
+		string majorMinorVersion = minecraftVersion;
 
-		versions.Reverse();
+		if (minecraftVersion.StartsWith("1.")) {
+			majorMinorVersion = minecraftVersion[2..] + ".";
+		}
 
-		BuildInfoCache[minecraftVersion] = versions.ToArray();
+		IEnumerable<string> versions = _availableVersionsCache.Where(version => version.StartsWith(majorMinorVersion)).Reverse();
+
+		BuildInfoCache[minecraftVersion] = [.. versions];
 
 		return Task.FromResult(BuildInfoCache[minecraftVersion]);
 	}

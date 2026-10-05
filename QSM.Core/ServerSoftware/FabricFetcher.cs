@@ -1,10 +1,17 @@
 ﻿using JetBrains.Annotations;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 
 namespace QSM.Core.ServerSoftware;
 
-public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
+public partial class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 {
+	[JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+	[JsonSerializable(typeof(AvailableFabricVersion[]))]
+	[JsonSerializable(typeof(SupportedMinecraftVersion[]))]
+	[JsonSerializable(typeof(FabricInstaller[]))]
+	private sealed partial class FabricContext : JsonSerializerContext { }
+
 	public override string HttpClientName => "FabricFetcher";
 	public override string HttpBaseAddress => "https://meta.fabricmc.net/";
 
@@ -17,7 +24,7 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		AvailableFabricVersion[]? response =
-			await client.GetFromJsonAsync<AvailableFabricVersion[]>($"/v2/versions/loader/{minecraftVersion}");
+			await client.GetFromJsonAsync($"/v2/versions/loader/{minecraftVersion}", FabricContext.Default.AvailableFabricVersionArray);
 
 		BuildInfoCache[minecraftVersion] = [.. response!.Select(e => e.Loader!.Version!)];
 
@@ -33,7 +40,7 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
 		SupportedMinecraftVersion[]? response =
-			await client.GetFromJsonAsync<SupportedMinecraftVersion[]>("/v2/versions/game")
+			await client.GetFromJsonAsync("/v2/versions/game", FabricContext.Default.SupportedMinecraftVersionArray)
 				?? throw new NetworkResourceUnavailableException();
 		List<string> versions = [];
 
@@ -53,7 +60,7 @@ public class FabricFetcher(IHttpClientFactory factory) : InfoFetcher
 	public override async Task<string> GetDownloadUrlAsync(string minecraftVersion, string build)
 	{
 		using HttpClient client = factory.CreateClient(HttpClientName);
-		FabricInstaller[]? response = await client.GetFromJsonAsync<FabricInstaller[]>("/v2/versions/installer");
+		FabricInstaller[]? response = await client.GetFromJsonAsync("/v2/versions/installer", FabricContext.Default.FabricInstallerArray);
 
 		return response == null ? throw new NetworkResourceUnavailableException() : $"https://meta.fabricmc.net/v2/versions/loader/{minecraftVersion}/{build}/{response[0].Version}/server/jar";
 	}

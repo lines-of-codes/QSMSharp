@@ -1,11 +1,17 @@
 ﻿using QSM.Core.Utilities;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace QSM.Core.JavaProvider;
 
-public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttpConsumer
+public partial class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttpConsumer
 {
+	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+	[JsonSerializable(typeof(ReleaseNamesRequest))]
+	[JsonSerializable(typeof(AvailableReleasesRequest))]
+	internal partial class AdoptiumContext : JsonSerializerContext { }
+
 	public string HttpClientName => "AdoptiumFetcher";
 	public string HttpBaseAddress => "https://api.adoptium.net/v3/";
 
@@ -41,10 +47,10 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 	{
 		HttpClient client = factory.CreateClient(HttpClientName);
 		AvailableReleasesRequest? response =
-			await client.GetFromJsonAsync<AvailableReleasesRequest>("info/available_releases");
+			await client.GetFromJsonAsync("info/available_releases", AdoptiumContext.Default.AvailableReleasesRequest);
 
-		return response!.available_releases!.Reverse().ToDictionary(version =>
-			response.available_lts_releases!.Contains(version) ? $"Java {version} (LTS)" : $"Java {version}");
+		return response!.AvailableReleases!.Reverse().ToDictionary(version =>
+			response.AvailableLTSReleases!.Contains(version) ? $"Java {version} (LTS)" : $"Java {version}");
 	}
 
 	public async Task<JavaDownloadInfo> GetDownloadUrlAsync(string releaseName)
@@ -60,20 +66,21 @@ public class AdoptiumProvider(IHttpClientFactory factory) : IJavaProvider, IHttp
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
 		HttpClient client = factory.CreateClient(HttpClientName);
-		ReleaseNamesRequest? response = await client.GetFromJsonAsync<ReleaseNamesRequest>(
-			$"info/release_names?architecture={ProcessArchitecture}&heap_size=normal&image_type=jre&os={OS}&page=0&page_size=10&project=jdk&release_type=ga&semver=false&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse&version=%5B{javaMajorRelease}%2C{javaMajorRelease + 1}%5D");
+		ReleaseNamesRequest? response = await client.GetFromJsonAsync(
+			$"info/release_names?architecture={ProcessArchitecture}&heap_size=normal&image_type=jre&os={OS}&page=0&page_size=10&project=jdk&release_type=ga&semver=false&sort_method=DEFAULT&sort_order=DESC&vendor=eclipse&version=%5B{javaMajorRelease}%2C{javaMajorRelease + 1}%5D",
+			AdoptiumContext.Default.ReleaseNamesRequest);
 
-		return response!.releases!;
+		return response!.Releases!;
 	}
 
 	internal sealed record AvailableReleasesRequest(
-		int[]? available_lts_releases = null,
-		int[]? available_releases = null,
-		int? most_recent_feature_release = null,
-		int? most_recent_feature_version = null,
-		int? most_recent_lts = null,
-		int? tip_version = null);
+		int[]? AvailableLTSReleases = null,
+		int[]? AvailableReleases = null,
+		int? MostRecentFeatureRelease = null,
+		int? MostRecentFeatureVersion = null,
+		int? MostRecentLTS = null,
+		int? TipVersion = null);
 
 	internal sealed record ReleaseNamesRequest(
-		string[]? releases = null);
+		string[]? Releases = null);
 }

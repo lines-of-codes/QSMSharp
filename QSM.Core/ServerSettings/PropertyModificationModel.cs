@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace QSM.Core.ServerSettings;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
 public abstract class PropertyModificationModel
 {
 	private readonly Dictionary<string, PropertyInfo> _properties = [];

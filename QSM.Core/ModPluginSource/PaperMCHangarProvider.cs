@@ -4,13 +4,20 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 using HashAlgorithm = QSM.Core.Utilities.HashAlgorithm;
 
 namespace QSM.Core.ModPluginSource;
 
 [PublicAPI]
-public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPluginProvider
+public partial class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPluginProvider
 {
+	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+	[JsonSerializable(typeof(VersionRequest))]
+	[JsonSerializable(typeof(SearchRequest))]
+	[JsonSerializable(typeof(HangarProject))]
+	internal sealed partial class HangarContext : JsonSerializerContext { }
+
 	public const string HttpClientName = "PaperMCHangarApi";
 	public const string BaseAddress = "https://hangar.papermc.io/api/v1/";
 
@@ -28,13 +35,14 @@ public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPl
 
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 
-		VersionRequest response = await client.GetFromJsonAsync<VersionRequest>(
-									  $"projects/{slug}/versions?platform={serverMetadata.Software}&platformVersion={serverMetadata.MinecraftVersion}")
+		VersionRequest response = await client.GetFromJsonAsync(
+									  $"projects/{slug}/versions?platform={serverMetadata.Software}&platformVersion={serverMetadata.MinecraftVersion}",
+									  HangarContext.Default.VersionRequest)
 								  ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginDownloadInfo> versions = [];
 
-		foreach (ProjectVersionEntry version in response.Result!)
+		foreach (ProjectVersionEntry version in response.Result)
 		{
 			string platform = serverMetadata.Software.ToString().ToUpperInvariant();
 			HangarDownloadEntry downloadEntry = version.Downloads![platform];
@@ -87,24 +95,25 @@ public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPl
 
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 
-		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(route)
+		SearchRequest response = await client.GetFromJsonAsync(route, HangarContext.Default.SearchRequest)
 								 ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginInfo> plugins = [];
 
-		foreach (HangarProject project in response.Result!)
+		foreach (HangarProject project in response.Result)
 		{
 			plugins.Add(new ModPluginInfo
 			{
-				Name = project.Name!,
-				IconUrl = project.AvatarUrl!,
-				License = project.Settings!.License!.Name!,
+				Name = project.Name,
+				IconUrl = project.AvatarUrl,
+				License = project.Settings.License.Name ?? project.Settings.License.Type ?? string.Empty,
 				LicenseUrl = project.Settings.License.Url!,
-				Owner = project.Namespace!.Owner!,
+				Owner = project.Namespace.Owner!,
 				Slug = project.Namespace.Slug!,
 				Id = project.Namespace.Slug,
-				DownloadCount = (uint)project.Stats!.Downloads!,
-				Description = project.Description!
+				DownloadCount = (uint)project.Stats.Downloads!,
+				Description = project.Description,
+				Url = $"https://hangar.papermc.io/{project.Namespace.Owner}/{project.Namespace.Slug}"
 			});
 		}
 
@@ -152,7 +161,7 @@ public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPl
 
 		try
 		{
-			HangarProject? project = await client.GetFromJsonAsync<HangarProject>($"versions/hash/{hash}");
+			HangarProject? project = await client.GetFromJsonAsync($"versions/hash/{hash}", HangarContext.Default.HangarProject);
 			return project;
 		}
 		catch (HttpRequestException ex)
@@ -212,22 +221,22 @@ public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPl
 		string? Type = null);
 
 	internal sealed record HangarSettings(
-		string[]? Tags = null,
-		HangarLicense? License = null,
-		string[]? Keywords = null,
-		string? Sponsors = null);
+		string[] Tags,
+		HangarLicense License,
+		string[] Keywords,
+		string Sponsors);
 
 	internal sealed record HangarProject(
-		DateTime? CreatedAt = null,
-		string? Name = null,
-		HangarNamespace? Namespace = null,
-		HangarStats? Stats = null,
-		string? Category = null,
-		DateTime? LastUpdated = null,
-		string? Visibility = null,
-		string? AvatarUrl = null,
-		string? Description = null,
-		HangarSettings? Settings = null);
+		DateTime CreatedAt,
+		string Name,
+		HangarNamespace Namespace,
+		HangarStats Stats,
+		string Category,
+		DateTime LastUpdated,
+		string Visibility,
+		string AvatarUrl,
+		string Description,
+		HangarSettings Settings);
 
 	internal sealed record ProjectReleaseChannel(
 		string? Name = null);
@@ -257,10 +266,10 @@ public class PaperMCHangarProvider(IHttpClientFactory httpClientFactory) : ModPl
 		Dictionary<string, Dependency[]>? PluginDependencies = null);
 
 	internal sealed record SearchRequest(
-		PaginationInfo? Pagination = null,
-		HangarProject[]? Result = null);
+		PaginationInfo Pagination,
+		HangarProject[] Result);
 
 	internal sealed record VersionRequest(
-		PaginationInfo? Pagination = null,
-		ProjectVersionEntry[]? Result = null);
+		PaginationInfo Pagination,
+		ProjectVersionEntry[] Result);
 }

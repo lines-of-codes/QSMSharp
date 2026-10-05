@@ -5,12 +5,22 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 using HashAlgorithm = QSM.Core.Utilities.HashAlgorithm;
 
 namespace QSM.Core.ModPluginSource;
 
-public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginProvider
+public partial class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginProvider
 {
+	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+	[JsonSerializable(typeof(VersionInfo[]))]
+	[JsonSerializable(typeof(SearchRequest))]
+	[JsonSerializable(typeof(DetailedProjectResult))]
+	[JsonSerializable(typeof(List<string>))]
+	[JsonSerializable(typeof(Dictionary<string, VersionInfo>))]
+	[JsonSerializable(typeof(Category[]))]
+	private sealed partial class ModrinthContext : JsonSerializerContext { }
+
 	public enum ProjectType
 	{
 		Mod,
@@ -36,35 +46,35 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 			queryString += WebUtility.UrlEncode($"[\"{serverMetadata.MinecraftVersion}\"]");
 		}
 
-		VersionInfo[] response = await client.GetFromJsonAsync<VersionInfo[]>(queryString)
+		VersionInfo[] response = await client.GetFromJsonAsync(queryString, ModrinthContext.Default.VersionInfoArray)
 								 ?? throw new NetworkResourceUnavailableException();
 
 		List<ModPluginDownloadInfo> versions = [];
 
 		foreach (VersionInfo info in response)
 		{
-			IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = info.dependencies!.Select(dependency =>
+			IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = info.Dependencies!.Select(dependency =>
 				new ModPluginDownloadInfo.Dependency
 				{
-					Slug = dependency.version_id ?? string.Empty,
-					Name = dependency.file_name ?? string.Empty,
+					Slug = dependency.VersionId ?? string.Empty,
+					Name = dependency.FileName ?? string.Empty,
 					DownloadUri = null,
-					ExternalPageUrl = dependency.dependency_type,
-					Required = dependency.dependency_type == "required"
+					ExternalPageUrl = dependency.DependencyType,
+					Required = dependency.DependencyType == "required"
 				});
 
-			VersionFile primaryFile = info.files.FirstOrDefault(file => file.primary, info.files[0]);
+			VersionFile primaryFile = info.Files.FirstOrDefault(file => file.Primary, info.Files[0]);
 
-			versions.Add(new ModPluginDownloadInfo(info.id)
+			versions.Add(new ModPluginDownloadInfo(info.Id)
 			{
-				DisplayName = $"{info.name} ({info.version_type})",
-				FileName = primaryFile.filename,
+				DisplayName = $"{info.Name} ({info.VersionType})",
+				FileName = primaryFile.Filename,
 				Dependencies = [.. dependencies],
-				DownloadUri = primaryFile.url,
+				DownloadUri = primaryFile.Url,
 				ExternalPageUrl = null,
-				Hash = primaryFile.hashes.sha512,
+				Hash = primaryFile.Hashes.SHA512,
 				HashAlgorithm = HashAlgorithm.Sha512,
-				Size = primaryFile.size
+				Size = primaryFile.Size
 			});
 		}
 
@@ -74,31 +84,31 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 	public async Task<ModPluginDownloadInfo> GetVersionAsync(string id)
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-		VersionInfo version = await client.GetFromJsonAsync<VersionInfo>("version/" + id)
+		VersionInfo version = await client.GetFromJsonAsync("version/" + id, ModrinthContext.Default.VersionInfo)
 							   ?? throw new NetworkResourceUnavailableException();
 
-		IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = version.dependencies!.Select(dependency =>
+		IEnumerable<ModPluginDownloadInfo.Dependency> dependencies = version.Dependencies!.Select(dependency =>
 			new ModPluginDownloadInfo.Dependency
 			{
-				Slug = dependency.version_id ?? string.Empty,
-				Name = dependency.file_name ?? string.Empty,
+				Slug = dependency.VersionId ?? string.Empty,
+				Name = dependency.FileName ?? string.Empty,
 				DownloadUri = null,
-				ExternalPageUrl = dependency.dependency_type,
-				Required = dependency.dependency_type == "required"
+				ExternalPageUrl = dependency.DependencyType,
+				Required = dependency.DependencyType == "required"
 			});
 
-		VersionFile primaryFile = version.files.FirstOrDefault(file => file.primary, version.files[0]);
+		VersionFile primaryFile = version.Files.FirstOrDefault(file => file.Primary, version.Files[0]);
 
-		return new ModPluginDownloadInfo(version.id)
+		return new ModPluginDownloadInfo(version.Id)
 		{
-			DisplayName = $"{version.name} ({version.version_type})",
-			FileName = primaryFile.filename,
+			DisplayName = $"{version.Name} ({version.VersionType})",
+			FileName = primaryFile.Filename,
 			Dependencies = [.. dependencies],
-			DownloadUri = primaryFile.url,
+			DownloadUri = primaryFile.Url,
 			ExternalPageUrl = null,
-			Hash = primaryFile.hashes.sha512,
+			Hash = primaryFile.Hashes.SHA512,
 			HashAlgorithm = HashAlgorithm.Sha512,
-			Size = primaryFile.size
+			Size = primaryFile.Size
 		};
 	}
 
@@ -172,24 +182,25 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		}
 
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-		SearchRequest response = await client.GetFromJsonAsync<SearchRequest>(queryString)
+		SearchRequest response = await client.GetFromJsonAsync(queryString, ModrinthContext.Default.SearchRequest)
 								 ?? throw new NetworkResourceUnavailableException();
 
 		return
 		[
 			.. response.Hits!.Select(project => new ModPluginInfo
 			{
-				IconUrl = project.icon_url,
-				License = project.license,
-				Name = project.title!,
-				Owner = project.author,
-				Slug = project.slug!,
-				Id = project.project_id,
-				DownloadCount = (uint)project.downloads,
-				LicenseUrl = project.license.StartsWith("LicenseRef")
+				IconUrl = project.IconUrl,
+				License = project.License,
+				Name = project.Title!,
+				Owner = project.Author,
+				Slug = project.Slug!,
+				Id = project.ProjectId,
+				DownloadCount = (uint)project.Downloads,
+				LicenseUrl = project.License.StartsWith("LicenseRef")
 					? string.Empty
-					: $"https://spdx.org/licenses/{project.license}",
-				Description = project.description!
+					: $"https://spdx.org/licenses/{project.License}",
+				Description = project.Description!,
+				Url = $"https://modrinth.com/mod/{project.ProjectId}"
 			})
 		];
 	}
@@ -204,10 +215,10 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 				if (!s_ignoredDependencyType.Contains(dependency.ExternalPageUrl))
 				{
 					using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-					VersionInfo response = await client.GetFromJsonAsync<VersionInfo>($"version/{dependency.Slug}")
+					VersionInfo response = await client.GetFromJsonAsync($"version/{dependency.Slug}", ModrinthContext.Default.VersionInfo)
 										   ?? throw new NetworkResourceUnavailableException();
 
-					downloadUri = new Uri(response.files.First(file => file.primary).url);
+					downloadUri = new Uri(response.Files.First(file => file.Primary).Url);
 				}
 
 				return new ModPluginDownloadInfo.Dependency
@@ -229,14 +240,14 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
 		DetailedProjectResult? project =
-			await client.GetFromJsonAsync<DetailedProjectResult>($"project/{modPlugin.Slug}");
+			await client.GetFromJsonAsync($"project/{modPlugin.Slug}", ModrinthContext.Default.DetailedProjectResult);
 
 		if (string.IsNullOrEmpty(modPlugin.LicenseUrl))
 		{
-			modPlugin.LicenseUrl = project!.license!.url!;
+			modPlugin.LicenseUrl = project!.License!.Url!;
 		}
 
-		modPlugin.LongDescription = project!.body!;
+		modPlugin.LongDescription = project!.Body!;
 
 		return modPlugin;
 	}
@@ -246,8 +257,8 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		using SHA512 hasher = SHA512.Create();
 		List<string> hashes = [.. modFiles.Select(hasher.GetFileHashAsString)];
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-		HttpResponseMessage response = await client.PostAsJsonAsync("version_files/update", hashes);
-		Dictionary<string, VersionInfo>? updates = await response.Content.ReadFromJsonAsync<Dictionary<string, VersionInfo>>();
+		HttpResponseMessage response = await client.PostAsJsonAsync("version_files/update", hashes, ModrinthContext.Default.ListString);
+		Dictionary<string, VersionInfo>? updates = await response.Content.ReadFromJsonAsync(ModrinthContext.Default.DictionaryStringVersionInfo);
 
 		if (updates is null) return [];
 
@@ -255,16 +266,16 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 		[
 			.. updates.Values.Select(version =>
 			{
-				VersionFile primaryFile = version.files.FirstOrDefault(file => file.primary, version.files[0]);
-				
-				return new ModPluginDownloadInfo(version.id)
+				VersionFile primaryFile = version.Files.FirstOrDefault(file => file.Primary, version.Files[0]);
+
+				return new ModPluginDownloadInfo(version.Id)
 				{
-					DownloadUri = primaryFile.url,
-					DisplayName = version.name ?? string.Empty,
-					FileName = primaryFile.filename,
-					Hash = primaryFile.hashes.sha512,
+					DownloadUri = primaryFile.Url,
+					DisplayName = version.Name ?? string.Empty,
+					FileName = primaryFile.Filename,
+					Hash = primaryFile.Hashes.SHA512,
 					HashAlgorithm = HashAlgorithm.Sha512,
-					Size = primaryFile.size
+					Size = primaryFile.Size
 				};
 			})
 		];
@@ -273,106 +284,98 @@ public class ModrinthProvider(IHttpClientFactory httpClientFactory) : ModPluginP
 	public async Task<Category[]> ListCategories()
 	{
 		using HttpClient client = httpClientFactory.CreateClient(HttpClientName);
-		return (await client.GetFromJsonAsync<Category[]>("tag/category"))!;
+		return await client.GetFromJsonAsync("tag/category", ModrinthContext.Default.CategoryArray) ?? [];
 	}
 
-	// ReSharper disable InconsistentNaming
 	// ReSharper disable ClassNeverInstantiated.Global
 	internal record VersionDependency(
-		string? version_id = null,
-		string? project_id = null,
-		string? file_name = null,
-		string? dependency_type = null);
+		string? VersionId = null,
+		string? ProjectId = null,
+		string? FileName = null,
+		string? DependencyType = null);
 
 	internal record VersionFileHashes(
-		string? sha512 = null,
-		string? sha1 = null);
+		string? SHA512 = null,
+		string? SHA1 = null);
 
 	internal record VersionFile(
-		VersionFileHashes hashes,
-		string url,
-		string filename,
-		bool primary,
-		long size,
-		string? file_type = null);
+		VersionFileHashes Hashes,
+		string Url,
+		string Filename,
+		bool Primary,
+		long Size,
+		string? FileType = null);
 
 	internal record ProjectResult(
-		string project_id,
-		string project_type,
-		int downloads,
-		string author,
-		int follows,
-		DateTime date_created,
-		DateTime date_modified,
-		string license,
-		string? slug = null,
-		string? title = null,
-		string? description = null,
-		string[]? categories = null,
-		string? icon_url = null,
-		string[]? display_categories = null,
-		string[]? versions = null,
-		string? latest_version = null,
-		string[]? gallery = null,
-		string? featured_gallery = null);
+		string ProjectId,
+		string ProjectType,
+		int Downloads,
+		string Author,
+		int Follows,
+		DateTime DateCreated,
+		DateTime DateModified,
+		string License,
+		string? Slug = null,
+		string? Title = null,
+		string? Description = null,
+		string[]? Categories = null,
+		string? IconUrl = null,
+		string[]? DisplayCategories = null,
+		string[]? Versions = null,
+		string? LatestVersion = null,
+		string[]? Gallery = null,
+		string? FeaturedGallery = null);
 
 	internal record VersionInfo(
-		string id = "",
-		string? name = null,
-		string? version_number = null,
-		string? changelog = null,
-		VersionDependency[]? dependencies = null,
-		string? version_type = null,
-		bool? featured = null,
-		VersionFile[] files = null!);
+		string Id = "",
+		string? Name = null,
+		string? VersionNumber = null,
+		string? Changelog = null,
+		VersionDependency[]? Dependencies = null,
+		string? VersionType = null,
+		bool? Featured = null,
+		VersionFile[] Files = null!);
 
 	internal record LicenseDetails(
-		string? id = null,
-		string? name = null,
-		string? url = null);
+		string? Id = null,
+		string? Name = null,
+		string? Url = null);
 
 	internal record GalleryImage(
-		string? url = null,
-		bool? featured = null,
-		string? title = null,
-		string? description = null,
-		DateTime? created = null,
-		int? ordering = null);
+		string? Url = null,
+		bool? Featured = null,
+		string? Title = null,
+		string? Description = null,
+		DateTime? Created = null,
+		int? Ordering = null);
 
 	internal record DetailedProjectResult(
-		string? slug = null,
-		string? title = null,
-		string? description = null,
-		string[]? categories = null,
-		string? client_side = null,
-		string? server_side = null,
-		string? body = null,
-		string? project_type = null,
-		int? downloads = null,
-		string? icon_url = null,
-		string? project_id = null,
-		string? author = null,
-		string[]? display_categories = null,
-		string[]? versions = null,
-		int? follows = null,
-		DateTime? date_created = null,
-		DateTime? date_modified = null,
-		string? latest_version = null,
-		LicenseDetails? license = null,
-		GalleryImage[]? gallery = null,
-		string? featured_gallery = null);
+		string? Slug = null,
+		string? Title = null,
+		string? Description = null,
+		string[]? Categories = null,
+		string? ClientSide = null,
+		string? ServerSide = null,
+		string? Body = null,
+		string? ProjectType = null,
+		int? Downloads = null,
+		string? IconUrl = null,
+		string? ProjectId = null,
+		string? Author = null,
+		string[]? DisplayCategories = null,
+		string[]? Versions = null,
+		int? Follows = null,
+		DateTime? DateCreated = null,
+		DateTime? DateModified = null,
+		string? LatestVersion = null,
+		LicenseDetails? License = null,
+		GalleryImage[]? Gallery = null,
+		string? FeaturedGallery = null);
 
 	internal record SearchRequest(
-		ProjectResult[]? hits = null,
-		int? offset = null,
-		int? limit = null,
-		int? total_hits = null)
-	{
-		public ProjectResult[]? Hits = hits;
-		public int? Limit = limit;
-		public int? Offset = offset;
-		public int? TotalHits = total_hits;
-	}
+		ProjectResult[]? Hits = null,
+		int? Offset = null,
+		int? Limit = null,
+		int? TotalHits = null);
 	// ReSharper restore ClassNeverInstantiated.Global
-	// ReSharper restore InconsistentNaming
 }

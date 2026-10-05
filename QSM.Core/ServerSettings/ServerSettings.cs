@@ -14,7 +14,7 @@ public class ServerSettings
 	public List<BackupItem> Backups { get; set; } = [];
 
 	public JavaSettings Java { get; set; } = new();
-	
+
 	public ModpackInfo? Modpack { get; set; }
 
 	public Task SaveJsonAsync(string filePath)

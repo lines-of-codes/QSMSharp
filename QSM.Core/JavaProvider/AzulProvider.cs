@@ -1,11 +1,16 @@
 ﻿using QSM.Core.Utilities;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace QSM.Core.JavaProvider;
 
-public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpConsumer
+public partial class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpConsumer
 {
+	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+	[JsonSerializable(typeof(ZuluJvmData[]))]
+	private sealed partial class AzulContext : JsonSerializerContext { }
+
 	public string HttpClientName => "AzulFetcher";
 	public string HttpBaseAddress => "https://api.azul.com/metadata/v1/zulu/";
 
@@ -47,12 +52,13 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 		Dictionary<int, string> availableMajorReleases = [];
 
 		HttpClient client = factory.CreateClient(HttpClientName);
-		ZuluJvmData[]? response = await client.GetFromJsonAsync<ZuluJvmData[]>(
-			$"packages?latest=true&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=support_term");
+		ZuluJvmData[]? response = await client.GetFromJsonAsync(
+			$"packages?latest=true&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=support_term",
+			AzulContext.Default.ZuluJvmDataArray);
 
 		foreach (ZuluJvmData runtime in response!)
 		{
-			int majorVersion = runtime.java_version![0];
+			int majorVersion = runtime.JavaVersion![0];
 
 			if (availableMajorReleases.ContainsKey(majorVersion))
 			{
@@ -60,7 +66,7 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 			}
 
 			availableMajorReleases.Add(majorVersion,
-				runtime.support_term == "lts" ? $"Java {majorVersion} (LTS)" : $"Java {majorVersion}");
+				runtime.SupportTerm == "lts" ? $"Java {majorVersion} (LTS)" : $"Java {majorVersion}");
 		}
 
 		return availableMajorReleases.ToDictionary(x => x.Value, x => x.Key);
@@ -79,18 +85,19 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 	public async Task<string[]> ListJREAsync(int javaMajorRelease)
 	{
 		HttpClient client = factory.CreateClient(HttpClientName);
-		ZuluJvmData[]? response = await client.GetFromJsonAsync<ZuluJvmData[]>(
-			$"packages?java_version={javaMajorRelease}&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=lib_c_type&include_fields=sha256_hash");
+		ZuluJvmData[]? response = await client.GetFromJsonAsync(
+			$"packages?java_version={javaMajorRelease}&arch={ProcessArchitecture}&os={OS}&java_package_type=jre&javafx_bundled=false&archive_type={ArchiveType}&include_fields=lib_c_type&include_fields=sha256_hash",
+			AzulContext.Default.ZuluJvmDataArray);
 
-		List<string> jres = new();
-		Dictionary<string, JavaDownloadInfo> downloadUrlCache = new();
+		List<string> jres = [];
+		Dictionary<string, JavaDownloadInfo> downloadUrlCache = [];
 
 		foreach (ZuluJvmData runtime in response!)
 		{
 			string version =
-				$"{runtime.java_version![0]}.{runtime.java_version[1]}.{runtime.java_version[2]}+{runtime.openjdk_build_number}";
+				$"{runtime.JavaVersion![0]}.{runtime.JavaVersion[1]}.{runtime.JavaVersion[2]}+{runtime.OpenjdkBuildNumber}";
 			jres.Add(version);
-			_ = downloadUrlCache.TryAdd(version, new JavaDownloadInfo(runtime.download_url!, runtime.sha256_hash!, HashAlgorithm.Sha256));
+			_ = downloadUrlCache.TryAdd(version, new JavaDownloadInfo(runtime.DownloadUrl!, runtime.SHA256Hash!, HashAlgorithm.Sha256));
 		}
 
 		_downloadUrlCache.TryAdd(javaMajorRelease, downloadUrlCache);
@@ -99,16 +106,16 @@ public class AzulProvider(IHttpClientFactory factory) : IJavaProvider, IHttpCons
 	}
 
 	private sealed record ZuluJvmData(
-		string? availability_type = null,
-		int[]? distro_version = null,
-		string? download_url = null,
-		int[]? java_version = null,
-		bool? latest = null,
-		string? lib_c_type = null,
-		string? name = null,
-		int? openjdk_build_number = null,
-		string? package_uuid = null,
-		string? product = "zulu",
-		string? sha256_hash = null,
-		string? support_term = null);
+		string? AvailabilityType = null,
+		int[]? DistroVersion = null,
+		string? DownloadUrl = null,
+		int[]? JavaVersion = null,
+		bool? Latest = null,
+		string? LibCType = null,
+		string? Name = null,
+		int? OpenjdkBuildNumber = null,
+		string? PackageUuid = null,
+		string? Product = "zulu",
+		string? SHA256Hash = null,
+		string? SupportTerm = null);
 }

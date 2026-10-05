@@ -1,10 +1,16 @@
 ﻿using JetBrains.Annotations;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 
 namespace QSM.Core.ServerSoftware;
 
-public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
+public partial class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 {
+	[JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+	[JsonSerializable(typeof(BuildInfoRequest))]
+	[JsonSerializable(typeof(ProjectInfoRequest))]
+	private sealed partial class PurpurContext : JsonSerializerContext { }
+
 	public override string HttpClientName => "PurpurFetcher";
 	public override string HttpBaseAddress => "https://api.purpurmc.org/v2/purpur/";
 
@@ -16,7 +22,7 @@ public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 		}
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
-		BuildInfoRequest? response = await client.GetFromJsonAsync<BuildInfoRequest>(minecraftVersion);
+		BuildInfoRequest? response = await client.GetFromJsonAsync(minecraftVersion, PurpurContext.Default.BuildInfoRequest);
 
 		if (response is null)
 		{
@@ -47,7 +53,7 @@ public class PurpurFetcher(IHttpClientFactory factory) : InfoFetcher
 		}
 
 		using HttpClient client = factory.CreateClient(HttpClientName);
-		ProjectInfoRequest? response = await client.GetFromJsonAsync<ProjectInfoRequest>("");
+		ProjectInfoRequest? response = await client.GetFromJsonAsync("", PurpurContext.Default.ProjectInfoRequest);
 
 		if (response is null)
 		{

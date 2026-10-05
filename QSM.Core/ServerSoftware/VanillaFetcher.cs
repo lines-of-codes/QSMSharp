@@ -1,10 +1,16 @@
 ﻿using JetBrains.Annotations;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 
 namespace QSM.Core.ServerSoftware;
 
-public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
+public partial class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 {
+	[JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+	[JsonSerializable(typeof(VersionManifest))]
+	[JsonSerializable(typeof(VersionInfo))]
+	private sealed partial class VanillaContext : JsonSerializerContext { }
+
 	public override string HttpClientName => "VanillaFetcher";
 	public override string HttpBaseAddress => "https://piston-meta.mojang.com/mc/game/";
 
@@ -23,11 +29,11 @@ public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 		}
 
 		HttpClient client = factory.CreateClient(HttpClientName);
-		VersionManifest response = await client.GetFromJsonAsync<VersionManifest>("version_manifest_v2.json")
+		VersionManifest response = await client.GetFromJsonAsync("version_manifest_v2.json", VanillaContext.Default.VersionManifest)
 								   ?? throw new NetworkResourceUnavailableException();
 
 		_versionCache = response.Versions.Where(e => e.Type == "release");
-		MinecraftVersionsCache = _versionCache.Select(e => e.Id).ToArray();
+		MinecraftVersionsCache = [.. _versionCache.Select(e => e.Id)];
 
 		return MinecraftVersionsCache;
 	}
@@ -36,7 +42,7 @@ public class VanillaFetcher(IHttpClientFactory factory) : InfoFetcher
 	{
 		string versionUrl = _versionCache.First(e => e.Id == minecraftVersion).Url;
 		HttpClient client = factory.CreateClient(HttpClientName);
-		VersionInfo response = await client.GetFromJsonAsync<VersionInfo>(versionUrl)
+		VersionInfo response = await client.GetFromJsonAsync(versionUrl, VanillaContext.Default.VersionInfo)
 							   ?? throw new NetworkResourceUnavailableException();
 
 		return response.Downloads.Server.Url;

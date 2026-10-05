@@ -6,6 +6,16 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <IsTrimmable>True</IsTrimmable>
+      <IsAotCompatible>True</IsAotCompatible>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <IsTrimmable>True</IsTrimmable>
+      <IsAotCompatible>True</IsAotCompatible>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="cuid.net" Version="7.1.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />

@@ -185,7 +185,7 @@ public class MrpackExtractor(IHttpClientFactory factory)
 			double percentage = (double)totalBytesRead / totalBytes * 100;
 			yield return new MrpackOperation($"Downloading {fileName}...", percentage);
 		}
-		
+
 		using SHA512 sha512 = SHA512.Create();
 		string localHash = sha512.GetFileHashAsString(dest);
 

@@ -7,9 +7,9 @@ public static class Hasher
 	public static string GetFileHash(HashAlgorithm algorithm, string path)
 	{
 		if (algorithm == HashAlgorithm.None) return string.Empty;
-		
+
 		using FileStream stream = File.OpenRead(path);
-		
+
 		// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
 		byte[] hashBytes = algorithm switch
 		{
@@ -18,7 +18,7 @@ public static class Hasher
 			HashAlgorithm.Sha512 => SHA512.HashData(stream),
 			_ => throw new InvalidOperationException("Unsupported hash algorithm used in parameter.")
 		};
-		
+
 		return Convert.ToHexStringLower(hashBytes);
 	}
 }

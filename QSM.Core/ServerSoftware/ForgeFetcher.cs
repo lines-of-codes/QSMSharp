@@ -1,12 +1,17 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace QSM.Core.ServerSoftware;
 
 public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 {
+	[JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+	[JsonSerializable(typeof(ForgeVersions))]
+	private sealed partial class ForgeContext : JsonSerializerContext { }
+
 	private readonly Regex _majorMinorVersionMatch = MajorMinorVersionMatch();
 
 	private string[] _availableVersionsCache = [];
@@ -17,6 +22,8 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 
 	public override string HttpBaseAddress => "";
 
+	private static string ForgeReleasesUrl => "https://maven.minecraftforge.net/api/maven/versions/releases/net/minecraftforge/forge";
+
 	public override async Task<string[]> FetchAvailableMinecraftVersionsAsync()
 	{
 		if (MinecraftVersionsCache.Length != 0)
@@ -26,8 +33,9 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 
 		HttpClient client = factory.CreateClient(HttpClientName);
 		ForgeVersions? response =
-			await client.GetFromJsonAsync<ForgeVersions>(
-				"https://maven.minecraftforge.net/api/maven/versions/releases/net/minecraftforge/forge");
+			await client.GetFromJsonAsync(
+				ForgeReleasesUrl,
+				ForgeContext.Default.ForgeVersions);
 
 		_availableVersionsCache = response!.Versions!;
 
@@ -58,13 +66,11 @@ public partial class ForgeFetcher(IHttpClientFactory factory) : InfoFetcher
 		}
 
 		string prefix = minecraftVersion + "-";
-		List<string> versions = (from version in _availableVersionsCache
+		IEnumerable<string> versions = (from version in _availableVersionsCache
 								 where version.StartsWith(prefix)
-								 select version[prefix.Length..]).ToList();
+								 select version[prefix.Length..]).Reverse();
 
-		versions.Reverse();
-
-		BuildInfoCache[minecraftVersion] = versions.ToArray();
+		BuildInfoCache[minecraftVersion] = [.. versions];
 
 		return Task.FromResult(BuildInfoCache[minecraftVersion]);
 	}
