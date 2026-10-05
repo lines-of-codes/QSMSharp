@@ -14,6 +14,7 @@ using QSM.Windows.Utilities;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -32,6 +33,7 @@ public sealed partial class CurseForgeImportPage : Page
 	readonly ExtendedObservableCollection<ModPluginDownloadInfo> _availableVersions = [];
 	readonly ExtendedObservableCollection<CurseCategory> _categories = [];
 	CurseCategory _modpackCat;
+	ModPluginInfo _selectedMod;
 	ReverseMarkdown.Converter _converter = new(new ReverseMarkdown.Config() {
 		Tags = { Unknown = ReverseMarkdown.Config.UnknownTagsOption.Bypass }
 	});
@@ -191,30 +193,31 @@ public sealed partial class CurseForgeImportPage : Page
 	{
 		if (e.AddedItems.Count == 0) return;
 
-		var mod = (ModPluginInfo)e.AddedItems[0];
+		_selectedMod = (ModPluginInfo)e.AddedItems[0];
 
-		mod = await _curseforge.GetDetailedInfoAsync(mod);
+		_selectedMod = await _curseforge.GetDetailedInfoAsync(_selectedMod);
 
-		ModIcon.Source = new BitmapImage(new Uri(mod.IconUrl));
-		ModName.Text = mod.Name;
-		OwnerLabel.Text = mod.Owner;
+		ModIcon.Source = new BitmapImage(new Uri(_selectedMod.IconUrl));
+		ModName.Text = _selectedMod.Name;
+		OwnerLabel.Text = _selectedMod.Owner;
 
-		ModDownloadCount.Text = $"{mod.DownloadCount:n0} Downloads";
+		ModDownloadCount.Text = $"{_selectedMod.DownloadCount:n0} Downloads";
 
-		mod.LongDescription = _converter.Convert(_sanitizer.Sanitize(mod.LongDescription)).Replace("!\\[\\]", "![]");
+		_selectedMod.LongDescription = _converter.Convert(_sanitizer.Sanitize(_selectedMod.LongDescription)).Replace("!\\[\\]", "![]");
 
 		ModDescription.Text = string.Empty;
-		ModDescription.Text = mod.LongDescription;
+		ModDescription.Text = _selectedMod.LongDescription;
 
 		VersionSelector.IsEnabled = true;
 
-		ModPluginDownloadInfo[] versions = await _curseforge.GetVersionsAsync(mod.Id.ToString());
+		ModPluginDownloadInfo[] versions = await _curseforge.GetVersionsAsync(_selectedMod.Id.ToString());
 
 		_availableVersions.Clear();
 		_availableVersions.AddRange(versions);
 		VersionSelector.SelectedIndex = 0;
 
 		ConfirmButton.IsEnabled = true;
+		OpenBrowser.Visibility = Visibility.Visible;
 	}
 
 	async Task FilteredSearch()
@@ -255,5 +258,10 @@ public sealed partial class CurseForgeImportPage : Page
 	private async void ModLoaderSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		await FilteredSearch();
+	}
+
+	private void OpenBrowser_Click(object sender, RoutedEventArgs e)
+	{
+		Process.Start(@"C:\Windows\explorer.exe", _selectedMod.Url);
 	}
 }

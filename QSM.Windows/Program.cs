@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Windows.ApplicationModel.DynamicDependency;
 using QSM.Core.JavaProvider;
 using QSM.Core.ModPluginSource;
 using QSM.Core.ServerSoftware;
@@ -27,6 +28,8 @@ public static class Program
 				Path.Combine(ApplicationData.LogsFolderPath, "WinQSM.txt"),
 				rollingInterval: RollingInterval.Day)
 			.CreateLogger();
+
+		Bootstrap.Initialize(0x00020005);
 
 		var builder = Host.CreateApplicationBuilder(args);
 

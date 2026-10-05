@@ -8,11 +8,10 @@
         <Platforms>x86;x64;ARM64</Platforms>
         <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &gt;= 8">win-x86;win-x64;win-arm64</RuntimeIdentifiers>
         <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &lt; 8">win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
-        <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<PublishProfile>Properties/PublishProfiles/FolderProfile.pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
         <EnableMsixTooling>true</EnableMsixTooling>
         <DefaultLanguage>en-us</DefaultLanguage>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <PublishTrimmed>false</PublishTrimmed>
         <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
@@ -117,22 +116,43 @@
     </ItemGroup>
     <ItemGroup>
         <Content Update="Assets\ServerSoftware\Fabric.png">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\folia.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\forge.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\minecraft_logo.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Update="Assets\ServerSoftware\minecraft_logo.svg">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Update="Assets\ServerSoftware\NeoForged.png">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Update="Assets\ServerSoftware\papermc-logomark.png">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\purpur.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Update="Assets\ServerSoftware\purpur.svg">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\quilt-logo.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\quilt-logo.svg">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Assets\ServerSoftware\velocity-blue.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Update="Assets\ServerSoftware\velocity-blue.svg">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
     <ItemGroup>

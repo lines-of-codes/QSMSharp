@@ -97,13 +97,21 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 
-                <StackPanel Orientation="Horizontal">
+                <Grid ColumnDefinitions="Auto, *, Auto">
                     <ImageIcon x:Name="ModIcon" Width="32" />
-                    <StackPanel Margin="8,0">
-                        <TextBlock x:Name="ModName" Style="{StaticResource TitleTextBlockStyle}" />
+                    <Grid RowDefinitions="Auto, Auto" Margin="8,0" Grid.Column="1">
                         <TextBlock x:Name="OwnerLabel" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                    </StackPanel>
-                </StackPanel>
+                        <TextBlock 
+                            x:Name="ModName" 
+                            Style="{StaticResource TitleTextBlockStyle}" 
+                            LineStackingStrategy="BlockLineHeight"
+                            LineHeight="26"
+                            Grid.Row="1" />
+                    </Grid>
+					<Button x:Name="OpenBrowser" Click="OpenBrowser_Click" Visibility="Collapsed" Grid.Column="2">
+						<FontIcon Glyph="&#xE8A7;" FontSize="14" />
+					</Button>
+				</Grid>
                 
                 <TextBlock x:Name="ModLicense" Grid.Row="1" />
                 <TextBlock x:Name="ModDownloadCount" Grid.Row="2" />

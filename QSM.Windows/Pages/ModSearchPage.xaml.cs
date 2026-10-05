@@ -25,6 +25,7 @@ namespace QSM.Windows;
 public sealed partial class ModSearchPage : Page
 {
 	int _metadataIndex;
+	ModPluginInfo _selectedMod;
 	ServerMetadata _metadata;
 	ProviderInfo _currentProvider;
 	readonly List<ModPluginDownloadInfo> _selectedMods = [];
@@ -99,45 +100,47 @@ public sealed partial class ModSearchPage : Page
 	{
 		if (e.AddedItems.Count == 0) return;
 
-		var mod = (ModPluginInfo)e.AddedItems[0];
+		_selectedMod = (ModPluginInfo)e.AddedItems[0];
 
-		mod = await _currentProvider.Provider.GetDetailedInfoAsync(mod);
+		_selectedMod = await _currentProvider.Provider.GetDetailedInfoAsync(_selectedMod);
 
 		if (_currentProvider.ProviderName == "CurseForge")
 		{
-			mod.LongDescription = _htmlConverter.Convert(mod.LongDescription);
+			_selectedMod.LongDescription = _htmlConverter.Convert(_selectedMod.LongDescription);
 		}
 
-		ModIcon.Source = new BitmapImage(new Uri(mod.IconUrl));
-		ModName.Text = mod.Name;
-		OwnerLabel.Text = mod.Owner;
+		ModIcon.Source = new BitmapImage(new Uri(_selectedMod.IconUrl));
+		ModName.Text = _selectedMod.Name;
+		OwnerLabel.Text = _selectedMod.Owner;
 
-		if (string.IsNullOrEmpty(mod.LicenseUrl))
+		if (string.IsNullOrEmpty(_selectedMod.LicenseUrl))
 		{
-			ModLicense.Text = $"License: {mod.License}";
+			ModLicense.Text = $"License: {_selectedMod.License}";
 		}
 		else
 		{
 			ModLicense.Text = "License: ";
 
 			Hyperlink hyperlink = new();
-			Run run = new();
-
-			run.Text = mod.License;
-			hyperlink.NavigateUri = new Uri(mod.LicenseUrl);
+			Run run = new()
+			{
+				Text = _selectedMod.License
+			};
+			hyperlink.NavigateUri = new Uri(_selectedMod.LicenseUrl);
 
 			hyperlink.Inlines.Add(run);
 			ModLicense.Inlines.Add(hyperlink);
 		}
 
-		ModDownloadCount.Text = $"{mod.DownloadCount:n0} Downloads";
-		ModDescription.Text = mod.LongDescription;
+		ModDownloadCount.Text = $"{_selectedMod.DownloadCount:n0} Downloads";
+		ModDescription.Text = _selectedMod.LongDescription;
 
 		VersionSelector.IsEnabled = true;
+		OpenBrowser.Visibility = Visibility.Visible;
 
 		try
 		{
-			ModPluginDownloadInfo[] versions = await _currentProvider.Provider.GetVersionsAsync(_currentProvider.ProviderName == "CurseForge" ? mod.Id.ToString() : mod.Slug, ServerMetadata.Selected);
+			ModPluginDownloadInfo[] versions = await _currentProvider.Provider.GetVersionsAsync(_currentProvider.ProviderName == "CurseForge" ? _selectedMod.Id.ToString() : _selectedMod.Slug, ServerMetadata.Selected);
 
 			_availableVersions.Clear();
 			_availableVersions.AddRange(versions);
@@ -161,7 +164,7 @@ public sealed partial class ModSearchPage : Page
 
 	private async void ModSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
 	{
-		var mods = await ((ProviderInfo)ProviderSelector.SelectedItem).Provider.SearchAsync(args.QueryText);
+		IEnumerable<ModPluginInfo> mods = await ((ProviderInfo)ProviderSelector.SelectedItem).Provider.SearchAsync(args.QueryText);
 
 		mods = mods.Select(mod =>
 		{
@@ -170,7 +173,7 @@ public sealed partial class ModSearchPage : Page
 				mod.IconUrl = "ms-appx://Square44x44Logo.scale-200.png";
 			}
 			return mod;
-		}).ToArray();
+		});
 
 		_searchResults.Clear();
 		_searchResults.AddRange(mods);
@@ -178,7 +181,7 @@ public sealed partial class ModSearchPage : Page
 
 	private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
 	{
-		var confirmPage = new ModDownloadsConfirmPage(_selectedMods.ToArray());
+		var confirmPage = new ModDownloadsConfirmPage([.. _selectedMods]);
 
 		ContentDialog dialog = new()
 		{
@@ -259,5 +262,10 @@ public sealed partial class ModSearchPage : Page
 	private void ModDescription_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
 	{
 		Process.Start(@"C:\Windows\explorer.exe", e.Link);
+	}
+
+	private void OpenBrowser_Click(object sender, RoutedEventArgs e)
+	{
+		Process.Start(@"C:\Windows\explorer.exe", _selectedMod.Url);
 	}
 }

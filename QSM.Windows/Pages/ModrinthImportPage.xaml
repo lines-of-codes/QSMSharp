@@ -34,20 +34,21 @@
                 QuerySubmitted="ModpackSearchBox_QuerySubmitted"
                 Grid.Column="1" />
             
-            <ToggleButton 
+            <Button 
                 x:Name="FilterButton"
                 Grid.Column="2" 
                 HorizontalAlignment="Stretch" 
                 VerticalAlignment="Stretch"
-                Checked="FilterButton_Checked"
-                Unchecked="FilterButton_Unchecked">
+                Click="FilterButton_Click">
                 <FontIcon Glyph="&#xE71C;" FontSize="14" />
-            </ToggleButton>
+            </Button>
         </Grid>
 
         <SplitView x:Name="FilterPane" 
                    Grid.Row="1"
-                   DisplayMode="Inline">
+                   DisplayMode="Overlay"
+                   PanePlacement="Right"
+                   PaneBackground="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
             <SplitView.Pane>
                 <ScrollView>
                     <StackPanel Margin="30,20">
@@ -59,7 +60,7 @@
                             SelectionChanged="FilterCategorySelector_SelectionChanged">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="modrinth:Category">
-                                    <TextBlock Text="{x:Bind name}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
@@ -80,7 +81,7 @@
                 IsPaneOpen="True">
                 <SplitView.Pane>
                     <ListView 
-                        ItemsSource="{x:Bind SearchResults, Mode=OneWay}"
+                        ItemsSource="{x:Bind _searchResults, Mode=OneWay}"
                         SelectionChanged="ModList_SelectionChanged"
                         x:Name="ModList">
                         <ListView.ItemTemplate>
@@ -129,13 +130,16 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal">
-                        <ImageIcon x:Name="ModIcon" Width="32" />
-                        <StackPanel Margin="8,0">
-                            <TextBlock x:Name="ModName" Style="{StaticResource TitleTextBlockStyle}" />
+					<Grid ColumnDefinitions="Auto, *, Auto">
+						<ImageIcon x:Name="ModIcon" Width="32" />
+                        <Grid RowDefinitions="Auto, Auto" Margin="8,0" Grid.Column="1">
                             <TextBlock x:Name="OwnerLabel" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        </StackPanel>
-                    </StackPanel>
+                            <TextBlock x:Name="ModName" Style="{StaticResource TitleTextBlockStyle}" Grid.Row="1" LineStackingStrategy="BlockLineHeight" LineHeight="26" />
+                        </Grid>
+						<Button x:Name="OpenBrowser" Click="OpenBrowser_Click" Visibility="Collapsed" Grid.Column="2">
+							<FontIcon Glyph="&#xE8A7;" FontSize="14" />
+						</Button>
+					</Grid>
 
                     <TextBlock x:Name="ModLicense" Grid.Row="1" />
                     <TextBlock x:Name="ModDownloadCount" Grid.Row="2" />
@@ -150,7 +154,7 @@
                     <StackPanel Spacing="8" Grid.Row="4">
                         <ComboBox 
                             x:Name="VersionSelector"
-                            ItemsSource="{x:Bind AvailableVersions, Mode=OneWay}"
+                            ItemsSource="{x:Bind _availableVersions, Mode=OneWay}"
                             IsEnabled="False">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="modplugin:ModPluginDownloadInfo">

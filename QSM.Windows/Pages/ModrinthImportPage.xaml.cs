@@ -14,6 +14,7 @@ using QSM.Windows.Utilities;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -28,9 +29,11 @@ namespace QSM.Windows.Pages;
 public sealed partial class ModrinthImportPage : Page
 {
 	ModrinthProvider _modrinth;
-	readonly ExtendedObservableCollection<ModPluginInfo> SearchResults = [];
-	readonly ExtendedObservableCollection<ModPluginDownloadInfo> AvailableVersions = [];
+	readonly ExtendedObservableCollection<ModPluginInfo> _searchResults = [];
+	readonly ExtendedObservableCollection<ModPluginDownloadInfo> _availableVersions = [];
 	readonly ExtendedObservableCollection<Category> _categories = [];
+
+	ModPluginInfo _selectedMod;
 
 	public ModrinthImportPage()
 	{
@@ -51,13 +54,13 @@ public sealed partial class ModrinthImportPage : Page
 				return modpack;
 			});
 
-		SearchResults.AddRange(searchResults);
+		_searchResults.AddRange(searchResults);
 
 		IEnumerable<Category> categories = await _modrinth.ListCategories();
 
 		categories = categories
-			.Where(cat => cat.project_type == "modpack")
-			.Select(cat => cat with { name = StringUtility.KebabCaseToText(cat.name) });
+			.Where(cat => cat.ProjectType == "modpack")
+			.Select(cat => cat with { Name = StringUtility.KebabCaseToText(cat.Name) });
 
 		_categories.AddRange(categories);
 
@@ -173,17 +176,17 @@ public sealed partial class ModrinthImportPage : Page
 	{
 		if (e.AddedItems.Count == 0) return;
 
-		var mod = (ModPluginInfo)e.AddedItems[0];
+		_selectedMod = (ModPluginInfo)e.AddedItems[0];
 
-		mod = await _modrinth.GetDetailedInfoAsync(mod);
+		_selectedMod = await _modrinth.GetDetailedInfoAsync(_selectedMod);
 
-		ModIcon.Source = new BitmapImage(new Uri(mod.IconUrl));
-		ModName.Text = mod.Name;
-		OwnerLabel.Text = mod.Owner;
+		ModIcon.Source = new BitmapImage(new Uri(_selectedMod.IconUrl));
+		ModName.Text = _selectedMod.Name;
+		OwnerLabel.Text = _selectedMod.Owner;
 
-		if (string.IsNullOrEmpty(mod.LicenseUrl))
+		if (string.IsNullOrEmpty(_selectedMod.LicenseUrl))
 		{
-			ModLicense.Text = $"License: {mod.License}";
+			ModLicense.Text = $"License: {_selectedMod.License}";
 		}
 		else
 		{
@@ -191,30 +194,31 @@ public sealed partial class ModrinthImportPage : Page
 
 			Hyperlink hyperlink = new()
 			{
-				NavigateUri = new Uri(mod.LicenseUrl)
+				NavigateUri = new Uri(_selectedMod.LicenseUrl)
 			};
 
 			Run run = new()
 			{
-				Text = mod.License
+				Text = _selectedMod.License
 			};
 
 			hyperlink.Inlines.Add(run);
 			ModLicense.Inlines.Add(hyperlink);
 		}
 
-		ModDownloadCount.Text = $"{mod.DownloadCount:n0} Downloads";
-		ModDescription.Text = mod.LongDescription;
+		ModDownloadCount.Text = $"{_selectedMod.DownloadCount:n0} Downloads";
+		ModDescription.Text = _selectedMod.LongDescription;
 
 		VersionSelector.IsEnabled = true;
 
-		ModPluginDownloadInfo[] versions = await _modrinth.GetVersionsAsync(mod.Slug);
+		ModPluginDownloadInfo[] versions = await _modrinth.GetVersionsAsync(_selectedMod.Slug);
 
-		AvailableVersions.Clear();
-		AvailableVersions.AddRange(versions);
+		_availableVersions.Clear();
+		_availableVersions.AddRange(versions);
 		VersionSelector.SelectedIndex = 0;
 
 		ConfirmButton.IsEnabled = true;
+		OpenBrowser.Visibility = Visibility.Visible;
 	}
 
 	async Task FilteredSearch()
@@ -225,7 +229,7 @@ public sealed partial class ModrinthImportPage : Page
 			ModrinthProvider.ProjectType.Modpack,
 			FilterCategorySelector.SelectedItems.Select(cat =>
 			{
-				return StringUtility.ToKebabCase(((Category)cat).name);
+				return StringUtility.ToKebabCase(((Category)cat).Name);
 			}).Concat(ModLoaderSelector.SelectedItems.Select(loader =>
 			{
 				return ((string)loader).ToLowerInvariant();
@@ -238,8 +242,8 @@ public sealed partial class ModrinthImportPage : Page
 				return modpack;
 			});
 
-		SearchResults.Clear();
-		SearchResults.AddRange(modpacks);
+		_searchResults.Clear();
+		_searchResults.AddRange(modpacks);
 	}
 
 	private async void FilterCategorySelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -247,18 +251,18 @@ public sealed partial class ModrinthImportPage : Page
 		await FilteredSearch();
 	}
 
-	private void FilterButton_Checked(object sender, RoutedEventArgs e)
+	private void FilterButton_Click(object sender, RoutedEventArgs e)
 	{
 		FilterPane.IsPaneOpen = true;
-	}
-
-	private void FilterButton_Unchecked(object sender, RoutedEventArgs e)
-	{
-		FilterPane.IsPaneOpen = false;
 	}
 
 	private async void ModLoaderSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		await FilteredSearch();
+	}
+
+	private void OpenBrowser_Click(object sender, RoutedEventArgs e)
+	{
+		Process.Start(@"C:\Windows\explorer.exe", _selectedMod.Url);
 	}
 }
