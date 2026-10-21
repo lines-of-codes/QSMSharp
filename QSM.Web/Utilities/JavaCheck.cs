@@ -15,7 +15,7 @@ public static class JavaCheck
 		{
 			CreateNoWindow = true,
 			UseShellExecute = false,
-			FileName = Path.Join(javaHome, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "bin/java.exe" : "bin/java"),
+			FileName = Path.Join(javaHome, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "bin/java.exe" : "bin/java"), // NOSONAR
 			WindowStyle = ProcessWindowStyle.Hidden,
 			Arguments = $"-jar \"{s_pathToJavaCheck}\"",
 			RedirectStandardOutput = true,
