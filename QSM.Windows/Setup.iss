@@ -44,8 +44,8 @@ WizardStyle=modern dynamic
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#ProjectRoot}\QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#ProjectRoot}\QSM.Windows\bin\x64\Release\net10.0-windows10.0.26100.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#ProjectRoot}\QSM.Windows\bin\Release\Publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#ProjectRoot}\QSM.Windows\bin\Release\Publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
