@@ -11,10 +11,14 @@
 
 <h3>Backups</h3>
 
-@if (!_installed)
+@if (_installed)
+{
+    <a href="/Settings/BackupSystem"><i class="bi bi-gear" aria-hidden="true"></i> View global backup settings</a>
+}
+else
 {
     <div>
-        QBSGo is not installed. Please visit the 
+        QBSGo is not installed. Please visit the
         <a href="/Settings/BackupSystem">Server Settings</a> page to install it.
     </div>
 }

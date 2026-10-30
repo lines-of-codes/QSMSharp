@@ -1,8 +1,6 @@
 @page "/Server/{Id:int:min(0)}"
 @implements IDisposable
 
-@using System.Text
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using QSM.Web.Data
 
@@ -10,8 +8,6 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject ProcessManager ProcessManager
 @inject ILogger<ServerSummary> Logger
-
-@attribute [Authorize]
 
 <PageTitle>@_server.Name - QSM Web Console</PageTitle>
 
@@ -24,7 +20,7 @@
     }
 
     <h1>@_server.Name</h1>
-    <p>@(GetServerSoftwareText())</p>
+    <p>@(_server.GetServerSoftwareText())</p>
     
     
     <div id="eulaConfirmDialog" class="alert alert-primary" hidden="@(!_eulaPrompt)">
@@ -106,6 +102,8 @@
 </dialog>
 
 @code {
+    const string EulaPrompt = "You need to agree to the EULA in order to run the server. Go to eula.txt for more info.";
+    
     [Parameter] public int Id { get; set; }
     private ServerInstance _server = new();
     private string _lastOutput = "Server not running.";
@@ -128,13 +126,11 @@
         }
 
         _server = server;
+        _ = ProcessManager.Processes.TryGetValue(server.Id, out var process);
 
-        if (server.Running && (!ProcessManager.Processes.TryGetValue(server.Id, out var process) || process.HasExited))
-        {
-            server.Running = false;
-            ctx.Servers.Update(server);
-            ctx.SaveChanges();
-        }
+        server.Running = !process?.HasExited ?? false;
+        ctx.Servers.Update(server);
+        ctx.SaveChanges();
 
         var lastMessageExist = ProcessManager.ServerOutput.TryGetValue(server.Id, out var messageList);
 
@@ -142,7 +138,7 @@
         {
             var lastMessage = messageList?.LastOrDefault(msg => msg.Message != string.Empty)?.Message;
             _lastOutput = lastMessage ?? string.Empty;
-            if (_lastOutput.Contains("You need to agree to the EULA in order to run the server. Go to eula.txt for more info."))
+            if (_lastOutput.Contains(EulaPrompt))
                 _eulaPrompt = true;
         } else if (server.Running)
         {
@@ -232,7 +228,7 @@
 
             if (data.Message == string.Empty) return;
 
-            if (data.Message.Contains("You need to agree to the EULA in order to run the server. Go to eula.txt for more info."))
+            if (data.Message.Contains(EulaPrompt))
                 _eulaPrompt = true;
         
             _lastOutput = data.Message;
@@ -263,29 +259,6 @@
     {
         _eulaPrompt = false;
         await StopButtonClicked();
-    }
-
-    private string GetServerSoftwareText()
-    {
-        StringBuilder sb = new();
-
-        sb.Append(_server.Software.ToString());
-
-        if (!string.IsNullOrEmpty(_server.ServerVersion))
-        {
-            sb.Append(" (Build ");
-            sb.Append(_server.ServerVersion);
-        }
-
-        if (_server.MinecraftVersion == null) return sb.ToString();
-        
-        sb.Append(string.IsNullOrEmpty(_server.ServerVersion) ? " (" : " for ");
-
-        sb.Append("Minecraft ");
-        sb.Append(_server.MinecraftVersion);
-        sb.Append(")");
-
-        return sb.ToString();
     }
 
 }

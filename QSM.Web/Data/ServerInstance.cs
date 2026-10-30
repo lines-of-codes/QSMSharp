@@ -1,5 +1,6 @@
 using QSM.Core.ServerSoftware;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace QSM.Web.Data;
 
@@ -40,5 +41,28 @@ public class ServerInstance
 			instance.ServerVersion ?? string.Empty,
 			instance.ServerPath ?? string.Empty
 		);
+	}
+
+	public string GetServerSoftwareText()
+	{
+		StringBuilder sb = new();
+
+		sb.Append(Software.ToString());
+
+		if (!string.IsNullOrEmpty(ServerVersion))
+		{
+			sb.Append(" (Build ");
+			sb.Append(ServerVersion);
+		}
+
+		if (MinecraftVersion == null) return sb.ToString();
+        
+		sb.Append(string.IsNullOrEmpty(ServerVersion) ? " (" : " for ");
+
+		sb.Append("Minecraft ");
+		sb.Append(MinecraftVersion);
+		sb.Append(')');
+
+		return sb.ToString();
 	}
 }
