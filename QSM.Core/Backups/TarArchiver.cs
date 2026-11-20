@@ -1,11 +1,11 @@
 ﻿using SharpCompress.Archives;
 using SharpCompress.Archives.Tar;
 using SharpCompress.Common;
-using SharpCompress.Writers.Tar;
 using System.Formats.Tar;
 using System.IO.Pipelines;
 using ZstdSharp;
 using ZstdSharp.Unsafe;
+using TarWriterOptions = SharpCompress.Writers.Tar.TarWriterOptions;
 
 namespace QSM.Core.Backups;
 
@@ -40,13 +40,13 @@ public static class TarArchiver
 		}
 	}
 
-	public static async Task CreateTarArchiveAsync(string sourceDirectory, PipeWriter writer)
+	private static async Task CreateTarArchiveAsync(string sourceDirectory, PipeWriter writer)
 	{
 		await TarFile.CreateFromDirectoryAsync(sourceDirectory, writer.AsStream(), false);
 		await writer.CompleteAsync();
 	}
 
-	public static void SharpCompressTar(string folderPath, string dest, CompressionFormat format)
+	private static void SharpCompressTar(string folderPath, string dest, CompressionFormat format)
 	{
 		using IWritableArchive<TarWriterOptions> archive = TarArchive.CreateArchive();
 		archive.AddAllFromDirectory(folderPath);
@@ -62,14 +62,15 @@ public static class TarArchiver
 			{ LeaveStreamOpen = false });
 	}
 
-	public static async Task ZstdCompressTarAsync(string sourceDirectory, string outputFilePath,
+	private static async Task ZstdCompressTarAsync(string sourceDirectory, string outputFilePath,
 		byte compressionLevel = 11)
 	{
-		using FileStream outputFileStream = File.Create(outputFilePath);
-		using CompressionStream compressionStream = new(outputFileStream, compressionLevel);
+		await using FileStream outputFileStream = File.Create(outputFilePath);
+		await using CompressionStream compressionStream = new(outputFileStream, compressionLevel);
 		Pipe pipe = new();
 
 		compressionStream.SetParameter(ZSTD_cParameter.ZSTD_c_nbWorkers, Environment.ProcessorCount);
+		compressionStream.SetParameter(ZSTD_cParameter.ZSTD_c_enableLongDistanceMatching, 1);
 
 		Task tarTask = CreateTarArchiveAsync(sourceDirectory, pipe.Writer);
 		Task compressTask = pipe.Reader.CopyToAsync(compressionStream);

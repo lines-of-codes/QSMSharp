@@ -1,4 +1,6 @@
 @page "/Server/{Id:int:min(0)}/ChangeVersion"
+@rendermode InteractiveServer
+
 @using Microsoft.EntityFrameworkCore
 @using ServerSettingsData = QSM.Core.ServerSettings.ServerSettings
 @using QSM.Core.ServerSoftware
@@ -22,7 +24,7 @@
         </div>
         <div class="col-lg-3">
             <strong>Current Version</strong>
-            <p>Build @_server.ServerVersion (@_server.MinecraftVersion)</p>
+            <p>@_server.GetServerSoftwareText()</p>
         </div>
     </div>
 
@@ -32,7 +34,7 @@
     <div class="row col-lg-6 mb-2">
         <div class="col">
             <strong>Minecraft Version</strong>
-            <InputSelect @bind-Value="Model!.MinecraftVersion" class="form-select" @onchange="OnMinecraftVersionChanged">
+            <InputSelect @bind-Value="Model!.MinecraftVersion" class="form-select" @bind-Value:after="OnMinecraftVersionChanged">
                 @foreach (var version in _minecraftVersions)
                 {
                     <option value="@version">@version</option>
@@ -127,6 +129,7 @@
     private async Task FetchBuilds(string? minecraftVersion = null)
     {
         _availableBuilds = await _infoFetchers[_server.Software].FetchAvailableBuildsAsync(minecraftVersion ?? Model!.MinecraftVersion);
+        Model?.Build = _availableBuilds[0];
     }
 
     private async Task FetchMinecraftVersions()
@@ -141,12 +144,9 @@
         public bool MakeBackup { get; set; } = true;
     }
 
-    private async Task OnMinecraftVersionChanged(ChangeEventArgs changeEvent)
+    private async Task OnMinecraftVersionChanged()
     {
-        if (changeEvent.Value is string value)
-        {
-            await FetchBuilds(value);
-        }
+        await FetchBuilds(Model!.MinecraftVersion);
     }
 
     private async Task FormSubmit()
